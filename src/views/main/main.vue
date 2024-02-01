@@ -3,10 +3,12 @@
         <template #form>
             <el-form inline labelPosition="right">
                 <el-form-item label='名称'>
-                    <el-input v-model="state.formData.name" @keypress.enter.native="onSearch" placeholder="请输入名称" />
+                    <el-input v-model="state.formData.name" class="g-input" @keypress.enter.native="onSearch"
+                        placeholder="请输入名称" clearable />
                 </el-form-item>
                 <el-form-item label='主机'>
-                    <el-input v-model="state.formData.host" @keypress.enter.native="onSearch" placeholder="请输入主机" />
+                    <el-input v-model="state.formData.host" class="g-input" @keypress.enter.native="onSearch"
+                        placeholder="请输入主机" clearable />
                 </el-form-item>
                 <el-form-item>
                     <el-button @Click="onSearch">查询</el-button>

@@ -3,12 +3,13 @@
         <template #form>
             <el-form inline labelPosition="right">
                 <el-form-item label='配置文件名称'>
-                    <el-input v-model.trim="state.formData.scriptName" @keypress.enter.native="onSearch"
+                    <el-input v-model.trim="state.formData.scriptName" class="g-input" @keypress.enter.native="onSearch"
                         placeholder="请输入配置文件名称" clearable />
                 </el-form-item>
                 <el-form-item label='群组名称'>
-                    <el-autocomplete v-model.trim="state.formData.group" @keypress.enter.native="onSearch" clearable
-                        placeholder="请输入群组名称" :fetch-suggestions="getGroupOpt" @select="onSearch" @clear="onSearch" />
+                    <el-autocomplete v-model.trim="state.formData.group" class="g-input" @keypress.enter.native="onSearch"
+                        clearable placeholder="请输入群组名称" :fetch-suggestions="getGroupOpt" @select="onSearch"
+                        @clear="onSearch" />
                 </el-form-item>
                 <el-form-item>
                     <el-button @Click="onSearch" :icon="Search">查询</el-button>
