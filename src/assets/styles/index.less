@@ -1,0 +1,83 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+
+html,
+body {
+    width: 100%;
+    min-width: 1200px;
+    height: 100vh;
+    color: #333;
+    font-size: 14px;
+    overflow-y: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+}
+
+// 遮罩块样式
+#fetch-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-size: 20px;
+}
+
+.el-table {
+    --el-table-header-bg-color: #f5f7fa !important;
+
+    &+.el-pagination {
+        margin-top: @gap;
+    }
+}
+
+.el-pagination__rightwrapper {
+    justify-content: flex-start;
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.el-table__cell {
+    .el-link+.el-link {
+        margin-left: @gap*2;
+    }
+}
+
+@import './animation.less';

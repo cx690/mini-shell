@@ -1,0 +1,1 @@
+declare var electronAPI: import('../electron/preload').electronAPIType
