@@ -24,7 +24,8 @@ module.exports = {
             'public',
             'README.md',
             '.gitignore',
-            'forge.config.js'
+            'forge.config.js',
+            'temp'
         ]
     }
 }
