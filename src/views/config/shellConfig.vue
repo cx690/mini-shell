@@ -119,7 +119,7 @@
                                     </el-form-item>
                                     <el-form-item label="环境变量" :prop="`baseScripts.${num}.baseScripts.${index}.env`"
                                         :rules="envRules">
-                                        <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.env"
+                                        <el-input type="textarea" :autosize="{ minRows: 1 }" v-model="item.env"
                                             style="word-break: break-all;width: 700px;" :placeholder="envPlacehold"
                                             clearable :spellcheck="false" />
                                     </el-form-item>
