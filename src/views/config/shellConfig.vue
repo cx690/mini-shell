@@ -61,11 +61,11 @@
                         </span>
                     </template>
                     <el-input type="textarea" :autosize="{ minRows: 6 }" v-model="state.currentRow.envVar"
-                        :placeholder="envVarPleaseHold" clearable @blur="handleFormat" :spellcheck="false" />
+                        :placeholder="configPleaseHold" clearable @blur="handleFormat" :spellcheck="false" />
                 </el-form-item>
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="本地目录变量名：" prop="localDir">
+                        <el-form-item label="本地目录变量名" prop="localDir">
                             <el-select v-model="state.currentRow.localDir" placeholder="用于打开本地终端设置默认pwd" clearable
                                 style="width: 250px;">
                                 <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
@@ -74,7 +74,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="目标目录变量名：" prop="mainPath">
+                        <el-form-item label="目标目录变量名" prop="mainPath">
                             <el-select v-model="state.currentRow.mainPath" placeholder="用于上传文件的默认远程目录" clearable
                                 style="width: 250px;">
                                 <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
@@ -107,30 +107,42 @@
                         </template>
                         <VueDraggable v-model="base.baseScripts" handle=".sort-handle" class="multi-row"
                             v-if="base.type !== 3">
-                            <el-form-item v-for="(item, index) in base.baseScripts" :key="item.key"
-                                :prop="`baseScripts.${num}.baseScripts.${index}.value`" :rules="scriptRules">
-                                <el-select v-model="item.type" placeholder="脚本类型，默认为powershell" style="margin-bottom: 8px;"
-                                    v-if="base.type === 2">
-                                    <el-option label="powershell" value="powershell">powershell</el-option>
-                                    <el-option label="bat" value="bat">bat</el-option>
-                                    <el-option label="native" value="native">native</el-option>
-                                </el-select>
-                                <el-row class="row-content" :gutter="8">
-                                    <el-col :span="20">
-                                        <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.value"
-                                            style="word-break: break-all;"
-                                            :placeholder="base.type === 1 ? '请输入远端脚本' : '请输入本地脚本,如果是powershell脚本，多行脚本使用英文分号 ; 分隔'"
+                            <div v-for="(item, index) in base.baseScripts" :key="item.key">
+                                <template v-if="base.type === 2">
+                                    <el-divider v-if="index > 0" />
+                                    <el-form-item label="脚本类型">
+                                        <el-select v-model="item.type" placeholder="默认为powershell">
+                                            <el-option label="powershell" value="powershell">powershell</el-option>
+                                            <el-option label="bat" value="bat">bat</el-option>
+                                            <el-option label="native" value="native">native</el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="环境变量" :prop="`baseScripts.${num}.baseScripts.${index}.env`"
+                                        :rules="envRules">
+                                        <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.env"
+                                            style="word-break: break-all;width: 700px;" :placeholder="envPlacehold"
                                             clearable :spellcheck="false" />
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-button :icon="CirclePlusFilled" @click="addScriptItem(num)" circle
-                                            type="primary" v-if="index === base.baseScripts.length - 1"></el-button>
-                                        <el-button :icon="RemoveFilled" circle type="danger"
-                                            @click="removeScriptItem(num, index)"></el-button>
-                                        <el-button class="sort-handle" :icon="Sort" circle></el-button>
-                                    </el-col>
-                                </el-row>
-                            </el-form-item>
+                                    </el-form-item>
+                                </template>
+                                <el-form-item :prop="`baseScripts.${num}.baseScripts.${index}.value`" :rules="scriptRules"
+                                    label="脚本内容">
+                                    <el-row class="row-content" :gutter="8">
+                                        <el-col :span="20">
+                                            <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.value"
+                                                style="word-break: break-all;"
+                                                :placeholder="base.type === 1 ? '请输入远端脚本' : '请输入本地脚本,如果是powershell脚本，多行脚本使用英文分号 ; 分隔'"
+                                                clearable :spellcheck="false" />
+                                        </el-col>
+                                        <el-col :span="4">
+                                            <el-button :icon="CirclePlusFilled" @click="addScriptItem(num)" circle
+                                                type="primary" v-if="index === base.baseScripts.length - 1"></el-button>
+                                            <el-button :icon="RemoveFilled" circle type="danger"
+                                                @click="removeScriptItem(num, index)"></el-button>
+                                            <el-button class="sort-handle" :icon="Sort" circle></el-button>
+                                        </el-col>
+                                    </el-row>
+                                </el-form-item>
+                            </div>
                         </VueDraggable>
                         <el-row v-else :gutter="8">
                             <el-col :span="12">
@@ -179,7 +191,6 @@ import dayjs from 'dayjs';
 import { ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
 
-type ShellListRecoedType = Omit<ShellListRecoed, 'envVar'> & { envVar: string }
 const addForm = ref<InstanceType<typeof ElForm>>();
 const state = reactive({
     data: [] as ShellListRecoed[],
@@ -197,7 +208,7 @@ const state = reactive({
         group: '',
         uuid: '',
         host: '',
-    } as ShellListRecoedType,
+    } as ShellListRecoed<'edit'>,
     showAdd: false,
     parseEnvVarOpt: [] as string[],
     shellShow: false,
@@ -205,7 +216,7 @@ const state = reactive({
     selects: [] as ShellListRecoed[],
     showInset: false,
 })
-const validater = (rule: any, value: any, callback: any) => {
+const validaterJSON = (rule: any, value: string, callback: any) => {
     try {
         JSON.parse(value); // 尝试解析 JSON
         callback(); // 解析成功，调用 callback() 表示验证通过
@@ -223,7 +234,7 @@ const rules = {
             required: true,
             message: '请输入脚本变量配置'
         },
-        { validator: validater, trigger: 'blur' }
+        { validator: validaterJSON, trigger: 'blur' }
 
     ],
 }
@@ -234,14 +245,24 @@ const scriptRules = {
     trigger: 'blur',
 }
 
-const envVarPleaseHold = `请输入配置json
-{
-    "mainPath": "/data/Component/shujuzichanpingguchengshiduan/assetmain",
-    "Harbor": "172.16.32.28:32080",
-    "DeployIP": "172.16.32.28",
-    "Namespace": "dataos",  
+const envRules = {
+    validator: (rule: any, value: string | undefined, callback: any) => {
+        value = value?.trim?.();
+        if (value) {
+            return validaterJSON(rule, value, callback);
+        }
+        callback();
+    },
+    trigger: 'blur'
 }
-`
+
+const configPleaseHold = `请输入配置json如：
+{
+    "mainPath": "/root/apps"
+}`;
+
+const envPlacehold = `请输入要注入的环境变量配置json如：{"NODE_ENV": "production"}`;
+
 onMounted(onSearch);
 
 function onSearch() {
@@ -268,8 +289,17 @@ function showDetail(row: ShellListRecoed, isCopy = false) {
         delete param.id;
         delete param.uuid;
     }
-    param.envVar = JSON.stringify(envVar, null, '\t')
-    state.parseEnvVarOpt = Object.keys(JSON.parse(param.envVar))
+    param.envVar = JSON.stringify(envVar, null, '\t');
+    param.baseScripts?.forEach((base: any) => {
+        if (base.type === 2) {
+            base.baseScripts?.forEach((item: any) => {
+                if (item.env && typeof item.env === 'object') {
+                    item.env = JSON.stringify(item.env, null, '\t');
+                }
+            })
+        }
+    });
+    state.parseEnvVarOpt = Object.keys(JSON.parse(param.envVar));
     state.currentRow = param;
 }
 
@@ -359,10 +389,20 @@ async function onDelete() {
 }
 
 async function onConfim() {
+    const baseScripts: ShellListRecoed<'edit'>['baseScripts'] = JSON.parse(JSON.stringify(state.currentRow.baseScripts));
+    if (baseScripts?.length) {
+        baseScripts.forEach(base => {
+            base.baseScripts?.forEach(item => {
+                if (item.env && typeof item.env === 'string') {
+                    item.env = JSON.parse(item.env);
+                }
+            })
+        })
+    }
     const param = {
         ...state.currentRow,
         uuid: state.currentRow.uuid ? state.currentRow.uuid : v4(),//添加唯一键
-        baseScripts: JSON.parse(JSON.stringify(state.currentRow.baseScripts)),
+        baseScripts,
         envVar: JSON.parse(state.currentRow.envVar),
     }
     const valid = await addForm.value!.validate().catch(() => false);
@@ -397,7 +437,7 @@ function getGroupOpt(queryString: string, cb: any) {
     })
 }
 
-function showShell(row: { envVar: string | Record<string, any>, baseScripts: ShellListRecoed['baseScripts'] }) {
+function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
     let env: Record<string, any>;
     if (typeof row.envVar === 'string') {
         try {

@@ -19,19 +19,25 @@ export interface ServerListRecord extends BaseItem {
     /** 说明 */
     desc?: string,
 }
-export type ShellsType = {
+
+export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
     type: 1 | 2 | 3,
     key: string,
-    baseScripts: { key: string, value: string, type?: 'powershell' | 'bat' | 'native', }[],
+    baseScripts: {
+        key: string, value: string,
+        type?: 'powershell' | 'bat' | 'native',
+        env?: T extends 'edit' ? string : Record<string, any>,
+    }[],
     localFile?: string,
     remoteDir?: string,
 }[]
 
 /** 脚本表 */
-export interface ShellListRecoed extends BaseItem {
+export interface ShellListRecoed<T extends 'edit' | 'record' = 'record'> extends BaseItem {
+    id: T extends 'edit' ? (number | null | undefined) : number;
     scriptName: string,
-    envVar: Record<string, any>,
-    baseScripts: ShellsType,
+    envVar: T extends 'edit' ? string : Record<string, any>,
+    baseScripts: ShellsType<T>,
     /** 本地目录 */
     localDir?: string,
     /** 远端目录 */

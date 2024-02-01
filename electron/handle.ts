@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, dialog, ipcMain, shell } from "electron";
 import { openExe, execCmd } from './cmd';
 export function handles() {
-    ipcMain.handle('exec-cmd', async function (e, command: string, type?: 'powershell' | 'bat' | 'native') {
-        return await execCmd(command, type);
+    ipcMain.handle('exec-cmd', async function (e, command: string, type?: 'powershell' | 'bat' | 'native', env?: Record<string, any>) {
+        return await execCmd(command, type, env);
     })
     ipcMain.handle('open-exe', async function (e, command: string) {
         return await openExe(command);

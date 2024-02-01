@@ -8,7 +8,7 @@ const electronAPI = {
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean>,
     /** 在powershell中执行代码 */
-    execCmd: (command: string, type?: 'powershell' | 'bat' | 'native') => ipcRenderer.invoke('exec-cmd', command, type) as ReturnType<typeof import('./cmd').execCmd>,
+    execCmd: (command: string, type?: 'powershell' | 'bat' | 'native', env?: Record<string, any>) => ipcRenderer.invoke('exec-cmd', command, type, env) as ReturnType<typeof import('./cmd').execCmd>,
     /** 打开某个exe，打开某个目录之类的 */
     openExe: (path: string) => ipcRenderer.invoke('open-exe', path) as ReturnType<typeof import('./cmd').openExe>,
     showOpenDialog: (option: OpenDialogOptions) => ipcRenderer.invoke('show-open-dialog', option) as Promise<Electron.OpenDialogReturnValue>,

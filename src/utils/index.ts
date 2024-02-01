@@ -9,22 +9,22 @@ dayjs.extend(duration);
 export const defaultEnv = {
     NOW_TIME: "YYYY-MM-DD~HH:mm:ss",
 }
-export function formatterShell(environment: Record<string, any>, shell: string): string;
-export function formatterShell(environment: Record<string, any>, shell: string[]): string[];
-export function formatterShell<T extends string | string[]>(environment: Record<string, any>, shell: T): T {
-    environment = { ...defaultEnv, ...environment };
-    environment.NOW_TIME = dayjs().format(environment.NOW_TIME);
+export function formatterShell(config: Record<string, any>, shell: string): string;
+export function formatterShell(config: Record<string, any>, shell: string[]): string[];
+export function formatterShell<T extends string | string[]>(config: Record<string, any>, shell: T): T {
+    config = { ...defaultEnv, ...config };
+    config.NOW_TIME = dayjs().format(config.NOW_TIME);
     if (Array.isArray(shell)) {
         return shell.map(str => {
-            for (const key in environment) {
-                str = str.replaceAll(new RegExp(`\{${key}\}`, 'g'), environment[key]);
+            for (const key in config) {
+                str = str.replaceAll(new RegExp(`\{${key}\}`, 'g'), config[key]);
             }
             return str;
         }) as T
     }
     let str = shell as string;
-    for (const key in environment) {
-        str = str.replaceAll(new RegExp(`\{${key}\}`, 'g'), environment[key]);
+    for (const key in config) {
+        str = str.replaceAll(new RegExp(`\{${key}\}`, 'g'), config[key]);
     }
     return str as T;
 }
@@ -35,20 +35,47 @@ export enum shellTypeEnum {
     "文件上传脚本" = 3
 }
 
-export function formatScriptStr(environment: Record<string, any>, shells: ShellsType) {
+export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>) {
     let str = '依次执行的脚本：\n';
     for (const item of shells) {
-        str += `${shellTypeEnum[item.type]}：\n`;
-        if (item.type !== 3 && item.baseScripts) {
+        const { type } = item;
+        str += `${shellTypeEnum[type]}：\n`;
+        if (type !== 3 && item.baseScripts) {
             for (let i = 0, l = item.baseScripts.length; i < l; i++) {
-                const value = item.baseScripts[i].value;
-                str += `脚本${i + 1}：\n${formatterShell(environment, value)}\n`
+                const { value, env } = item.baseScripts[i];
+                str += `脚本${i + 1}：\n`;
+                if (type === 2 && env) {
+                    if (typeof env === 'string') {
+                        str += `环境变量：\n${env}\n`;
+                    } else {
+                        const formatEnvObj = formatEnv(config, env);
+                        if (formatEnvObj) {
+                            str += `环境变量：\n${JSON.stringify(formatEnvObj)}\n`;
+                        }
+                    }
+                }
+                str += `${formatterShell(config, value)}\n`;
             }
         } else {
-            str += `上传的本地文件地址：${formatterShell(environment, item.localFile ?? '')}\n远端目标目录：${formatterShell(environment, item.remoteDir ?? '')}\n`;
+            str += `上传的本地文件地址：${formatterShell(config, item.localFile ?? '')}\n远端目标目录：${formatterShell(config, item.remoteDir ?? '')}\n`;
         }
     }
     return str;
+}
+
+export function formatEnv(config: Record<string, any>, env?: null | Record<string, any>) {
+    if (env && typeof env === 'object') {
+        const obj: Record<string, any> = {};
+        for (const key in env) {
+            const value = env[key];
+            if (typeof value === 'string' && value) {
+                obj[key] = formatterShell(config, value);
+            } else {
+                obj[key] = value;
+            }
+        }
+        return obj;
+    }
 }
 
 /** 一段时间只保留最后一次触发 */

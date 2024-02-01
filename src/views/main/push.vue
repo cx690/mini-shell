@@ -213,7 +213,7 @@ import Table from '@/components/table.vue';
 import { Download, Delete, Refresh } from '@element-plus/icons-vue';
 import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
 import Output from '@/components/output.vue';
-import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum } from '@/utils';
+import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum, formatEnv } from '@/utils';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
 import Terminal from '@/components/Terminal.vue';
 import { ExcuteListRecoed, ShellListRecoed } from '@/utils/tables';
@@ -437,8 +437,8 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
         };
         if (item.type === 1) {
             logInfo(`开始执行${i + 1}、远端脚本：\n`);
-            const list = formatterShell(envVar, item.baseScripts.map(item => item.value));
-            for (const cmd of list) {
+            for (const excuteItem of item.baseScripts) {
+                const cmd = formatterShell(envVar, excuteItem.value);
                 logInfo(`执行脚本：${cmd}\n`);
                 const code = await clientStore.client!.exec(cmd, (data: string) => {
                     logInfo(data);
@@ -456,13 +456,15 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
             }
         } else if (item.type === 2) {
             logInfo(`开始执行${i + 1}、${shellTypeEnum[item.type]}：\n`);
-            const list = formatterShell(envVar, item.baseScripts.map(item => item.value));
-            const cmdTypes = item.baseScripts.map(item => item.type);
-            for (let i = 0, l = list.length; i < l; i++) {
-                const cmd = list[i];
-                const type = cmdTypes[i];
+            for (const excuteItem of item.baseScripts) {
+                const cmd = formatterShell(envVar, excuteItem.value);
+                const { type } = excuteItem;
                 logInfo(`执行脚本(${type ? type : 'powershell'})：${cmd}\n`);
-                const { code, data } = await electronAPI.execCmd(cmd, type);
+                const env = formatEnv(envVar, excuteItem.env);
+                if (env) {
+                    logInfo(`环境变量：${JSON.stringify(env)}\n`);
+                }
+                const { code, data } = await electronAPI.execCmd(cmd, type, env);
                 logInfo(data);
                 if (abort) {
                     abortRecord();
