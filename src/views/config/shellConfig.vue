@@ -55,10 +55,21 @@
                 </el-form-item>
                 <el-form-item prop="envVar">
                     <template #label>
-                        <span>
-                            脚本变量配置：<br />
+                        <div>
+                            <span class="script-config">
+                                脚本变量配置
+                                <el-tooltip placement="top">
+                                    <el-icon>
+                                        <QuestionFilled />
+                                    </el-icon>
+                                    <template #content>
+                                        <p>脚本配置的内容中可以使用“{脚本变量名}”的方式嵌入“脚本变量配置”中声明的配置项</p>
+                                    </template>
+                                </el-tooltip>：
+                            </span>
+                            <br />
                             <el-button type="primary" @click="state.showInset = true">内置变量</el-button>
-                        </span>
+                        </div>
                     </template>
                     <el-input type="textarea" :autosize="{ minRows: 6 }" v-model="state.currentRow.envVar"
                         :placeholder="configPleaseHold" clearable @blur="handleFormat" :spellcheck="false" />
@@ -85,7 +96,19 @@
                 </el-row>
                 <el-form-item style="margin-bottom: 8px;">
                     <template #label>
-                        <div>脚本配置（添加的脚步将从上向下执行）：
+                        <div>
+                            <span class="script-config">
+                                脚本配置
+                                <el-tooltip placement="top">
+                                    <el-icon>
+                                        <QuestionFilled />
+                                    </el-icon>
+                                    <template #content>
+                                        <p>1.添加的脚步将从上向下执行</p>
+                                        <p>2.脚本内容中可以使用“{脚本变量名}”的方式嵌入“脚本变量配置”中声明的配置项</p>
+                                    </template>
+                                </el-tooltip>：
+                            </span>
                             <el-button :icon="Plus" @click="addShellType(1)">添加{{ shellTypeEnum[1] }}</el-button>
                             <el-button :icon="Plus" @click="addShellType(2)">添加{{ shellTypeEnum[2] }}</el-button>
                             <el-button :icon="Plus" @click="addShellType(3)">添加{{ shellTypeEnum[3] }}</el-button>
@@ -183,7 +206,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
-import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete } from '@element-plus/icons-vue';
+import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
 import { exportData, formatScriptStr, noRepeat, shellTypeEnum } from '@/utils';
@@ -493,5 +516,10 @@ function rowKey(row: ShellListRecoed) {
     &:not(:last-child) {
         margin-bottom: 8px;
     }
+}
+
+.script-config {
+    display: inline-flex;
+    align-items: center;
 }
 </style>
