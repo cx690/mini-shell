@@ -47,7 +47,7 @@ async function checkTask() {
                 })
             }
             close = false;
-            exec('shutdown -s -t 10', (err) => {
+            exec('shutdown -s -t 0', (err) => {
                 if (err) {
                     dialog.showMessageBox({
                         title: '关闭计算机错误',
