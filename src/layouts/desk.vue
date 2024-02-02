@@ -5,8 +5,8 @@
                 <div class="header">
                     <div>迷你Shell</div>
                     <div>
-                        <el-button v-if="win.close" @click="onCancelColose">取消任务执行完毕关机设定</el-button>
-                        <el-button type="primary" @click="openWin">新开窗口</el-button>
+                        <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">取消任务执行完毕关机设定</el-button>
+                        <el-button type="primary" @click="openWin" :icon="Plus">新开窗口</el-button>
                     </div>
                 </div>
             </el-header>
@@ -59,6 +59,7 @@ import { menus, MetaType } from '@/router';
 import { useRoute, useRouter } from 'vue-router';
 import { RouterLink, RouterView } from 'vue-router';
 import { computed } from 'vue';
+import { Remove, Plus } from '@element-plus/icons-vue';
 import useWin from '@/store/useWin';
 
 const route = useRoute();

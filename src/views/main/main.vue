@@ -11,7 +11,7 @@
                         placeholder="请输入主机" clearable />
                 </el-form-item>
                 <el-form-item>
-                    <el-button @Click="onSearch">查询</el-button>
+                    <el-button @Click="onSearch" :icon="Search">查询</el-button>
                 </el-form-item>
             </el-form>
         </template>
@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { onActivated, onMounted, reactive } from 'vue';
 import { ElForm, ElMessageBox } from 'element-plus';
+import { Search } from '@element-plus/icons-vue';
 import { findAll } from '@/utils/database';
 import { useRouter } from 'vue-router';
 import { ServerListRecord } from '@/utils/tables';

@@ -9,23 +9,23 @@
                         连接状态：{{ StatusEnum[clientStore.status] }}
                     </span>
                     <el-button class="mgL10" v-if="clientStore.config && clientStore.status === 0" type="primary"
-                        @click="reLink">重新连接</el-button>
+                        @click="reLink" :icon="Connection">重新连接</el-button>
                 </template>
                 <RouterLink :to="{ name: 'main' }" class="mgL10">
-                    <el-button type="primary">
+                    <el-button type="primary" :icon="Switch">
                         {{ clientStore.config ? '切换服务器' : '选择服务器' }}
                     </el-button>
                 </RouterLink>
                 <el-popconfirm v-if="clientStore.status === 2 || clientStore.status === 1"
                     :title="`确定要停止${clientStore.config?.host ?? ''}的链接吗？`" @confirm="clientStore.disConnect">
                     <template #reference>
-                        <el-button class="mgL10">断开连接</el-button>
+                        <el-button class="mgL10" :icon="Close">断开连接</el-button>
                     </template>
                 </el-popconfirm>
-                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10"
-                    @click="state.showUpload = true">上传文件</el-button>
-                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10"
-                    @click="state.showDownload = true">下载文件</el-button>
+                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showUpload = true"
+                    :icon="Upload">上传文件</el-button>
+                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showDownload = true"
+                    :icon="Download">下载文件</el-button>
             </div>
         </template>
         <el-form :model="formData" inline>
@@ -51,13 +51,14 @@
                                 style="width: 220px;" :options="shellListGroup">
                             </el-select-v2>
                             <el-button class="mgL10" @click="reFresh" :icon="Refresh">刷新数据</el-button>
-                            <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell">
+                            <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell"
+                                :icon="CaretRight">
                                 执行脚本
                             </el-button>
                             <el-popover title="选择要执行的脚本" :width="550"
                                 v-if="formData.selectShell && formData.selectShell.baseScripts && formData.selectShell.baseScripts.length">
                                 <template #reference>
-                                    <el-button class="mgL10" type="primary">
+                                    <el-button class="mgL10" type="primary" :icon="Filter">
                                         执行部分脚本
                                     </el-button>
                                 </template>
@@ -76,10 +77,11 @@
                                 </el-checkbox-group>
                                 <div>
                                     <el-button type="primary" :disabled="!formData.checkList.length"
-                                        @click="excuteShell(formData.checkList)">执行所选脚本</el-button>
+                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">执行所选脚本</el-button>
                                 </div>
                             </el-popover>
-                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell">查看脚本</el-button>
+                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell"
+                                :icon="View">查看脚本</el-button>
                             <el-dropdown @command="openPowershell">
                                 <el-button class="mgL10">打开本地终端</el-button>
                                 <template #dropdown>
@@ -92,10 +94,11 @@
                             <el-popconfirm title="确定要在执行完所有任务的时候关闭计算机吗？"
                                 v-if="state.excuteData.length && win.close === false" @confirm="closeWin">
                                 <template #reference>
-                                    <el-button type="danger" class="mgL10">任务执行完毕后关闭计算机</el-button>
+                                    <el-button type="danger" class="mgL10" :icon="SwitchButton">任务执行完毕后关闭计算机</el-button>
                                 </template>
                             </el-popconfirm>
-                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose">取消任务执行完毕关机设定</el-button>
+                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose"
+                                :icon="Remove">取消任务执行完毕关机设定</el-button>
                         </el-form-item>
                         <div class="table-title">
                             执行记录：
@@ -217,7 +220,7 @@
 import useClient, { StatusEnum } from '@/store/useClient';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
-import { Download, Delete, Refresh } from '@element-plus/icons-vue';
+import { Download, Delete, Refresh, Upload, CaretRight, View, Switch, Close, Connection, SwitchButton, Remove, Filter } from '@element-plus/icons-vue';
 import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
 import Output from '@/components/output.vue';
 import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum, formatEnv } from '@/utils';

@@ -2,16 +2,17 @@
     <base-page>
         <div class="main-container">
             <ElCard>
-                <el-button type="primary" @click="onInport">导入数据</el-button>
+                <el-button type="primary" @click="onInport" :icon="Upload">导入数据</el-button>
             </ElCard>
             <ElCard>
-                <el-button :loading="state.exportConfigLoading" @Click="exportAllConfig">导出所有配置</el-button>
+                <el-button :loading="state.exportConfigLoading" @Click="exportAllConfig" :icon="Download">导出所有配置</el-button>
             </ElCard>
             <ElCard>
-                <el-button :loading="state.exportLogsLoading" @Click="exportExcuteRecord">导出运行日志</el-button>
+                <el-button :loading="state.exportLogsLoading" @Click="exportExcuteRecord"
+                    :icon="Download">导出运行日志</el-button>
             </ElCard>
             <ElCard>
-                <el-button type="danger" @Click="state.showDeleteLogs = true">删除运行日志</el-button>
+                <el-button type="danger" @Click="state.showDeleteLogs = true" :icon="Delete">删除运行日志</el-button>
             </ElCard>
         </div>
         <el-dialog title="删除日志" v-model="state.showDeleteLogs">
@@ -31,7 +32,7 @@
 </template>
 <script setup lang="ts">
 import { ElMessage, ElCard } from 'element-plus';
-import { WarningFilled } from '@element-plus/icons-vue';
+import { WarningFilled, Upload, Download, Delete } from '@element-plus/icons-vue';
 import { getDatabase, exportTables, clearStore } from '@/utils/database';
 import { reactive } from 'vue';
 const state = reactive({

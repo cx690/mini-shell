@@ -112,7 +112,8 @@
                             <el-button :icon="Plus" @click="addShellType(1)">添加{{ shellTypeEnum[1] }}</el-button>
                             <el-button :icon="Plus" @click="addShellType(2)">添加{{ shellTypeEnum[2] }}</el-button>
                             <el-button :icon="Plus" @click="addShellType(3)">添加{{ shellTypeEnum[3] }}</el-button>
-                            <el-button type="primary" @click="showShell(state.currentRow)">查看格式化后的脚本</el-button>
+                            <el-button type="primary" @click="showShell(state.currentRow)"
+                                :icon="View">查看格式化后的脚本</el-button>
                         </div>
                     </template>
                 </el-form-item>
@@ -206,7 +207,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
-import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled } from '@element-plus/icons-vue';
+import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
 import { exportData, formatScriptStr, noRepeat, shellTypeEnum } from '@/utils';
