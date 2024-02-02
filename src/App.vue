@@ -15,8 +15,10 @@ const uploadInfo = reactive<Record<string, {
   notificationHandle?: NotificationHandle
 }>>({});
 
-electronAPI.onInfo<'upload', UploadInfoType>(({ type, uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } }) => {
+electronAPI.onInfo<'upload', UploadInfoType>((info) => {
+  const { type } = info;
   if (type === 'upload') {
+    const { uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } } = info;
     if (uploadInfo[uuid]) {
       Object.assign(uploadInfo[uuid].data, data);
       if (data.status === 2 || data.status === 3) {
