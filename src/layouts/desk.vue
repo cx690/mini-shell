@@ -5,6 +5,7 @@
                 <div class="header">
                     <div>迷你Shell</div>
                     <div>
+                        <el-button v-if="win.close" @click="onCancelColose">取消任务执行完毕关机设定</el-button>
                         <el-button type="primary" @click="openWin">新开窗口</el-button>
                     </div>
                 </div>
@@ -58,6 +59,7 @@ import { menus, MetaType } from '@/router';
 import { useRoute, useRouter } from 'vue-router';
 import { RouterLink, RouterView } from 'vue-router';
 import { computed } from 'vue';
+import useWin from '@/store/useWin';
 
 const route = useRoute();
 const router = useRouter();
@@ -92,6 +94,16 @@ const keepliveList = computed(() => {
 })
 function openWin() {
     window.electronAPI.open(window.location.href);
+}
+const win = useWin();
+electronAPI.onInfo<'close-windows'>(({ type, data }) => {
+    if (type === 'close-windows') {
+        win.close = data;
+    }
+})
+
+function onCancelColose() {
+    electronAPI.setCloseWhenTask0(false);
 }
 </script>
 

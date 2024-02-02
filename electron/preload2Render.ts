@@ -2,6 +2,7 @@ import { ipcRenderer } from "electron";
 
 export interface InfoEvent {
     'upload': UploadInfoType,
+    'close-windows': boolean
 }
 
 // enum statusInfo {

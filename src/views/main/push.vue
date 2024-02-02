@@ -46,7 +46,7 @@
                                     :value="item" />
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="脚本选择">
+                        <el-form-item label="脚本选择" class="script-btns">
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell" placeholder="请选择"
                                 style="width: 220px;" :options="shellListGroup">
                             </el-select-v2>
@@ -89,6 +89,13 @@
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
+                            <el-popconfirm title="确定要在执行完所有任务的时候关闭计算机吗？"
+                                v-if="state.excuteData.length && win.close === false" @confirm="closeWin">
+                                <template #reference>
+                                    <el-button type="danger" class="mgL10">任务执行完毕后关闭计算机</el-button>
+                                </template>
+                            </el-popconfirm>
+                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose">取消任务执行完毕关机设定</el-button>
                         </el-form-item>
                         <div class="table-title">
                             执行记录：
@@ -211,7 +218,7 @@ import useClient, { StatusEnum } from '@/store/useClient';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Download, Delete, Refresh } from '@element-plus/icons-vue';
-import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
+import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated, watch } from 'vue';
 import Output from '@/components/output.vue';
 import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum, formatEnv } from '@/utils';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
@@ -219,6 +226,7 @@ import Terminal from '@/components/Terminal.vue';
 import { ExcuteListRecoed, ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
 import dayjs from 'dayjs';
+import useWin from '@/store/useWin';
 import Status from './status.vue';
 
 const clientStore = useClient();
@@ -765,6 +773,19 @@ if (process.env.NODE_ENV !== 'development') {
     });
 }
 
+const win = useWin();
+watch(state.excuteData, () => {
+    window.Excute.setTaskNum(state.excuteData.length);
+    console.log(233)
+})
+
+function closeWin() {
+    electronAPI.setCloseWhenTask0(true);
+}
+
+function onCancelColose() {
+    electronAPI.setCloseWhenTask0(false);
+}
 </script>
 <style lang="less" scoped>
 .status {
@@ -856,5 +877,11 @@ if (process.env.NODE_ENV !== 'development') {
     overflow-y: auto;
     max-height: 40vh;
     height: fit-content;
+}
+
+.script-btns {
+    :deep(.el-form-item__content) {
+        flex-wrap: nowrap;
+    }
 }
 </style>

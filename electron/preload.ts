@@ -5,6 +5,9 @@ import './preload2Render';
 const electronAPI = {
     getClient,
     open: (url: string) => ipcRenderer.send('open-url', url),
+    /** 通知主线程任务数量 */
+    setTaskNum: (num: number) => ipcRenderer.send('task-num', num),
+    setCloseWhenTask0: (status: boolean) => ipcRenderer.send('close-windows-when-task-0', status),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean>,
     /** 在powershell中执行代码 */

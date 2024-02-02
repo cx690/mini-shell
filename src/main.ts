@@ -8,6 +8,7 @@ import App from './App.vue';
 import 'dayjs/locale/zh-cn';
 import router from './router';
 import BasePage from '@/components/basePage.vue';
+import './excute';
 
 const app = createApp(App);
 app.component('BasePage', BasePage);

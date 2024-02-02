@@ -19,9 +19,9 @@ if (!gotTheLock) {
     })
 
     app.whenReady().then(() => {
-        createWindow();
         events();
         handles();
+        createWindow();
         app.on('activate', function () {
             if (BrowserWindow.getAllWindows().length === 0) createWindow()
         })
