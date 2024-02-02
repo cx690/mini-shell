@@ -36,8 +36,8 @@ export default events;
 async function checkTask() {
     if (close) {
         const wins = BrowserWindow.getAllWindows();
-        const arr = await Promise.all(wins.map(({ webContents }) => webContents.executeJavaScript('window.Excute.getTaskNum()')))
-        let taskNum: number = arr.reduce((a, b) => a + b);
+        const arr = await Promise.all(wins.map(({ webContents }) => webContents.executeJavaScript('window.Excute.getTaskNum();')))
+        const taskNum: number = arr.reduce((a, b) => a + b);
         if (taskNum === 0) {
             for (const win of wins) {
                 win.webContents.send('emit-info', {

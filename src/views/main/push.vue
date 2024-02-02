@@ -218,7 +218,7 @@ import useClient, { StatusEnum } from '@/store/useClient';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Download, Delete, Refresh } from '@element-plus/icons-vue';
-import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated, watch } from 'vue';
+import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
 import Output from '@/components/output.vue';
 import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum, formatEnv } from '@/utils';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
@@ -774,9 +774,8 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 const win = useWin();
-watch(state.excuteData, () => {
+watchEffect(() => {
     window.Excute.setTaskNum(state.excuteData.length);
-    console.log(233)
 })
 
 function closeWin() {
