@@ -17,7 +17,7 @@
     </base-page>
 </template>
 <script setup lang="ts">
-const { versions, openExternal } = window.electronAPI;
+const { versions, openExternal } = electronAPI;
 const developer = [
     {
         name: 'cx690',

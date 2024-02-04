@@ -94,7 +94,7 @@ const keepliveList = computed(() => {
     return router.getRoutes().map(route => route.meta?.keepAlive !== false ? route.name : null).filter(Boolean) as string[];
 })
 function openWin() {
-    window.electronAPI.open(window.location.href);
+    electronAPI.open(window.location.href);
 }
 const win = useWin();
 electronAPI.onInfo('close-windows', ({ data }) => {

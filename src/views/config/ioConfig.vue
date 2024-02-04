@@ -78,7 +78,7 @@ async function onInport() {
             return;
         }
         try {
-            const text = await window.electronAPI.readFile(path);
+            const text = await electronAPI.readFile(path);
             const data = JSON.parse(text);
             const db = await getDatabase();
             for (const storeName in data) {
