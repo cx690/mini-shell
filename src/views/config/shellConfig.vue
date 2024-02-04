@@ -2,73 +2,76 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
-                <el-form-item label='配置文件名称'>
+                <el-form-item :label="t('script-config-name')">
                     <el-input v-model.trim="state.formData.scriptName" class="g-input" @keypress.enter.native="onSearch"
-                        placeholder="请输入配置文件名称" clearable />
+                        :placeholder="t('enter-script-config-name')" clearable />
                 </el-form-item>
-                <el-form-item label='群组名称'>
+                <el-form-item :label="t('group-name')">
                     <el-autocomplete v-model.trim="state.formData.group" class="g-input" @keypress.enter.native="onSearch"
-                        clearable placeholder="请输入群组名称" :fetch-suggestions="getGroupOpt" @select="onSearch"
+                        clearable :placeholder="t('enter-group-name')" :fetch-suggestions="getGroupOpt" @select="onSearch"
                         @clear="onSearch" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button @Click="onSearch" :icon="Search">查询</el-button>
-                    <el-button type="primary" @click="onAdd" :icon="Plus">新增</el-button>
-                    <el-button @click="onExport" :icon="Download">导出</el-button>
-                    <el-button type="danger" @click="onDelete" :icon="Delete">删除</el-button>
+                    <el-button @Click="onSearch" :icon="Search">{{ t('Search') }}</el-button>
+                    <el-button type="primary" @click="onAdd" :icon="Plus">{{ t('New') }}</el-button>
+                    <el-button @click="onExport" :icon="Download">{{ t('Export') }}</el-button>
+                    <el-button type="danger" @click="onDelete" :icon="Delete">{{ t('Delete') }}</el-button>
                 </el-form-item>
             </el-form>
         </template>
 
         <Table :data="state.data" :row-key="rowKey" @selection-change="onSelect">
             <el-table-column type="selection" width="55" />
-            <el-table-column prop="scriptName" label="配置文件名称" />
-            <el-table-column prop="group" label="群组名称" />
-            <el-table-column prop="host" label="关联主机" />
-            <el-table-column prop="action" label="操作">
+            <el-table-column prop="scriptName" :label="t('script-config-name')" />
+            <el-table-column prop="group" :label="t('group-name')" />
+            <el-table-column prop="host" :label="t('relevancy-host')" />
+            <el-table-column prop="action" :label="t('Action')">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="showDetail(row)">修改</el-link>
-                    <el-link type="primary" :underline="false" @click="showDetail(row, true)">复制</el-link>
+                    <el-link type="primary" :underline="false" @click="showDetail(row)">{{ t('Edit') }}</el-link>
+                    <el-link type="primary" :underline="false" @click="showDetail(row, true)">{{ t('Copy') }}</el-link>
                     <el-link type="primary" :underline="false" v-if="row.baseScripts && row.baseScripts.length"
-                        @click="showShell(row)">查看脚本</el-link>
-                    <el-popconfirm title="确定要删除这条数据吗？" @confirm="delItem(row.id)">
+                        @click="showShell(row)">{{ t('View') }}</el-link>
+                    <el-popconfirm :title="t('confirm-delete-item')" @confirm="delItem(row.id)">
                         <template #reference>
-                            <el-link type="danger" :underline="false">删除</el-link>
+                            <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
                 </template>
             </el-table-column>
         </Table>
-        <el-dialog v-if="state.showAdd" :title="state.currentRow?.id ? '修改脚本设置' : '新增脚本设置'" v-model="state.showAdd"
-            width="1200px" :close-on-click-modal="false">
+        <el-dialog v-if="state.showAdd" :title="state.currentRow?.id ? t('edit-script-config') : t('add-script-config')"
+            v-model="state.showAdd" width="1200px" :close-on-click-modal="false">
             <el-form ref="addForm" :model="state.currentRow" :rules="rules">
-                <el-form-item label="配置文件名称" prop="scriptName">
-                    <el-input v-model.trim="state.currentRow.scriptName" clearable placeholder="请输入配置文件名称" />
+                <el-form-item :label="t('script-config-name')" prop="scriptName">
+                    <el-input v-model.trim="state.currentRow.scriptName" clearable
+                        :placeholder="t('enter-script-config-name')" />
                 </el-form-item>
-                <el-form-item label="群组名称" prop="group">
-                    <el-autocomplete v-model.trim="state.currentRow.group" clearable placeholder="请输入群组名称"
+                <el-form-item :label="t('group-name')" prop="group">
+                    <el-autocomplete v-model.trim="state.currentRow.group" clearable :placeholder="t('enter-group-name')"
                         :fetch-suggestions="getGroupOpt" />
                 </el-form-item>
-                <el-form-item label="关联主机" prop="host">
-                    <el-autocomplete v-model.trim="state.currentRow.host" clearable placeholder="默认关联0.0.0.0"
+                <el-form-item :label="t('relevancy-host')" prop="host">
+                    <el-autocomplete v-model.trim="state.currentRow.host" clearable :placeholder="t('default-host')"
                         :fetch-suggestions="getHostOpt" />
                 </el-form-item>
                 <el-form-item prop="envVar">
                     <template #label>
                         <div>
                             <span class="script-config">
-                                脚本变量配置
+                                {{ t('script-variable-config') }}
                                 <el-tooltip placement="top">
                                     <el-icon>
                                         <QuestionFilled />
                                     </el-icon>
                                     <template #content>
-                                        <p>脚本配置的内容中可以使用“{脚本变量名}”的方式嵌入“脚本变量配置”中声明的配置项</p>
+                                        <p>{{ t('script-variable-config-desc') }}</p>
                                     </template>
                                 </el-tooltip>：
                             </span>
                             <br />
-                            <el-button type="primary" @click="state.showInset = true">内置变量</el-button>
+                            <el-button type="primary" @click="state.showInset = true">
+                                {{ t('built-in-variablle') }}
+                            </el-button>
                         </div>
                     </template>
                     <el-input type="textarea" :autosize="{ minRows: 6 }" v-model="state.currentRow.envVar"
@@ -76,18 +79,18 @@
                 </el-form-item>
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="本地目录变量名" prop="localDir">
-                            <el-select v-model="state.currentRow.localDir" placeholder="用于打开本地终端设置默认pwd" clearable
-                                style="width: 250px;">
+                        <el-form-item :label="t('local-dir-var-name')" prop="localDir">
+                            <el-select v-model="state.currentRow.localDir" :placeholder="t('start-d')" clearable
+                                style="width: 300px;">
                                 <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
                                     :value="item" />
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="目标目录变量名" prop="mainPath">
-                            <el-select v-model="state.currentRow.mainPath" placeholder="用于上传文件的默认远程目录" clearable
-                                style="width: 250px;">
+                        <el-form-item :label="t('remote-dir-var-name')" prop="mainPath">
+                            <el-select v-model="state.currentRow.mainPath" :placeholder="t('upload-d')" clearable
+                                style="width: 300px;">
                                 <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
                                     :value="item" />
                             </el-select>
@@ -98,22 +101,29 @@
                     <template #label>
                         <div>
                             <span class="script-config">
-                                脚本配置
+                                {{ t('script-config') }}
                                 <el-tooltip placement="top">
                                     <el-icon>
                                         <QuestionFilled />
                                     </el-icon>
                                     <template #content>
-                                        <p>1.添加的脚步将从上向下执行</p>
-                                        <p>2.脚本内容中可以使用“{脚本变量名}”的方式嵌入“脚本变量配置”中声明的配置项</p>
+                                        <p>1.{{ t('excute-sort') }}</p>
+                                        <p>2.{{ t('excute-var-desc') }}</p>
                                     </template>
                                 </el-tooltip>：
                             </span>
-                            <el-button :icon="Plus" @click="addShellType(1)">添加{{ shellTypeEnum[1] }}</el-button>
-                            <el-button :icon="Plus" @click="addShellType(2)">添加{{ shellTypeEnum[2] }}</el-button>
-                            <el-button :icon="Plus" @click="addShellType(3)">添加{{ shellTypeEnum[3] }}</el-button>
-                            <el-button type="primary" @click="showShell(state.currentRow)"
-                                :icon="View">查看格式化后的脚本</el-button>
+                            <el-button :icon="Plus" @click="addShellType(1)">
+                                {{ t('Add ') }}{{ shellTypeEnum[1] }}
+                            </el-button>
+                            <el-button :icon="Plus" @click="addShellType(2)">
+                                {{ t('Add ') }}{{ shellTypeEnum[2] }}
+                            </el-button>
+                            <el-button :icon="Plus" @click="addShellType(3)">
+                                {{ t('Add ') }}{{ shellTypeEnum[3] }}
+                            </el-button>
+                            <el-button type="primary" @click="showShell(state.currentRow)" :icon="View">
+                                {{ t('view-format-script') }}
+                            </el-button>
                         </div>
                     </template>
                 </el-form-item>
@@ -134,27 +144,27 @@
                             <div v-for="(item, index) in base.baseScripts" :key="item.key">
                                 <template v-if="base.type === 2">
                                     <el-divider v-if="index > 0" />
-                                    <el-form-item label="脚本类型">
-                                        <el-select v-model="item.type" placeholder="默认为powershell">
+                                    <el-form-item :label="t('script-type')">
+                                        <el-select v-model="item.type" :placeholder="t('default-cmd')">
                                             <el-option label="powershell" value="powershell">powershell</el-option>
                                             <el-option label="bat" value="bat">bat</el-option>
                                             <el-option label="native" value="native">native</el-option>
                                         </el-select>
                                     </el-form-item>
-                                    <el-form-item label="环境变量" :prop="`baseScripts.${num}.baseScripts.${index}.env`"
-                                        :rules="envRules">
+                                    <el-form-item :label="t('env-var')"
+                                        :prop="`baseScripts.${num}.baseScripts.${index}.env`" :rules="envRules">
                                         <el-input type="textarea" :autosize="{ minRows: 1 }" v-model="item.env"
                                             style="word-break: break-all;width: 700px;" :placeholder="envPlacehold"
                                             clearable :spellcheck="false" />
                                     </el-form-item>
                                 </template>
                                 <el-form-item :prop="`baseScripts.${num}.baseScripts.${index}.value`" :rules="scriptRules"
-                                    label="脚本内容">
+                                    :label="t('script-code')">
                                     <el-row class="row-content" :gutter="8">
                                         <el-col :span="20">
                                             <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.value"
                                                 style="word-break: break-all;"
-                                                :placeholder="base.type === 1 ? '请输入远端脚本' : '请输入本地脚本,如果是powershell脚本，多行脚本使用英文分号 ; 分隔'"
+                                                :placeholder="base.type === 1 ? t('enter-remote-script') : t('enter-remote-script-powershell')"
                                                 clearable :spellcheck="false" />
                                         </el-col>
                                         <el-col :span="4">
@@ -170,16 +180,18 @@
                         </VueDraggable>
                         <el-row v-else :gutter="8">
                             <el-col :span="12">
-                                <el-form-item label="本地文件或者文件夹路径" :rules="{ required: true, message: '请输入本地文件或者文件夹地址' }"
+                                <el-form-item :label="t('local-dir')"
+                                    :rules="{ required: true, message: t('enter-local-dir') }"
                                     :prop="`baseScripts.${num}.localFile`">
-                                    <el-input v-model="base.localFile" placeholder="请输入本地文件或者文件夹地址" clearable
+                                    <el-input v-model="base.localFile" :placeholder="t('enter-local-dir')" clearable
                                         :spellcheck="false" />
                                 </el-form-item>
                             </el-col>
                             <el-col :span="12">
-                                <el-form-item label="远端文件目录" :rules="{ required: true, message: '请输入远端文件目录' }"
+                                <el-form-item :label="t('remote-dir')"
+                                    :rules="{ required: true, message: t('enter-remote-dir') }"
                                     :prop="`baseScripts.${num}.remoteDir`">
-                                    <el-input v-model="base.remoteDir" placeholder="请输入远端文件目录" clearable
+                                    <el-input v-model="base.remoteDir" :placeholder="t('enter-remote-dir')" clearable
                                         :spellcheck="false" />
                                 </el-form-item>
                             </el-col>
@@ -189,32 +201,34 @@
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="state.showAdd = false">取消</el-button>
-                    <el-button type="primary" @click="onConfim">确认</el-button>
+                    <el-button @click="state.showAdd = false">{{ t('Cancel') }}</el-button>
+                    <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
                 </span>
             </template>
         </el-dialog>
-        <el-dialog v-model="state.shellShow" title="格式化脚本详情" width="1000px" draggable>
+        <el-dialog v-model="state.shellShow" :title="t('format-script-detail')" width="1000px" draggable>
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
-        <el-dialog v-model="state.showInset" title="内置详情" draggable>
-            <div> NOW_TIME: 'YYYY-MM-DD~HH:mm:ss' // 脚本运行时的时间</div>
+        <el-dialog v-model="state.showInset" :title="t('built-in-detail')" draggable>
+            <div> NOW_TIME: 'YYYY-MM-DD~HH:mm:ss' // {{ t('excute-time') }}</div>
         </el-dialog>
     </base-page>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
 import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
-import { exportData, formatScriptStr, noRepeat, shellTypeEnum } from '@/utils';
+import { exportData, formatScriptStr, noRepeat, useShellTypeEnum } from '@/utils';
 import dayjs from 'dayjs';
 import { ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
-
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+const shellTypeEnum = useShellTypeEnum();
 const addForm = ref<InstanceType<typeof ElForm>>();
 const state = reactive({
     data: [] as ShellListRecoed[],
@@ -245,29 +259,29 @@ const validaterJSON = (rule: any, value: string, callback: any) => {
         JSON.parse(value); // 尝试解析 JSON
         callback(); // 解析成功，调用 callback() 表示验证通过
     } catch (error) {
-        callback(new Error('解析错误，请填写 JSON 格式')); // 解析失败，调用 callback() 传递错误信息
+        callback(new Error(t('json-error'))); // 解析失败，调用 callback() 传递错误信息
     }
 }
-const rules = {
+const rules = computed(() => ({
     scriptName: {
         required: true,
-        message: '请输入配置文件名称'
+        message: t('enter-script-config-name')
     },
     envVar: [
         {
             required: true,
-            message: '请输入脚本变量配置'
+            message: t('enter-script-var-config')
         },
         { validator: validaterJSON, trigger: 'blur' }
 
     ],
-}
+}))
 
-const scriptRules = {
+const scriptRules = computed(() => ({
     required: true,
-    message: '脚本配置不能为空',
+    message: t('enter-script-config'),
     trigger: 'blur',
-}
+}))
 
 const envRules = {
     validator: (rule: any, value: string | undefined, callback: any) => {
@@ -280,12 +294,12 @@ const envRules = {
     trigger: 'blur'
 }
 
-const configPleaseHold = `请输入配置json如：
+const configPleaseHold = computed(() => `${t('enter-json')}：
 {
     "mainPath": "/root/apps"
-}`;
+}`);
 
-const envPlacehold = `请输入要注入的环境变量配置json如：{"NODE_ENV": "production"}`;
+const envPlacehold = computed(() => `${t('enter-json')}：{"NODE_ENV": "production"}`);
 
 onMounted(onSearch);
 
@@ -384,7 +398,7 @@ function onAdd() {
 
 function onExport() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-record'));
         return;
     }
     const text = JSON.stringify({
@@ -401,10 +415,10 @@ async function delItem(id: number | number[]) {
 
 async function onDelete() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-record'));
         return;
     }
-    const action = await ElMessageBox.confirm(`确定要删除选中的${state.selects.length}条数据吗？`, '删除确认', {
+    const action = await ElMessageBox.confirm(t('delete-confirm-content'), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {

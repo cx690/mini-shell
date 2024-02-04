@@ -223,7 +223,7 @@ import Table from '@/components/table.vue';
 import { Download, Delete, Refresh, Upload, CaretRight, View, Switch, Close, Connection, SwitchButton, Remove, Filter } from '@element-plus/icons-vue';
 import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
 import Output from '@/components/output.vue';
-import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, shellTypeEnum, formatEnv } from '@/utils';
+import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, useShellTypeEnum, formatEnv } from '@/utils';
 import { deleteItems, findAll, getDatabase } from '@/utils/database';
 import Terminal from '@/components/Terminal.vue';
 import { ExcuteListRecoed, ShellListRecoed } from '@/utils/tables';
@@ -231,7 +231,9 @@ import { v4 } from 'uuid';
 import dayjs from 'dayjs';
 import useWin from '@/store/useWin';
 import Status from './status.vue';
-
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+const shellTypeEnum = useShellTypeEnum();
 const clientStore = useClient();
 
 const holdTermRef = ref();
@@ -443,7 +445,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
     for (let i = 0, l = baseScripts.length; i < l; i++) {
         const item = baseScripts[i];
         if (checkList?.length && !checkList.includes(item)) {
-            logInfo(`已跳过${i + 1}、${shellTypeEnum[item.type]}\n`);
+            logInfo(`已跳过${i + 1}、${shellTypeEnum.value[item.type]}\n`);
             continue;
         };
         if (item.type === 1) {
@@ -466,7 +468,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                 }
             }
         } else if (item.type === 2) {
-            logInfo(`开始执行${i + 1}、${shellTypeEnum[item.type]}：\n`);
+            logInfo(`开始执行${i + 1}、${shellTypeEnum.value[item.type]}：\n`);
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
                 const { type } = excuteItem;
@@ -493,7 +495,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
             if (!remoteDir || !localFile) {
                 ElMessage.warning('不存在上传设置！');
             } else {
-                logInfo(`开始执行${i + 1}、${shellTypeEnum[item.type]}：\n`);
+                logInfo(`开始执行${i + 1}、${shellTypeEnum.value[item.type]}：\n`);
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
                 logInfo(`\n上传文件脚本 本地目标：${local} 目标目录：${remote}\n`);

@@ -2,75 +2,77 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
-                <el-form-item label='名称'>
+                <el-form-item :label="t('Name')">
                     <el-input v-model="state.formData.name" class="g-input" @keypress.enter.native="onSearch"
-                        placeholder="请输入名称" clearable />
+                        :placeholder="t('enter-name')" clearable />
                 </el-form-item>
-                <el-form-item label='主机'>
+                <el-form-item :label="t('Host')">
                     <el-input v-model="state.formData.host" class="g-input" @keypress.enter.native="onSearch"
-                        placeholder="请输入主机" clearable />
+                        :placeholder="t('enter-host')" clearable />
                 </el-form-item>
                 <el-form-item>
-                    <el-button @Click="onSearch" :icon="Search">查询</el-button>
-                    <el-button type="primary" @click="onAdd" :icon="Plus">新增</el-button>
-                    <el-button @click="onExport" :icon="Download">导出</el-button>
-                    <el-button type="danger" @click="onDelete" :icon="Delete">删除</el-button>
+                    <el-button @Click="onSearch" :icon="Search">{{ t('Search') }}</el-button>
+                    <el-button type="primary" @click="onAdd" :icon="Plus">{{ t('New') }}</el-button>
+                    <el-button @click="onExport" :icon="Download">{{ t('Export') }}</el-button>
+                    <el-button type="danger" @click="onDelete" :icon="Delete">{{ t('Delete') }}</el-button>
                 </el-form-item>
             </el-form>
         </template>
 
         <Table :data="state.data" row-key="id" @selection-change="onSelect" :row-class-name="activeClassName">
-            <el-table-column prop="name" label="名称" />
-            <el-table-column prop="host" label="主机" />
-            <el-table-column prop="port" label="端口" />
-            <el-table-column prop="username" label="用户名" />
-            <el-table-column prop="desc" label="说明" />
-            <el-table-column prop="action" label="操作">
+            <el-table-column prop="name" :label="t('Name')" />
+            <el-table-column prop="host" :label="t('Host')" />
+            <el-table-column prop="port" :label="t('Port')" />
+            <el-table-column prop="username" :label="t('user-name')" />
+            <el-table-column prop="desc" :label="t('desc')" show-overflow-tooltip />
+            <el-table-column prop="action" :label="t('Action')">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="showDetail(row)">修改</el-link>
-                    <el-link type="primary" :underline="false" @click="copyItem(row)">复制</el-link>
-                    <el-popconfirm title="确定要删除这条数据吗？" @confirm="delItem(row.id)">
+                    <el-link type="primary" :underline="false" @click="showDetail(row)">{{ t('Edit') }}</el-link>
+                    <el-link type="primary" :underline="false" @click="copyItem(row)">{{ t('Copy') }}</el-link>
+                    <el-popconfirm :title="t('confirm-delete-item')" @confirm="delItem(row.id)">
                         <template #reference>
-                            <el-link type="danger" :underline="false">删除</el-link>
+                            <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
                 </template>
             </el-table-column>
         </Table>
-        <el-dialog v-if="state.showAdd" :title="state.currentRow?.id ? '修改会话设置' : '新增会话设置'" v-model="state.showAdd"
+        <el-dialog v-if="state.showAdd"
+            :title="state.currentRow?.id ? t('edit-connection-config') : t('add-connection-config')" v-model="state.showAdd"
             width="600px" :close-on-click-modal="false">
             <el-form ref="addForm" :model="state.currentRow" :rules="rules" label-width="100px">
-                <el-form-item label="名称" prop="name">
-                    <el-input v-model.trim="state.currentRow.name" placeholder="请输入名称" clearable />
+                <el-form-item :label="t('Name')" prop="name">
+                    <el-input v-model.trim="state.currentRow.name" :placeholder="t('enter-name')" clearable />
                 </el-form-item>
-                <el-form-item label="主机" prop="host">
-                    <el-input v-model.trim="state.currentRow.host" placeholder="请输入主机IP/域名地址" clearable />
+                <el-form-item :label="t('Host')" prop="host">
+                    <el-input v-model.trim="state.currentRow.host" :placeholder="t('enter-host')" clearable />
                 </el-form-item>
-                <el-form-item label="端口" prop="port">
-                    <el-input v-model="state.currentRow.port" type="number" placeholder="请输入端口号" clearable />
+                <el-form-item :label="t('Port')" prop="port">
+                    <el-input v-model="state.currentRow.port" type="number" :placeholder="t('enter-port')" clearable />
                 </el-form-item>
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model.trim="state.currentRow.username" placeholder="请输入用户名" clearable />
+                <el-form-item :label="t('user-name')" prop="username">
+                    <el-input v-model.trim="state.currentRow.username" :placeholder="t('enter-username')" clearable />
                 </el-form-item>
-                <el-form-item label="密码" prop="password">
-                    <el-input type.trim="password" v-model="state.currentRow.password" placeholder="请输入密码" clearable />
+                <el-form-item :label="t('Password')" prop="password">
+                    <el-input type.trim="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
+                        clearable />
                 </el-form-item>
-                <el-form-item label="描述" prop="desc">
-                    <el-input v-model="state.currentRow.desc" placeholder="请输入描述" :maxLength="20" clearable />
+                <el-form-item :label="t('desc')" prop="desc">
+                    <el-input v-model="state.currentRow.desc" :placeholder="t('enter-desc')" :maxLength="20" clearable />
                 </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="state.showAdd = false">取消</el-button>
-                    <el-button type="primary" @click="onTest">连接测试</el-button>
-                    <el-button type="primary" @click="onConfim">确认</el-button>
+                    <el-button @click="state.showAdd = false">{{ t('cancel') }}</el-button>
+                    <el-button type="primary" @click="onTest">{{ t('connection-test') }}</el-button>
+                    <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
                 </span>
             </template>
         </el-dialog>
     </base-page>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Search, Plus, Download, Delete } from '@element-plus/icons-vue';
@@ -79,6 +81,8 @@ import useClient from '@/store/useClient';
 import { ServerListRecord } from '@/utils/tables';
 import { v4 } from 'uuid';
 import { exportData } from '@/utils';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 const addForm = ref<InstanceType<typeof ElForm>>();
 const state = reactive({
     data: [] as ServerListRecord[],
@@ -99,24 +103,24 @@ const state = reactive({
     showAdd: false,
     selects: [] as ServerListRecord[]
 })
-const rules = {
+const rules = computed(() => ({
     host: {
         required: true,
-        message: '请输入主机'
+        message: t('enter-host')
     },
     port: {
         required: true,
-        message: '请输入主机'
+        message: t('enter-port')
     },
     username: {
         required: true,
-        message: '请输入用户名'
+        message: t('enter-username')
     },
     password: {
         required: true,
-        message: '请输入密码'
+        message: t('enter-password')
     },
-}
+}))
 onMounted(onSearch);
 
 function onSearch() {
@@ -162,7 +166,7 @@ function onAdd() {
 
 function onExport() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-record'));
         return;
     }
     const text = JSON.stringify({
@@ -179,10 +183,10 @@ async function delItem(id: number | number[]) {
 
 async function onDelete() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-record'));
         return;
     }
-    const action = await ElMessageBox.confirm(`确定要删除选中的${state.selects.length}条数据吗？`, '删除确认', {
+    const action = await ElMessageBox.confirm(t('delete-confirm-content'), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {
@@ -204,7 +208,7 @@ async function onConfim() {
             request = objectStore.add({ ...state.currentRow, uuid: state.currentRow.uuid ? state.currentRow.uuid : v4() });
         }
         request.onsuccess = () => {
-            ElMessage.success('操作成功！');
+            ElMessage.success(t('action-success'));
             state.showAdd = false;
             getTableData();
         };

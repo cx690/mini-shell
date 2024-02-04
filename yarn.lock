@@ -538,6 +538,27 @@
   resolved "https://registry.npmmirror.com/@humanwhocodes/object-schema/-/object-schema-2.0.1.tgz#e5211452df060fa8522b55c7b3c0c4d1981cb044"
   integrity sha512-dvuCeX5fC9dXgJn9t+X5atfmgQAzUOWqS1254Gh0m6i8wKd10ebXkfNKiRK+1GWi/yTvvLDHpoxLr0xxxeslWw==
 
+"@intlify/core-base@9.9.1":
+  version "9.9.1"
+  resolved "https://registry.npmmirror.com/@intlify/core-base/-/core-base-9.9.1.tgz#97ff0a98bf416c3f895e2a4fbcb0da353326b71a"
+  integrity sha512-qsV15dg7jNX2faBRyKMgZS8UcFJViWEUPLdzZ9UR0kQZpFVeIpc0AG7ZOfeP7pX2T9SQ5jSiorq/tii9nkkafA==
+  dependencies:
+    "@intlify/message-compiler" "9.9.1"
+    "@intlify/shared" "9.9.1"
+
+"@intlify/message-compiler@9.9.1":
+  version "9.9.1"
+  resolved "https://registry.npmmirror.com/@intlify/message-compiler/-/message-compiler-9.9.1.tgz#4cd9c5a408be27784928e4cd57a77ea6ddb17e56"
+  integrity sha512-zTvP6X6HeumHOXuAE1CMMsV6tTX+opKMOxO1OHTCg5N5Sm/F7d8o2jdT6W6L5oHUsJ/vvkGefHIs7Q3hfowmsA==
+  dependencies:
+    "@intlify/shared" "9.9.1"
+    source-map-js "^1.0.2"
+
+"@intlify/shared@9.9.1":
+  version "9.9.1"
+  resolved "https://registry.npmmirror.com/@intlify/shared/-/shared-9.9.1.tgz#b602d012b35f6c336b29a8098296dfac96a005f5"
+  integrity sha512-b3Pta1nwkz5rGq434v0psHwEwHGy1pYCttfcM22IE//K9owbpkEvFptx9VcuRAxjQdrO2If249cmDDjBu5wMDA==
+
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.3"
   resolved "https://registry.npmmirror.com/@jridgewell/gen-mapping/-/gen-mapping-0.3.3.tgz#7e02e6eb5df901aaedb08514203b096614024098"
@@ -4215,6 +4236,15 @@ vue-draggable-plus@^0.3.4:
   version "0.3.4"
   resolved "https://registry.npmmirror.com/vue-draggable-plus/-/vue-draggable-plus-0.3.4.tgz#8ca0089223302b9152abbc0e713fbefaaae284b9"
   integrity sha512-3HyaQiJZLrhr6fdD66cS2O4HOsxyo8rfrdcvFctmsduRnBTMYwPsLmONN1WU7RGWHQoBBodt5l2PeRCvblgP3A==
+
+vue-i18n@^9.9.1:
+  version "9.9.1"
+  resolved "https://registry.npmmirror.com/vue-i18n/-/vue-i18n-9.9.1.tgz#3c2fdf3c9db430572a1246439d541d01e2795c06"
+  integrity sha512-xyQ4VspLdNSPTKBFBPWa1tvtj+9HuockZwgFeD2OhxxXuC2CWeNvV4seu2o9+vbQOyQbhAM5Ez56oxUrrnTWdw==
+  dependencies:
+    "@intlify/core-base" "9.9.1"
+    "@intlify/shared" "9.9.1"
+    "@vue/devtools-api" "^6.5.0"
 
 vue-router@^4.2.5:
   version "4.2.5"

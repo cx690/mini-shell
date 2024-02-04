@@ -3,6 +3,7 @@ import { ShellsType } from "./tables";
 import duration from 'dayjs/plugin/duration';
 import { ElMessage } from "element-plus";
 import type { SaveDialogOptions } from "electron";
+import { useEnum } from "./hooks";
 
 dayjs.extend(duration);
 
@@ -29,14 +30,17 @@ export function formatterShell<T extends string | string[]>(config: Record<strin
     return str as T;
 }
 
-export enum shellTypeEnum {
-    "远端脚本" = 1,
-    "本地脚本" = 2,
-    "文件上传脚本" = 3
+export function useShellTypeEnum() {
+    return useEnum((t) => ({
+        1: t('remote-script'),
+        2: t('local-script'),
+        3: t('upload-script'),
+    }))
 }
 
 export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>) {
     let str = '依次执行的脚本：\n';
+    const shellTypeEnum = useShellTypeEnum().value;
     for (const item of shells) {
         const { type } = item;
         str += `${shellTypeEnum[type]}：\n`;
@@ -132,13 +136,13 @@ export function utilTime(startTime: string, format = 'H时mm分ss秒前') {
  * @param text 要导出的数据
  * @param option 保存文件夹的选项
  */
-export async function exportData(text: any, option?: SaveDialogOptions) {
+export async function exportData(text: any, option?: SaveDialogOptions, t?: ReturnType<typeof import('vue-i18n').useI18n>['t']) {
     if (text == null) {
-        ElMessage.warning('没有找到要导出的数据！');
+        ElMessage.warning(t ? t('no-data-export') : 'No data found to export!');
         return;
     }
     const res = await electronAPI.showSaveDialog({
-        title: '选择保存位置',
+        title: t ? t('select-save') : 'Select save location',
         defaultPath: 'config',
         filters: [{ extensions: ['json'], name: '' }],
         ...option,
@@ -146,9 +150,11 @@ export async function exportData(text: any, option?: SaveDialogOptions) {
     if (!res.canceled && res.filePath) {
         const status = await electronAPI.writeFile(res.filePath, text);
         if (status === true) {
-            ElMessage.success(`文件已保存到${res.filePath}`);
+            ElMessage.success(t('file-save-success', { filePath: res.filePath }));
         } else {
-            ElMessage.error('文件保存失败');
+            ElMessage.error(t('file-save-error', { err: status + '' }));
         }
+        return status;
     }
+    return false;
 }

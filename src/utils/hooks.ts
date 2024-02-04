@@ -1,5 +1,7 @@
-import { onActivated } from "vue";
+import { onActivated, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from 'vue-i18n';
+
 // import type { Terminal } from "xterm";
 // import { FitAddon } from "xterm-addon-fit";
 // import { debounce } from ".";
@@ -58,6 +60,11 @@ export function addRefresh(name: string | string[]) {
         reFresh.add(name);
     }
     return reFresh;
+}
+
+export function useEnum<T extends Record<string, any> = Record<string, any>>(callback: (t: any) => T) {
+    const { t } = useI18n();
+    return computed(() => callback(t));
 }
 
 //term 内部bug https://github.com/xtermjs/xterm.js/issues/4841

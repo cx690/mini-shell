@@ -56,7 +56,7 @@ export async function clearStore(store: 'serverList' | 'shellList' | 'excuteList
     })
 }
 
-export async function exportTables(option?: SaveDialogOptions, tabls?: string[]) {
+export async function exportTables(t?: ReturnType<typeof import('vue-i18n').useI18n>['t'], option?: SaveDialogOptions, tabls?: string[]) {
     const text = await new Promise<string>((resolve, reject) => {
         const request = window.indexedDB.open("MyDatabase", 3);
         request.onsuccess = async (event: any) => {
@@ -79,7 +79,7 @@ export async function exportTables(option?: SaveDialogOptions, tabls?: string[])
             reject(err);
         }
     });
-    await exportData(text, option);
+    return await exportData(text, option, t);
 }
 
 function createStore(db: IDBDatabase, storeName: string, index: string[]) {

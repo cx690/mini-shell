@@ -1,3 +1,5 @@
+import { useEnum } from "./hooks";
+
 interface BaseItem {
     /** 新增时候无需提供此键 */
     id?: number | null;
@@ -46,12 +48,14 @@ export interface ShellListRecoed<T extends 'edit' | 'record' = 'record'> extends
     host?: string,
 }
 
-export enum ExcuteListRecoedStatus {
-    "执行中",
-    "执行完毕",
-    "执行错误",
-    "取消中",
-    "已取消",
+export function useExcuteListRecoedStatus() {
+    return useEnum((t) => ({
+        0: t('excuting'),
+        1: t('excute-success'),
+        2: t('excute-error'),
+        3: t('canceling'),
+        4: t('canceled'),
+    }))
 }
 /** 执行记录表 */
 export interface ExcuteListRecoed extends BaseItem {

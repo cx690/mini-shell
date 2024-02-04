@@ -47,6 +47,7 @@
     "vite-plugin-electron": "^0.15.6",
     "vue": "^3.4.14",
     "vue-draggable-plus": "^0.3.4",
+    "vue-i18n": "^9.9.1",
     "vue-router": "^4.2.5",
     "vue-tsc": "^1.8.27",
     "xterm": "^5.3.0",

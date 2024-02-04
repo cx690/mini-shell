@@ -1,5 +1,5 @@
 <template>
-  <el-config-provider :locale="zhCn">
+  <el-config-provider :locale="ElLocale">
     <router-view></router-view>
   </el-config-provider>
 </template>
@@ -7,8 +7,16 @@
 <script setup lang="ts">
 import type { UploadInfoType } from 'electron/preload2Render';
 import { ElMessage, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
+import { reactive, h, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
-import { reactive, h } from 'vue';
+import En from 'element-plus/es/locale/lang/en';
+
+const { locale } = useI18n();
+const ElLocale = computed(() => {
+  localStorage.locale = locale.value;
+  return locale.value === 'zh-cn' ? zhCn : En;
+});
 
 const uploadInfo = reactive<Record<string, {
   data: UploadInfoType,

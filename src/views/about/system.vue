@@ -1,13 +1,13 @@
 <template>
     <base-page>
         <div class="content">
-            <div>软件版本: {{ version }}</div>
-            <div>发布日期: {{ buildTime }}</div>
+            <div>{{ $t('version') }}: {{ version }}</div>
+            <div>{{ $t('buildTime') }}: {{ buildTime }}</div>
             <div>Chrome: {{ versions.chrome }}</div>
             <div>Node: {{ versions.node }}</div>
             <div>Electron: {{ versions.electron }}</div>
             <div class="developer">
-                <div>开发者：</div>
+                <div>{{ $t('developer') }}：</div>
                 <div class="item" @click="openExternal(item.href)" v-for="(item, index) of developer" :key="index">
                     <img :src="item.img" />
                     <el-link>{{ item.name }}</el-link>

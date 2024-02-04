@@ -3,10 +3,18 @@
         <el-container class="content">
             <el-header class="header-div">
                 <div class="header">
-                    <div>迷你Shell</div>
-                    <div>
-                        <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">取消任务执行完毕关机设定</el-button>
-                        <el-button type="primary" @click="openWin" :icon="Plus">新开窗口</el-button>
+                    <div>{{ t('title') }}</div>
+                    <div class="extra">
+                        <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">{{ t('cancel_close_windows')
+                        }}</el-button>
+                        <span>
+                            <span>{{ t('language') }}: </span>
+                            <el-select v-model="locale" style="width: 100px;">
+                                <el-option value="en" label="English">English</el-option>
+                                <el-option value="zh-cn" label="中文">中文</el-option>
+                            </el-select>
+                        </span>
+                        <el-button type="primary" @click="openWin" :icon="Plus">{{ t('new_window') }}</el-button>
                     </div>
                 </div>
             </el-header>
@@ -18,16 +26,20 @@
                             <template v-if="item.children?.length">
                                 <el-sub-menu :index="item.name">
                                     <template #title>
-                                        {{ item.meta?.title }}
+                                        {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
                                     </template>
                                     <el-menu-item v-for="subItem of item.children" :key="subItem.name"
                                         :index="subItem.name">
-                                        <router-link :to="{ name: subItem.name }">{{ subItem.meta?.title }}</router-link>
+                                        <router-link :to="{ name: subItem.name }">
+                                            {{ subItem.meta?.t ? t(subItem.meta.t) : subItem.meta?.title }}
+                                        </router-link>
                                     </el-menu-item>
                                 </el-sub-menu>
                             </template>
                             <el-menu-item :index="item.name" v-else>
-                                <router-link :to="{ name: item.name }">{{ item.meta?.title }}</router-link>
+                                <router-link :to="{ name: item.name }">
+                                    {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
+                                </router-link>
                             </el-menu-item>
                         </template>
                     </el-menu>
@@ -35,9 +47,13 @@
                 <el-main id="main">
                     <div class="layout-breadcrumb">
                         <el-breadcrumb separator=">">
-                            <el-breadcrumb-item v-for="({ title, path }, index) of breadcrumbs" :key="path">
-                                <template v-if="index === 0 || index === breadcrumbs.length - 1">{{ title }}</template>
-                                <router-link v-else :to="path">{{ title }}</router-link>
+                            <el-breadcrumb-item v-for="({ title, path, t: str }, index) of breadcrumbs" :key="path">
+                                <template v-if="index === 0 || index === breadcrumbs.length - 1">
+                                    {{ str ? t(str) : title }}
+                                </template>
+                                <router-link v-else :to="path">
+                                    {{ str ? t(str) : title }}
+                                </router-link>
                             </el-breadcrumb-item>
                         </el-breadcrumb>
                     </div>
@@ -61,12 +77,13 @@ import { RouterLink, RouterView } from 'vue-router';
 import { computed } from 'vue';
 import { Remove, Plus } from '@element-plus/icons-vue';
 import useWin from '@/store/useWin';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
 const breadcrumbs = computed(() => {
     const { path } = route;
-    const breadcrumbs: { path: string, title: string }[] = [];
+    const breadcrumbs: { path: string, title: string, t?: string }[] = [];
     let paths = path.split('/').filter(Boolean);
     const routes = router.getRoutes();
     while (paths.length) {
@@ -76,6 +93,7 @@ const breadcrumbs = computed(() => {
             const meta = item.meta as MetaType;
             breadcrumbs.unshift({
                 title: meta?.title || '',
+                t: meta?.t,
                 path: item.path,
             })
             if (meta.active) {
@@ -104,6 +122,8 @@ electronAPI.onInfo('close-windows', ({ data }) => {
 function onCancelColose() {
     electronAPI.setCloseWhenTask0(false);
 }
+
+const { t, locale } = useI18n();
 </script>
 
 <style scoped lang="less">
@@ -164,6 +184,12 @@ function onCancelColose() {
         justify-content: space-between;
         gap: 16px;
         height: 100%;
+
+        .extra {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
     }
 }
 </style>

@@ -6,6 +6,8 @@ import { ElMessage } from 'element-plus';
 export interface MetaType {
     /** 菜单标题 */
     title?: string;
+    /** 菜单标题i18n */
+    t?: string;
     /** 是否隐藏菜单 默认false */
     hiddenNav?: boolean;
     /** 要激活的其他路由名称，一般详情里面激活对应列表，以此生成面包屑 */
@@ -29,7 +31,8 @@ export const routes: RouteRecordRaw[] = [
         redirect: '/desk/main',
         component: Desk,
         meta: {
-            title: '交互桌面'
+            title: '交互桌面',
+            t: 'route-desk',
         },
         children: [
             {
@@ -38,26 +41,20 @@ export const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/main/main.vue'),
                 meta: {
                     title: '服务列表',
+                    t: 'route-main',
                     keepAlive: false,
                 },
             },
             {
-                path: 'push',
-                name: 'push',
-                component: () => import('@/views/main/push.vue'),
+                path: 'excute',
+                name: 'excute',
+                component: () => import('@/views/main/excute.vue'),
                 meta: {
                     title: '脚本执行',
+                    t: 'route-excute',
                     keepAlive: true,
                 },
             },
-            // {
-            //     path: 'demo',
-            //     name: 'demo',
-            //     component: () => import('@/views/demo/demo.vue'),
-            //     meta: {
-            //         title: '样本'
-            //     },
-            // },
         ]
     },
     {
@@ -66,7 +63,8 @@ export const routes: RouteRecordRaw[] = [
         redirect: '/config/server',
         component: Desk,
         meta: {
-            title: '配置管理'
+            title: '配置管理',
+            t: 'route-config',
         },
         children: [
             {
@@ -74,7 +72,8 @@ export const routes: RouteRecordRaw[] = [
                 name: 'server',
                 component: () => import('@/views/config/server.vue'),
                 meta: {
-                    title: '会话连接配置',
+                    title: '服务连接配置',
+                    t: 'route-server',
                     keepAlive: false,
                 },
             },
@@ -84,6 +83,7 @@ export const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/config/shellConfig.vue'),
                 meta: {
                     title: '脚本配置管理',
+                    t: 'route-shellConfig',
                     keepAlive: false,
                 },
             },
@@ -92,62 +92,19 @@ export const routes: RouteRecordRaw[] = [
                 name: 'ioConfig',
                 component: () => import('@/views/config/ioConfig.vue'),
                 meta: {
-                    title: '导入导出数据'
+                    title: '导入导出数据',
+                    t: 'route-ioConfig',
                 },
             },
         ]
     },
-    // {
-    //     path: '/cachetest',
-    //     name: 'cachetest',
-    //     redirect: '/cachetest/cache',
-    //     component: Desk,
-    //     meta: {
-    //         title: '路由缓存测试'
-    //     },
-    //     children: [
-    //         {
-    //             path: 'cache',
-    //             name: 'cache',
-    //             component: () => import('@/views/cache/cache.vue'),
-    //             meta: {
-    //                 title: '已缓存'
-    //             },
-    //         },
-    //         {
-    //             path: 'nocache',
-    //             name: 'nocache',
-    //             component: () => import('@/views/cache/nocache.vue'),
-    //             meta: {
-    //                 title: '未缓存',
-    //                 keepAlive: false,
-    //             },
-    //         },
-    //         {
-    //             path: 'storecache',
-    //             name: 'storecache',
-    //             component: () => import('@/views/cache/storecache.vue'),
-    //             meta: {
-    //                 title: 'pinia已缓存'
-    //             },
-    //         },
-    //         {
-    //             path: 'storenocache',
-    //             name: 'storenocache',
-    //             component: () => import('@/views/cache/storenocache.vue'),
-    //             meta: {
-    //                 title: 'pinia未缓存',
-    //                 keepAlive: false,
-    //             },
-    //         },
-    //     ]
-    // },
     {
         path: '/about',
         name: 'about',
         component: Desk,
         meta: {
-            title: '关于'
+            title: '关于',
+            t: 'route-about',
         },
         children: [
             {
@@ -155,7 +112,8 @@ export const routes: RouteRecordRaw[] = [
                 name: 'system',
                 component: () => import('@/views/about/system.vue'),
                 meta: {
-                    title: '系统信息'
+                    title: '系统信息',
+                    t: 'route-system',
                 },
             },
             {
@@ -163,7 +121,8 @@ export const routes: RouteRecordRaw[] = [
                 name: 'license',
                 component: () => import('@/views/about/license.vue'),
                 meta: {
-                    title: '开源协议'
+                    title: '开源协议',
+                    t: 'route-license',
                 },
             },
         ]
@@ -174,7 +133,7 @@ export const routes: RouteRecordRaw[] = [
         redirect: '/external/vueorg',
         component: Desk,
         meta: {
-            title: '开发文档'
+            title: '开发文档',
         },
         children: [
             {
