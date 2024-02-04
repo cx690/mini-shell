@@ -15,46 +15,43 @@ const uploadInfo = reactive<Record<string, {
   notificationHandle?: NotificationHandle
 }>>({});
 
-electronAPI.onInfo<'upload', UploadInfoType>((info) => {
-  const { type } = info;
-  if (type === 'upload') {
-    const { uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } } = info;
-    if (uploadInfo[uuid]) {
-      Object.assign(uploadInfo[uuid].data, data);
-      if (data.status === 2 || data.status === 3) {
-        setTimeout(() => {
-          uploadInfo[uuid].notificationHandle!.close();
-          if (data.status === 3) {
-            ElMessage.error(data.message ?? `文件上传失败！失败数量：${data.errorNum}个`);
+electronAPI.onInfo('upload', (info) => {
+  const { uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } } = info;
+  if (uploadInfo[uuid]) {
+    Object.assign(uploadInfo[uuid].data, data);
+    if (data.status === 2 || data.status === 3) {
+      setTimeout(() => {
+        uploadInfo[uuid].notificationHandle!.close();
+        if (data.status === 3) {
+          ElMessage.error(data.message ?? `文件上传失败！失败数量：${data.errorNum}个`);
+        } else {
+          if (data.errorNum === 0) {
+            ElMessage.success('文件上传成功！');
           } else {
-            if (data.errorNum === 0) {
-              ElMessage.success('文件上传成功！');
-            } else {
-              ElMessage.error(`文件上传成功：${data.successNum}个；  文件上传失败：${data.errorNum}个`);
-            }
+            ElMessage.error(`文件上传成功：${data.successNum}个；  文件上传失败：${data.errorNum}个`);
           }
-        }, 1000)
-      }
-    } else {
-      uploadInfo[uuid] = { data };//转换响应式
-      uploadInfo[uuid].notificationHandle =
-        ElNotification({
-          title: '文件上传',
-          showClose: false,
-          message: h(Content, null, {
-            default: () => h(ElProgress, {
-              status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
-              percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
-              style: "width:250px;"
-            }, {
-              default: () => h('span', null, `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
-            },
-            )
-          }),
-          position: 'bottom-right',
-          duration: 0,
-        })
+        }
+      }, 1000)
     }
+  } else {
+    uploadInfo[uuid] = { data };//转换响应式
+    uploadInfo[uuid].notificationHandle =
+      ElNotification({
+        title: '文件上传',
+        showClose: false,
+        message: h(Content, null, {
+          default: () => h(ElProgress, {
+            status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
+            percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
+            style: "width:250px;"
+          }, {
+            default: () => h('span', null, `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
+          },
+          )
+        }),
+        position: 'bottom-right',
+        duration: 0,
+      })
   }
 })
 

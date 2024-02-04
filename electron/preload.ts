@@ -17,7 +17,7 @@ const electronAPI = {
     showOpenDialog: (option: OpenDialogOptions) => ipcRenderer.invoke('show-open-dialog', option) as Promise<Electron.OpenDialogReturnValue>,
     showSaveDialog: (option: SaveDialogOptions) => ipcRenderer.invoke('show-save-dialog', option) as Promise<Electron.SaveDialogReturnValue>,
     /** 设置监听信息事件 */
-    onInfo: <T extends keyof InfoEvent, S = any>(callback: (info: InfoTyoe<T, S>) => void) => ipcRenderer.on('emit-info', (_event, value) => callback(value)),
+    onInfo: <T extends keyof InfoEvent, S = any>(key: T, callback: (info: InfoTyoe<T, S>) => void) => ipcRenderer.on('emit-info', (_event, value) => key === value.type && callback(value)),
     versions: {
         chrome: process.versions.chrome,
         node: process.versions.node,

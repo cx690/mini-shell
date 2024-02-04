@@ -97,10 +97,8 @@ function openWin() {
     window.electronAPI.open(window.location.href);
 }
 const win = useWin();
-electronAPI.onInfo<'close-windows'>(({ type, data }) => {
-    if (type === 'close-windows') {
-        win.close = data;
-    }
+electronAPI.onInfo('close-windows', ({ data }) => {
+    win.close = data;
 })
 
 function onCancelColose() {
