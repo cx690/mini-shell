@@ -1,4 +1,5 @@
 import { hideLoading, setLoading } from '@/utils/fetch';
+import { useEnum } from '@/utils/hooks';
 import { ServerListRecord } from '@/utils/tables';
 import type { ClientType } from 'electron/ssh2';
 import { ElMessage } from 'element-plus';
@@ -7,12 +8,11 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 export function useStatusEnum() {
-    const { t } = useI18n();
-    return {
+    return useEnum((t) => ({
         0: t('offline'),
         1: t('connecting'),
         2: t('online')
-    }
+    }))
 }
 
 const useClient = defineStore('counter', () => {
