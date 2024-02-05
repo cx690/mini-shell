@@ -5,7 +5,7 @@ import zh_cn from '@/locales/zh-cn.json';
 const i18n = createI18n({
     locale: localStorage.locale === 'zh-cn' ? 'zh-cn' : 'en',
     legacy: false,
-    fallbackLocale: 'en',
+    fallbackLocale: 'zh-cn',
     messages: {
         'en': en,
         'zh-cn': zh_cn

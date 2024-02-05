@@ -11,10 +11,10 @@ import { reactive, h, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import En from 'element-plus/es/locale/lang/en';
+import { onBeforeUnmount } from 'vue';
 
 const { locale } = useI18n();
 const ElLocale = computed(() => {
-  localStorage.locale = locale.value;
   return locale.value === 'zh-cn' ? zhCn : En;
 });
 
@@ -66,4 +66,17 @@ electronAPI.onInfo('upload', (info) => {
 function Content(props: any, ctx: any) {//ElNotification.message不是可以添加未依赖的函数，所以添加一个default插槽函数，这样可以跟踪数据变化，自动刷新
   return ctx.slots?.default?.();
 }
+
+function storage(e: WindowEventMap['storage']) {
+  const { key } = e;
+  if (key === 'locale') {
+    locale.value = localStorage.locale;
+  }
+}
+window.addEventListener('storage', storage)
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', storage)
+})
+
 </script>

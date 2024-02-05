@@ -8,6 +8,7 @@ const electronAPI = {
     /** 通知主线程任务数量 */
     setTaskNum: (num: number) => ipcRenderer.send('task-num', num),
     setCloseWhenTask0: (status: boolean) => ipcRenderer.send('close-windows-when-task-0', status),
+    switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
     /** 在powershell中执行代码 */
