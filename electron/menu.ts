@@ -134,4 +134,4 @@ export function setApplicationMenu(local?: string) {
     lang = local;
 }
 
-setApplicationMenu('en');
+setApplicationMenu();

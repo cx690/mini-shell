@@ -3,7 +3,7 @@ import en from '@/locales/en.json';
 import zh_cn from '@/locales/zh-cn.json';
 
 const i18n = createI18n({
-    locale: localStorage.locale === 'zh-cn' ? 'zh-cn' : 'en',
+    locale: localStorage.locale === 'en' ? 'en' : 'zh-cn',
     legacy: false,
     fallbackLocale: 'zh-cn',
     messages: {
