@@ -204,5 +204,16 @@
   "fail-script": "Non-associative",
   "only-host": "Only associate host",
   "has-task-close-window": "There is currently a running task, and the data cannot be saved when closing the window. Are you sure want to close the window?",
-  "switch-already-connected": "Currently connected to host {host}, are you sure want to switch connection? \n(If you want to maintain and establish a new connection, you can open a new window)"
+  "switch-already-connected": "Currently connected to host {host}, are you sure want to switch connection? \n(If you want to maintain and establish a new connection, you can open a new window)",
+  "connect-status": "Status",
+  "offline": "Offline",
+  "online": "Online",
+  "connecting": "Connecting",
+  "connect-success": "Connection succeeded",
+  "connect-err": "Connection failed: {err}",
+  "connecting6": "Server linking...",
+  "excute-script-list": "Scripts to be executed sequentially:",
+  "script-num": "Script {num} : ",
+  "upload-file-path": "Uploaded local file path",
+  "format-hms": "H:mm:ss"
 }

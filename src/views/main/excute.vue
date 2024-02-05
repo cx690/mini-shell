@@ -6,7 +6,7 @@
                     <span>{{ t('current-connect') }}：{{ clientStore.config?.name ?? t('unnamed') }}</span>
                     <span>{{ t('Host') }}：{{ clientStore.config?.host ?? '0.0.0.0' }}</span>
                     <span class="connect-status">
-                        {{ t('excute-status') }}：{{ StatusEnum[clientStore.status] }}
+                        {{ t('connect-status') }}：{{ StatusEnum[clientStore.status] }}
                     </span>
                     <el-button class="mgL10" v-if="clientStore.config && clientStore.status === 0" type="primary"
                         @click="reLink" :icon="Connection">{{ t('reconnect') }}</el-button>
@@ -71,7 +71,7 @@
                                             <span>{{ (index + 1) + '、' + shellTypeEnum[item.type] }}</span>
                                             <template #content>
                                                 <div class="select-shell-str">
-                                                    <pre>{{ formatScriptStr(formData.selectShell.envVar, [item]) }}</pre>
+                                                    <pre>{{ formatScriptStr(formData.selectShell.envVar, [item], t) }}</pre>
                                                 </div>
                                             </template>
                                         </el-tooltip>
@@ -231,7 +231,7 @@
     </BasePage>
 </template>
 <script setup lang="ts">
-import useClient, { StatusEnum } from '@/store/useClient';
+import useClient, { useStatusEnum } from '@/store/useClient';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Download, Delete, Refresh, Upload, CaretRight, View, Switch, Close, Connection, SwitchButton, Remove, Filter } from '@element-plus/icons-vue';
@@ -248,6 +248,7 @@ import Status from './status.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
+const StatusEnum = useStatusEnum();
 const clientStore = useClient();
 
 const holdTermRef = ref();
@@ -634,7 +635,7 @@ function showShell() {
         return;
     }
     state.shellShow = true;
-    state.shellStr = formatScriptStr(formData.selectShell.envVar, formData.selectShell.baseScripts);
+    state.shellStr = formatScriptStr(formData.selectShell.envVar, formData.selectShell.baseScripts, t);
 }
 
 async function openPowershell(command: 'powershell' | 'cmd') {

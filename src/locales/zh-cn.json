@@ -204,5 +204,16 @@
   "only-host": "仅关联host脚本",
   "fail-script": "非关联脚本",
   "has-task-close-window": "当前存在正在运行的脚本任务，现在关闭窗口数据无法保存，确定要关闭窗口吗？",
-  "switch-already-connected": "当前已连接主机{host}，确定要切换服务连接吗？(如果要保持并建立新连接，可以新开窗口)"
+  "switch-already-connected": "当前已连接主机{host}，确定要切换服务连接吗？(如果要保持并建立新连接，可以新开窗口)",
+  "connect-status": "连接状态",
+  "offline": "离线",
+  "connecting": "连接中",
+  "online": "在线",
+  "connect-success": "连接成功",
+  "connect-err": "连接失败：{err}",
+  "connecting6": "服务器链接中……",
+  "excute-script-list": "依次执行的脚本：",
+  "script-num": "脚本{num}：",
+  "upload-file-path": "上传的本地文件地址",
+  "format-hms": "H时mm分ss秒"
 }

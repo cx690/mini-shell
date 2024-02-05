@@ -200,7 +200,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     if (!to.matched?.length) {
         if (from.name) {
-            ElMessage.error('您要前往的页面不存在！');
+            ElMessage.error(localStorage.locale === 'en' ? 'The page you want to go to does not exist' : '您要前往的页面不存在');
             next(from);
         } else {
             next('/404');

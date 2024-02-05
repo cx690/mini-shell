@@ -46,7 +46,7 @@ export async function clearStore(store: 'serverList' | 'shellList' | 'excuteList
         const table = db.transaction([store], 'readwrite').objectStore(store);
         const request = table.clear();
         request.onsuccess = () => {
-            ElMessage.success('已成功删除数据！');
+            ElMessage.success(localStorage.locale === 'en' ? 'Deleted success!' : '已成功删除数据！');
             resolve();
         }
         request.onerror = function (err: any) {
@@ -97,7 +97,7 @@ function createIndex(store: IDBObjectStore, index: string[]) {
 /** 删除多条数据 */
 export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | IDBKeyRange) {
     if (!query) {
-        ElMessage.error('没有找到要删除的数据');
+        ElMessage.error(localStorage.locale === 'en' ? 'No data found' : '没有找到要删除的数据');
         return;
     }
 
@@ -105,7 +105,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
         return new Promise<Event>((resolve, reject) => {
             const request = store.delete(query);
             request.onsuccess = e => {
-                ElMessage.success('操作成功');
+                ElMessage.success(localStorage.locale === 'en' ? 'Successful operation' : '操作成功');
                 resolve(e);
             };
             request.onerror = err => {
@@ -118,7 +118,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
             query = [query];
         }
         if (!query.length) {
-            ElMessage.error('没有找到要删除的数据');
+            ElMessage.error(localStorage.locale === 'en' ? 'No data found' : '没有找到要删除的数据');
             return;
         }
         return Promise.all(query.map(item => {
@@ -133,7 +133,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
                 }
             })
         })).then(res => {
-            ElMessage.success('操作成功');
+            ElMessage.success(localStorage.locale === 'en' ? 'Successful operation' : '操作成功');
             return res;
         }).catch(err => {
             ElMessage.error(err + '');

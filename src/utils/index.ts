@@ -38,8 +38,8 @@ export function useShellTypeEnum() {
     }))
 }
 
-export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>) {
-    let str = '依次执行的脚本：\n';
+export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>, t: (...args: any) => string) {
+    let str = t('excute-script-list') + '\n';
     const shellTypeEnum = useShellTypeEnum().value;
     for (const item of shells) {
         const { type } = item;
@@ -47,21 +47,21 @@ export function formatScriptStr(config: Record<string, any>, shells: ShellsType<
         if (type !== 3 && item.baseScripts) {
             for (let i = 0, l = item.baseScripts.length; i < l; i++) {
                 const { value, env } = item.baseScripts[i];
-                str += `脚本${i + 1}：\n`;
+                str += t('script-num', { num: i + 1 }) + `\n`;
                 if (type === 2 && env) {
                     if (typeof env === 'string') {
-                        str += `环境变量：\n${env}\n`;
+                        str += `${t('env-var')}：\n${env}\n`;
                     } else {
                         const formatEnvObj = formatEnv(config, env);
                         if (formatEnvObj) {
-                            str += `环境变量：\n${JSON.stringify(formatEnvObj)}\n`;
+                            str += `${t('env-var')}：\n${JSON.stringify(formatEnvObj)}\n`;
                         }
                     }
                 }
                 str += `${formatterShell(config, value)}\n`;
             }
         } else {
-            str += `上传的本地文件地址：${formatterShell(config, item.localFile ?? '')}\n远端目标目录：${formatterShell(config, item.remoteDir ?? '')}\n`;
+            str += `${t('upload-file-path')}：${formatterShell(config, item.localFile ?? '')}\n${t('remote-path-dir')}：${formatterShell(config, item.remoteDir ?? '')}\n`;
         }
     }
     return str;
@@ -109,7 +109,8 @@ export function noRepeat<T extends Record<string, any>>(list: T[], key = 'value'
     return arr;
 }
 
-export function computedTime(startTime: string | dayjs.Dayjs, endTime?: string | dayjs.Dayjs, format = 'H时mm分ss秒') {
+export function computedTime(startTime: string | dayjs.Dayjs, endTime?: string | dayjs.Dayjs, format?: string) {
+    format = format ?? (localStorage.locale === 'en' ? 'H:mm:ss' : 'H时mm分ss秒');
     const start = dayjs(startTime);
     const end = dayjs(endTime);
     // 计算时间差
@@ -119,7 +120,8 @@ export function computedTime(startTime: string | dayjs.Dayjs, endTime?: string |
 }
 
 /** 计算一天之内的时间差 */
-export function utilTime(startTime: string, format = 'H时mm分ss秒前') {
+export function utilTime(startTime: string, format?: string) {
+    format = format ?? (localStorage.locale === 'en' ? 'H:mm:ss' : 'H时mm分ss秒');
     const start = dayjs(startTime);
     const end = dayjs();
     // 计算时间差
@@ -128,7 +130,7 @@ export function utilTime(startTime: string, format = 'H时mm分ss秒前') {
         return startTime;
     }
     // 将时间差格式化为 "x时x分x秒" 的形式
-    return dayjs.duration(diff).format(format);
+    return dayjs.duration(diff).format(format) + (localStorage.locale === 'en' ? ' ago' : '前');
 }
 
 /**

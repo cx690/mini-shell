@@ -492,7 +492,7 @@ function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
         return;
     };
     state.shellShow = true;
-    state.shellStr = formatScriptStr(env, row.baseScripts);
+    state.shellStr = formatScriptStr(env, row.baseScripts, t);
 }
 
 function onSelect(rows: ShellListRecoed[]) {
