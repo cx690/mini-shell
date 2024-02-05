@@ -20,6 +20,7 @@
         </template>
 
         <Table :data="state.data" row-key="id" @selection-change="onSelect" :row-class-name="activeClassName">
+            <el-table-column type="selection" width="55" />
             <el-table-column prop="name" :label="t('Name')" />
             <el-table-column prop="host" :label="t('Host')" />
             <el-table-column prop="port" :label="t('Port')" />

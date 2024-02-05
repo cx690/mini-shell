@@ -55,7 +55,7 @@
   "enter-password": "Please enter password",
   "enter-desc": "Please enter descriptions",
   "connection-test": "Connection test",
-  "Confirm": "Confirm",
+  "Confirm": "Ok",
   "pls-select-record": "Please select record!",
   "delete-confirm": "Delete Confirm",
   "delete-confirm-content": "Are you sure you want to delete the selected record {num}?",
@@ -154,7 +154,7 @@
   "confirm-cancel-task": "Are you sure want to cancel this task?",
   "select-file": "Select file",
   "select-dir": "Select folder",
-  "select-upload-file": "Select files to upload",
+  "select-upload-file": "Select files upload",
   "current-file": "Current file path",
   "pls-select-file-dir": "Select a file or enter a local file or folder path",
   "remote-path-dir": "Remote directory",
@@ -215,5 +215,6 @@
   "excute-script-list": "Scripts to be executed sequentially:",
   "script-num": "Script {num} : ",
   "upload-file-path": "Uploaded local file path",
-  "format-hms": "H:mm:ss"
+  "format-hms": "H:mm:ss",
+  "Status": "Status"
 }

@@ -127,7 +127,7 @@
                             <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
                             <el-table-column prop="host" :label="t('de-host')" width="120px;" />
                             <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
-                            <el-table-column prop="excuteType" :label="t('excuted-script')" width="120px"
+                            <el-table-column prop="excuteType" :label="t('excuted-script')" width="140px"
                                 show-overflow-tooltip>
                                 <template #default="{ row }">
                                     {{ !row.excuteType ? t('All') : row.excuteType === 1 ? t('part') : row.excuteType }}
@@ -140,7 +140,7 @@
                                 </template>
                             </el-table-column>
                             <el-table-column prop="time" :label="t('excute-duration')" width="160px" />
-                            <el-table-column prop="status" :label="t('excute-status')" width="100px">
+                            <el-table-column prop="status" :label="t('Status')" width="100px">
                                 <template #default="{ row }">
                                     <Status :status="row.status" />
                                 </template>
@@ -190,7 +190,7 @@
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
         <el-dialog v-model="state.showUpload" :title="t('uploadfile')" width="800px" :close-on-click-modal="false">
-            <el-form :model="formData" ref="formRef" :rules="rules" label-width="150px">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="160px">
                 <el-form-item :label="t('select-upload-file')" prop="file">
                     <el-button type="primary" @click="onSelectFile('openFile')">{{ t('select-file') }}</el-button>
                     <el-button type="primary" @click="onSelectFile('openDirectory')">{{ t('select-dir') }}</el-button>
@@ -209,7 +209,7 @@
         </el-dialog>
         <el-dialog v-model="state.showDownload" :title="t('downloadfile-unsport')" width="900px"
             :close-on-click-modal="false">
-            <el-form :model="formData" ref="formDownLoadRef" :rules="downLoadRules" label-width="150px">
+            <el-form :model="formData" ref="formDownLoadRef" :rules="downLoadRules" label-width="180px">
                 <el-form-item :label="t('select-save')" prop="locaDir">
                     <el-button type="primary" @click="onSelectDir">{{ t('select-dir') }}</el-button>
                 </el-form-item>

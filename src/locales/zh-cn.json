@@ -215,5 +215,6 @@
   "excute-script-list": "依次执行的脚本：",
   "script-num": "脚本{num}：",
   "upload-file-path": "上传的本地文件地址",
-  "format-hms": "H时mm分ss秒"
+  "format-hms": "H时mm分ss秒",
+  "Status": "状态"
 }
