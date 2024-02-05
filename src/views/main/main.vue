@@ -70,7 +70,7 @@
     </base-page>
 </template>
 <script setup lang="ts">
-import { onActivated, onMounted, reactive } from 'vue';
+import { computed, onActivated, onMounted, reactive } from 'vue';
 import { ElForm, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { findAll } from '@/utils/database';
@@ -98,24 +98,24 @@ const state = reactive({
     } as ServerListRecord,
     showAdd: false,
 })
-const rules = {
+const rules = computed(() => ({
     host: {
         required: true,
-        message: '请输入主机'
+        message: t('enter-host')
     },
     port: {
         required: true,
-        message: '请输入主机'
+        message: t('enter-port')
     },
     username: {
         required: true,
-        message: '请输入用户名'
+        message: t('enter-username')
     },
     password: {
         required: true,
-        message: '请输入密码'
+        message: t('enter-password')
     },
-}
+}))
 onMounted(onSearch);
 onActivated(onSearch);
 
@@ -147,7 +147,7 @@ async function onLink(row: any) {
             router.push({ name: 'excute' });
             return;
         }
-        const action = await ElMessageBox.confirm(`当前已连接主机${clientStore.config?.host ?? '未命名'}，确定要切换服务连接吗？(如果要保持并建立新连接，可以新开窗口)`, '切换服务器').catch(action => action);
+        const action = await ElMessageBox.confirm(t('switch-already-connected', { host: clientStore.config?.host ?? t('unnamed') }), t('switch-connect')).catch(action => action);
         if (action === 'confirm') {
             clientStore.reset();
         } else {

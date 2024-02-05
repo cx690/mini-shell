@@ -3,63 +3,65 @@
         <template #form>
             <div class="status">
                 <template v-if="clientStore.config">
-                    <span>当前链接的服务器：{{ clientStore.config?.name ?? '未命名' }}</span>
-                    <span> 主机：{{ clientStore.config?.host ?? '0.0.0.0' }}</span>
+                    <span>{{ t('current-connect') }}：{{ clientStore.config?.name ?? t('unnamed') }}</span>
+                    <span>{{ t('Host') }}：{{ clientStore.config?.host ?? '0.0.0.0' }}</span>
                     <span class="connect-status">
-                        连接状态：{{ StatusEnum[clientStore.status] }}
+                        {{ t('excute-status') }}：{{ StatusEnum[clientStore.status] }}
                     </span>
                     <el-button class="mgL10" v-if="clientStore.config && clientStore.status === 0" type="primary"
-                        @click="reLink" :icon="Connection">重新连接</el-button>
+                        @click="reLink" :icon="Connection">{{ t('reconnect') }}</el-button>
                 </template>
                 <RouterLink :to="{ name: 'main' }" class="mgL10">
                     <el-button type="primary" :icon="Switch">
-                        {{ clientStore.config ? '切换服务器' : '选择服务器' }}
+                        {{ clientStore.config ? t('switch-connect') : t('select-connect') }}
                     </el-button>
                 </RouterLink>
                 <el-popconfirm v-if="clientStore.status === 2 || clientStore.status === 1"
-                    :title="`确定要停止${clientStore.config?.host ?? ''}的链接吗？`" @confirm="clientStore.disConnect">
+                    :title="t('confirm-stop', { host: clientStore.config?.host ?? t('unknown') })"
+                    @confirm="clientStore.disConnect">
                     <template #reference>
-                        <el-button class="mgL10" :icon="Close">断开连接</el-button>
+                        <el-button class="mgL10" :icon="Close">{{ t('disconnect') }}</el-button>
                     </template>
                 </el-popconfirm>
                 <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showUpload = true"
-                    :icon="Upload">上传文件</el-button>
+                    :icon="Upload">{{ t('uploadfile') }}</el-button>
                 <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showDownload = true"
-                    :icon="Download">下载文件</el-button>
+                    :icon="Download">{{ t('downloadfile') }}</el-button>
             </div>
         </template>
         <el-form :model="formData" inline>
             <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
                 @tab-change="onActiveChange">
                 <el-tab-pane label="Exce" name="Exce">
-                    <el-button v-show="state.currentRecord" @click="state.currentRecord = null"
-                        style="margin: 4px 10px;">返回</el-button>
+                    <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
+                        {{ t('Back') }}
+                    </el-button>
                     <template v-if="state.currentRecord">
-                        <span> 执行状态：</span>
+                        <span>{{ t('excute-status') }}：</span>
                         <Status :status="state.currentRecord.status" />
                     </template>
                     <Output ref="outputRef" v-if="state.currentRecord" />
                     <div style="padding: 24px;" v-show="!state.currentRecord">
-                        <el-form-item label="群组选择">
-                            <el-select v-model="formData.group" clearable>
+                        <el-form-item :label="t('group-select')">
+                            <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable>
                                 <el-option v-for="(item, index) of state.groupList" :key="index" :label="item"
                                     :value="item" />
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="脚本选择" class="script-btns">
-                            <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell" placeholder="请选择"
-                                style="width: 220px;" :options="shellListGroup">
+                        <el-form-item :label="t('script-select')" class="script-btns">
+                            <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
+                                :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup">
                             </el-select-v2>
-                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">刷新数据</el-button>
+                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">{{ t('refresh-data') }}</el-button>
                             <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell"
                                 :icon="CaretRight">
-                                执行脚本
+                                {{ t('excute-script') }}
                             </el-button>
-                            <el-popover title="选择要执行的脚本" :width="550"
+                            <el-popover :title="t('select-excute-script')" :width="550"
                                 v-if="formData.selectShell && formData.selectShell.baseScripts && formData.selectShell.baseScripts.length">
                                 <template #reference>
                                     <el-button class="mgL10" type="primary" :icon="Filter">
-                                        执行部分脚本
+                                        {{ t('excute-part-script') }}
                                     </el-button>
                                 </template>
                                 <el-checkbox-group v-model="(formData.checkList as any)" class="select-shell-scripts">
@@ -77,76 +79,85 @@
                                 </el-checkbox-group>
                                 <div>
                                     <el-button type="primary" :disabled="!formData.checkList.length"
-                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">执行所选脚本</el-button>
+                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">{{ t('excute-select')
+                                        }}</el-button>
                                 </div>
                             </el-popover>
-                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell"
-                                :icon="View">查看脚本</el-button>
+                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell" :icon="View">{{
+                                t('view-script') }}</el-button>
                             <el-dropdown @command="openPowershell">
-                                <el-button class="mgL10">打开本地终端</el-button>
+                                <el-button class="mgL10">{{ t('open-local-term') }}</el-button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item command="cmd">打开CMD</el-dropdown-item>
-                                        <el-dropdown-item command="powershell">打开Powershell</el-dropdown-item>
+                                        <el-dropdown-item command="cmd">{{ t('Open ') }}CMD</el-dropdown-item>
+                                        <el-dropdown-item command="powershell">{{ t('Open ') }}Powershell</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
-                            <el-popconfirm title="确定要在执行完所有任务的时候关闭计算机吗？"
+                            <el-popconfirm :title="t('confirm-close-windows')"
                                 v-if="state.excuteData.length && win.close === false" @confirm="closeWin">
                                 <template #reference>
-                                    <el-button type="danger" class="mgL10" :icon="SwitchButton">任务执行完毕后关闭计算机</el-button>
+                                    <el-button type="danger" class="mgL10" :icon="SwitchButton">{{ t('close-windows-btn')
+                                    }}</el-button>
                                 </template>
                             </el-popconfirm>
-                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose"
-                                :icon="Remove">取消任务执行完毕关机设定</el-button>
+                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose" :icon="Remove">{{
+                                t('cancel-close-windows-btn') }}</el-button>
                         </el-form-item>
                         <div class="table-title">
-                            执行记录：
+                            {{ t('excute-logs') }}：
                             <el-radio-group v-model="state.hostType" size="small">
-                                <el-radio-button label="currentShell" value="currentShell">当前脚本</el-radio-button>
-                                <el-radio-button label="currentGroup" value="currentGroup">当前群组</el-radio-button>
-                                <el-radio-button label="currentHost" value="currentHost">当前主机</el-radio-button>
-                                <el-radio-button label="all" value="all">所有主机</el-radio-button>
+                                <el-radio-button label="currentShell" value="currentShell">
+                                    {{ t('current-shell') }}
+                                </el-radio-button>
+                                <el-radio-button label="currentGroup" value="currentGroup">{{ t('current-group')
+                                }}</el-radio-button>
+                                <el-radio-button label="currentHost" value="currentHost">{{ t('current-host')
+                                }}</el-radio-button>
+                                <el-radio-button label="all" value="all">{{ t('all-logs') }}</el-radio-button>
                             </el-radio-group>
                             <span class="mgL10">
-                                <el-button @click="onExport" size="small" :icon="Download">导出</el-button>
-                                <el-button type="danger" size="small" @click="onDelete" :icon="Delete">删除</el-button>
+                                <el-button @click="onExport" size="small" :icon="Download">{{ t('Export') }}</el-button>
+                                <el-button type="danger" size="small" @click="onDelete" :icon="Delete">{{ t('Delete')
+                                }}</el-button>
                             </span>
                         </div>
                         <Table :data="history" @selection-change="onSelect">
                             <el-table-column type="selection" width="55" :selectable="selectable" />
-                            <el-table-column prop="shellName" label="脚本名称" show-overflow-tooltip />
-                            <el-table-column prop="host" label="目标host" width="120px;" />
-                            <el-table-column prop="excuteGroup" label="所在群组" show-overflow-tooltip />
-                            <el-table-column prop="excuteType" label="执行脚本" width="120px" show-overflow-tooltip>
+                            <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
+                            <el-table-column prop="host" :label="t('de-host')" width="120px;" />
+                            <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
+                            <el-table-column prop="excuteType" :label="t('excuted-script')" width="120px"
+                                show-overflow-tooltip>
                                 <template #default="{ row }">
-                                    {{ !row.excuteType ? '全部' : row.excuteType === 1 ? '部分' : row.excuteType }}
+                                    {{ !row.excuteType ? t('All') : row.excuteType === 1 ? t('part') : row.excuteType }}
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="startTime" label="执行开始时间" width="170px;" />
-                            <el-table-column prop="endTime" label="执行结束时间" width="170px;">
+                            <el-table-column prop="startTime" :label="t('excute-start-time')" width="170px;" />
+                            <el-table-column prop="endTime" :label="t('excute-end-time')" width="170px;">
                                 <template #default="{ row }">
                                     <span v-if="row.endTime">{{ utilTime(row.endTime) }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="time" label="执行时长" width="160px" />
-                            <el-table-column prop="status" label="执行状态" width="100px">
+                            <el-table-column prop="time" :label="t('excute-duration')" width="160px" />
+                            <el-table-column prop="status" :label="t('excute-status')" width="100px">
                                 <template #default="{ row }">
                                     <Status :status="row.status" />
                                 </template>
                             </el-table-column>
-                            <el-table-column label="操作">
+                            <el-table-column :label="t('Action')">
                                 <template #default="{ row }">
-                                    <el-link type="primary" @click="onShowLogs(row)">查看日志</el-link>
-                                    <el-popconfirm title="确定要取消执行此任务吗？" v-if="row.status === 0"
+                                    <el-link type="primary" @click="onShowLogs(row)">{{ t('View') }}</el-link>
+                                    <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0"
                                         @confirm="cancelExte(row.uuid)">
                                         <template #reference>
-                                            <el-link type="danger">取消执行</el-link>
+                                            <el-link type="danger">{{ t('cancel-excute') }}</el-link>
                                         </template>
                                     </el-popconfirm>
-                                    <el-popconfirm title="确定要删除这条数据吗？" v-if="row.id" @confirm="delItem(row.id)">
+                                    <el-popconfirm :title="t('confirm-delete-item')" v-if="row.id"
+                                        @confirm="delItem(row.id)">
                                         <template #reference>
-                                            <el-link type="danger">删除</el-link>
+                                            <el-link type="danger">{{ t('Delete') }}</el-link>
                                         </template>
                                     </el-popconfirm>
                                 </template>
@@ -175,43 +186,46 @@
                 </el-tab-pane>
             </el-tabs>
         </el-form>
-        <el-dialog v-model="state.shellShow" title="准备执行的脚本详情" width="1000px" draggable>
+        <el-dialog v-model="state.shellShow" :title="t('format-script-detail')" width="1000px" draggable>
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
-        <el-dialog v-model="state.showUpload" title="上传文件" width="800px" :close-on-click-modal="false">
+        <el-dialog v-model="state.showUpload" :title="t('uploadfile')" width="800px" :close-on-click-modal="false">
             <el-form :model="formData" ref="formRef" :rules="rules" label-width="150px">
-                <el-form-item label="选择要上传的文件：" prop="file">
-                    <el-button type="primary" @click="onSelectFile('openFile')">选择文件</el-button>
-                    <el-button type="primary" @click="onSelectFile('openDirectory')">选择文件夹</el-button>
+                <el-form-item :label="t('select-upload-file')" prop="file">
+                    <el-button type="primary" @click="onSelectFile('openFile')">{{ t('select-file') }}</el-button>
+                    <el-button type="primary" @click="onSelectFile('openDirectory')">{{ t('select-dir') }}</el-button>
                 </el-form-item>
-                <el-form-item prop="file" label="当前文件地址：" required :title="formData.file || '未选择'">
-                    <el-input v-model="formData.file" placeholder="选择文件或者输入本地文件或文件夹地址" style="width: 520px;" />
+                <el-form-item prop="file" :label="t('current-file')" required>
+                    <el-input v-model="formData.file" :placeholder="t('pls-select-file-dir')" style="width: 520px;" />
                 </el-form-item>
-                <el-form-item label="目标地址目录：" prop="uploadDir">
-                    <el-input v-model="formData.uploadDir" placeholder="请输入文件上传目录" style="width: 520px;" />
+                <el-form-item :label="t('remote-path-dir')" prop="uploadDir">
+                    <el-input v-model="formData.uploadDir" :placeholder="t('enter-upload-dir')" style="width: 520px;" />
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">上传文件</el-button>
-                <el-button @click="state.showUpload = false">取消</el-button>
+                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">{{ t('uploadfile') }}</el-button>
+                <el-button @click="state.showUpload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
-        <el-dialog v-model="state.showDownload" title="下载文件（当前暂不支持下载远程文件夹！）" width="900px" :close-on-click-modal="false">
+        <el-dialog v-model="state.showDownload" :title="t('downloadfile-unsport')" width="900px"
+            :close-on-click-modal="false">
             <el-form :model="formData" ref="formDownLoadRef" :rules="downLoadRules" label-width="150px">
-                <el-form-item label="选择保存的文件夹：" prop="locaDir">
-                    <el-button type="primary" @click="onSelectDir">选择文件夹</el-button>
+                <el-form-item :label="t('select-save')" prop="locaDir">
+                    <el-button type="primary" @click="onSelectDir">{{ t('select-dir') }}</el-button>
                 </el-form-item>
-                <el-form-item prop="locaDir" label="保存的文件夹：" required :title="formData.file || '未选择'">
-                    <el-input v-model="formData.locaDir" placeholder="选择文件夹或者输入本地文件夹地址" style="width: 520px;" />
-                    <el-button class="mgL10" v-if="formData.locaDir" @click="openDir">打开目录</el-button>
+                <el-form-item prop="locaDir" :label="t('select-save')" required>
+                    <el-input v-model="formData.locaDir" :placeholder="t('enter-save-dir')" style="width: 520px;" />
+                    <el-button class="mgL10" v-if="formData.locaDir" @click="openDir">{{ t('open-dir') }}</el-button>
                 </el-form-item>
-                <el-form-item label="目标文件地址：" prop="downloadFile">
-                    <el-input v-model="formData.downloadFile" placeholder="请输入目标文件地址" style="width: 520px;" />
+                <el-form-item :label="t('remote-file')" prop="downloadFile">
+                    <el-input v-model="formData.downloadFile" :placeholder="t('enter-remote-file-path')"
+                        style="width: 520px;" />
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button type="primary" @click="onDownLoad" :loading="state.uploadLoading">下载文件</el-button>
-                <el-button @click="state.showDownload = false">取消</el-button>
+                <el-button type="primary" @click="onDownLoad" :loading="state.uploadLoading">{{ t('downloadfile')
+                }}</el-button>
+                <el-button @click="state.showDownload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
     </BasePage>
@@ -287,27 +301,27 @@ const formData = reactive({
     downloadFile: '',
     checkList: [] as ShellListRecoed['baseScripts']
 })
-const rules = {
+const rules = computed(() => ({
     file: {
         required: true,
-        message: '请选择文件！',
+        message: t('pls-select-file'),
     },
     uploadDir: {
         required: true,
-        message: '请输入上传文件目录！',
+        message: t('pls-enter-upload-dir'),
     },
-}
+}))
 
-const downLoadRules = {
+const downLoadRules = computed(() => ({
     locaDir: {
         required: true,
-        message: '请选择存放的文件夹！',
+        message: t('pls-enter-save-dir'),
     },
     downloadFile: {
         required: true,
-        message: '请输入下载文件地址！',
+        message: t('pls-enter-download-file'),
     },
-}
+}))
 
 const state = reactive({
     showUpload: false,
@@ -330,7 +344,7 @@ const outputRef = ref<any>();
 
 async function onSelectFile(type = 'openFile' as 'openFile' | 'openDirectory') {
     const res = await electronAPI.showOpenDialog({
-        title: '选择上传对象',
+        title: t('pls-select-item'),
         properties: [type],
     })
     if (!res.canceled) {
@@ -340,7 +354,7 @@ async function onSelectFile(type = 'openFile' as 'openFile' | 'openDirectory') {
 
 async function onSelectDir() {
     const res = await electronAPI.showOpenDialog({
-        title: '选择文件夹',
+        title: t('select-dir'),
         properties: ["openDirectory"]
     })
     if (!res.canceled) {
@@ -352,7 +366,7 @@ async function onUpload() {
     const valid = await formRef.value!.validate().catch(() => false);
     if (!valid) return;
     if (!clientStore.status) {
-        ElMessage.error('连接已失效，请重新建立连接！');
+        ElMessage.error(t('connect-lose'));
         return;
     }
     state.showUpload = false;
@@ -363,7 +377,7 @@ async function onDownLoad() {
     const valid = await formDownLoadRef.value!.validate().catch(() => false);
     if (!valid) return;
     if (!clientStore.status) {
-        ElMessage.error('连接已失效，请重新建立连接！');
+        ElMessage.error(t('connect-lose'));
         return;
     }
     state.uploadLoading = true;
@@ -371,7 +385,7 @@ async function onDownLoad() {
     state.uploadLoading = false;
     ElMessage({
         type: result === true ? 'success' : 'error',
-        message: result === true ? '文件下载成功！' : (result ? (result + '') : '文件下载失败！'),
+        message: result === true ? t('downloadfile-success') : (result ? (result + '') : t('downloadfile-error')),
     })
 }
 
@@ -387,8 +401,9 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
         type = checkList.map(item => item.type);
     }
     if (!formData.selectShell) return;
-    if (clientStore.status === 2 && formData.selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3)) && (hasType(1) || hasType(3))) {
-        const action = await ElMessageBox.confirm(`脚本："${formData.selectShell.scriptName ?? '未命名'}"关联的主机：${formData.selectShell.host}与当前连接不一致，确定要执行吗？`, '提示', {
+    const selectShell = formData.selectShell;
+    if (clientStore.status === 2 && selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3)) && (hasType(1) || hasType(3))) {
+        const action = await ElMessageBox.confirm(t('excute-unsame-host-script', { scriptName: selectShell.scriptName ?? t('unnamed'), host: selectShell.host }), t('Hint'), {
             type: 'warning',
         }).catch(action => action);
         if (action !== 'confirm') {
@@ -396,8 +411,8 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
         }
     }
     for (const item of state.excuteData) {
-        if (item.excuteId === formData.selectShell?.uuid && (item.status === 0 || item.status === 3)) {
-            const action = await ElMessageBox.confirm(`当前脚本："${formData.selectShell.scriptName ?? '未命名'}"已经在运行，确定要重复运行吗？`, '提示', {
+        if (item.excuteId === selectShell?.uuid && (item.status === 0 || item.status === 3)) {
+            const action = await ElMessageBox.confirm(t('already-excute', { scriptName: selectShell.scriptName ?? t('unnamed') }), t('Hint'), {
                 type: 'warning',
             }).catch(action => action);
             if (action !== 'confirm') {
@@ -405,54 +420,54 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
             }
         }
     }
-    if (!formData.selectShell.baseScripts?.length) {
-        ElMessage.error('请设置脚本后执行！');
+    if (!selectShell.baseScripts?.length) {
+        ElMessage.error(t('set-config-excute'));
         return
     };
-    if (clientStore.status !== 2 && formData.selectShell.baseScripts.find(item => item.type === 1 || item.type === 3) && (type.includes(1) || type.includes(3))) {
-        ElMessage.error('脚本内含有远端脚本，无法执行远端脚本，因为连接未成功建立！');
+    if (clientStore.status !== 2 && selectShell.baseScripts.find(item => item.type === 1 || item.type === 3) && (type.includes(1) || type.includes(3))) {
+        ElMessage.error(t('contans-remote-script-unexcute'));
         return;
     }
     const uuid = v4();
     state.excuteData.unshift({
-        shellName: formData.selectShell.scriptName ?? '未命名',
+        shellName: selectShell.scriptName ?? t('unnamed'),
         host: (hasType(1) || hasType(3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0',
         startTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         endTime: '',
         time: '',
-        excuteId: formData.selectShell.uuid,
-        excuteGroup: formData.selectShell.group,
-        excuteType: (checkList && checkList.length) ? (checkList.length === formData.selectShell.baseScripts.length ? 0 : 1) : 0,
+        excuteId: selectShell.uuid,
+        excuteGroup: selectShell.group,
+        excuteType: (checkList && checkList.length) ? (checkList.length === selectShell.baseScripts.length ? 0 : 1) : 0,
         status: 0,
         logs: '',
         uuid,
     });
     const exceteRecord = state.excuteData[0];
-    const { envVar, baseScripts } = formData.selectShell;
+    const { envVar, baseScripts } = selectShell;
     const logInfo = logInfoFn(exceteRecord);
     excuteAbort[uuid] = new AbortController();
     let abort = false;
     function abortRecord() {
-        logInfo(`已取消脚本的执行`);
-        ElMessage.warning(`已取消脚本："${exceteRecord.shellName}" 的执行！`);
+        logInfo(t('canceled-excute'));
+        ElMessage.warning(t('canceled-excute-item', { shellName: exceteRecord.shellName }));
         excuteResult(4, exceteRecord);
     }
     excuteAbort[uuid].signal.addEventListener('abort', () => {
-        ElMessage.warning(`脚本："${exceteRecord.shellName}" 已设置取消脚本指令！`);
+        ElMessage.warning(t('set-canceled', { shellName: exceteRecord.shellName }));
         exceteRecord.status = 3;
         abort = true;
     })
     for (let i = 0, l = baseScripts.length; i < l; i++) {
         const item = baseScripts[i];
         if (checkList?.length && !checkList.includes(item)) {
-            logInfo(`已跳过${i + 1}、${shellTypeEnum.value[item.type]}\n`);
+            logInfo(t('skip-script' + '\n', { num: i + 1, type: shellTypeEnum.value[item.type] }));
             continue;
         };
         if (item.type === 1) {
-            logInfo(`开始执行${i + 1}、远端脚本：\n`);
+            logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
-                logInfo(`执行脚本：${cmd}\n`);
+                logInfo(t('excute-script-cmd', { cmd }) + '\n');
                 const code = await clientStore.client!.exec(cmd, (data: string) => {
                     logInfo(data);
                 });
@@ -461,21 +476,21 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                     return;
                 }
                 if (code !== 0) {
-                    logInfo('远端脚本运行失败');
-                    ElMessage.error(`"${exceteRecord.shellName}"中远端脚本运行错误！`);
+                    logInfo(t('excute-script-error', { type: shellTypeEnum.value[item.type] }));
+                    ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
                 }
             }
         } else if (item.type === 2) {
-            logInfo(`开始执行${i + 1}、${shellTypeEnum.value[item.type]}：\n`);
+            logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
                 const { type } = excuteItem;
-                logInfo(`执行脚本(${type ? type : 'powershell'})：${cmd}\n`);
+                logInfo(t('excute-script-type', { type: type ? type : 'powershell', cmd }) + '\n');
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
-                    logInfo(`环境变量：${JSON.stringify(env)}\n`);
+                    logInfo(t('env-var-detail', { env: JSON.stringify(env) }) + '\n');
                 }
                 const { code, data } = await electronAPI.execCmd(cmd, type, env);
                 logInfo(data);
@@ -484,8 +499,8 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                     return;
                 }
                 if (code !== 0) {
-                    logInfo('本地脚本运行失败');
-                    ElMessage.error(`"${exceteRecord.shellName}"中本地脚本运行错误！`);
+                    logInfo(t('excute-script-error', { type: shellTypeEnum.value[item.type] }));
+                    ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
                 }
@@ -493,43 +508,43 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
         } else if (item.type === 3) {
             const { remoteDir, localFile } = item;
             if (!remoteDir || !localFile) {
-                ElMessage.warning('不存在上传设置！');
+                ElMessage.warning(t('no-upload-found'));
             } else {
-                logInfo(`开始执行${i + 1}、${shellTypeEnum.value[item.type]}：\n`);
+                logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
-                logInfo(`\n上传文件脚本 本地目标：${local} 目标目录：${remote}\n`);
+                logInfo(t('upload-config', { local, remote }) + '\n');
                 const result = await (clientStore.client!.uploadFile(local, remote, true));
                 if (result === true) {
-                    logInfo('文件上传成功\n');
+                    logInfo(t('upload-success') + '\n');
                     if (abort) {
                         abortRecord();
                         return;
                     }
                 } else {
-                    logInfo('文件上传失败\n');
+                    logInfo(t('upload-err', { err: result + '' }) + '\n');
                     if (abort) {
                         abortRecord();
                         return;
                     }
-                    ElMessage.error(`"${exceteRecord.shellName}"中上传脚本运行错误！`);
+                    ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
                 }
             }
         } else {
-            ElMessage.warning(`已无视未知的脚本类型：${item.type}`);
+            ElMessage.warning(t('skip-unknown-type', { type: item.type }) + '\n');
         }
     }
     excuteResult(1, exceteRecord);
-    ElMessage.success(`脚本"${exceteRecord.shellName}"执行完毕！`);
+    ElMessage.success(t('tip-excute-end', { shellName: exceteRecord.shellName }));
 }
 
 function cancelExte(uuid: string) {
     if (excuteAbort[uuid]) {
         excuteAbort[uuid].abort();
     } else {
-        ElMessage.error('未找到取消句柄！');
+        ElMessage.error(t('abort-404'));
     }
 }
 
@@ -562,7 +577,7 @@ async function excuteResult(status: ExcuteListRecoed['status'], record: ExcuteLi
     record.time = computedTime(startTime, record.endTime);
     const request = objectStore.add(JSON.parse(JSON.stringify(record)));
     request.onerror = () => {
-        ElMessage.error(`${record.shellName}日志记录失败！`);
+        ElMessage.error(t('record-log-error', { shellName: record.shellName }));
     };
     request.onsuccess = () => {
         state.excuteData.splice(state.excuteData.indexOf(record), 1);
@@ -596,7 +611,7 @@ function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
 function onActiveChange(activeName: any) {
     if (activeName === 'Terminal') {
         if (clientStore.status !== 2) {
-            ElMessage.warning('连接未建立，终端不可用！');
+            ElMessage.warning(t('unuse-term'));
         } else {
             if (createdTerm.value === false) {
                 nextTick(() => {
@@ -615,7 +630,7 @@ function onSelectShell(id: number) {
 }
 function showShell() {
     if (!formData.selectShell?.baseScripts?.length) {
-        ElMessage.error('请设置脚本后查看！');
+        ElMessage.error(t('pls-config-script-view'));
         return;
     }
     state.shellShow = true;
@@ -639,25 +654,25 @@ async function openPowershell(command: 'powershell' | 'cmd') {
         open = await electronAPI.openExe(command);
     }
     if (open.code !== 0) {
-        ElMessage.error(`终端打开失败，起始位置为：${pwd}；失败原因：${open.data}  请检查脚本配置！`);
+        ElMessage.error(t('open-term-error', { pwd, err: open.data + '' }));
     }
 }
 
 const shellListGroup = computed(() => {
     const groups = [{
-        label: '完全关联脚本',
+        label: t('prefect-script'),
         options: [] as { label: string, value: number }[]
     },
     {
-        label: '仅关联群组脚本',
+        label: t('only-group'),
         options: [] as { label: string, value: number }[]
     },
     {
-        label: '仅关联host脚本',
+        label: t('only-host'),
         options: [] as { label: string, value: number }[]
     },
     {
-        label: '非关联脚本',
+        label: t('fail-script'),
         options: [] as { label: string, value: number }[]
     }];
     const host = clientStore.config?.host || '0.0.0.0';
@@ -723,7 +738,7 @@ onActivated(() => {
 
 function onExport() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-item'));
         return;
     }
     const text = JSON.stringify({
@@ -740,10 +755,10 @@ async function delItem(id: number | number[]) {
 
 async function onDelete() {
     if (!state.selects.length) {
-        ElMessage.error('请选择数据！');
+        ElMessage.error(t('pls-select-item'));
         return;
     }
-    const action = await ElMessageBox.confirm(`确定要删除选中的${state.selects.length}条数据吗？`, '删除确认', {
+    const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: state.selects.length }), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {
@@ -767,7 +782,7 @@ if (process.env.NODE_ENV !== 'development') {
         e.preventDefault();
         if (confirming) return;
         confirming = true;
-        const action = await ElMessageBox.confirm('当前存在正在运行的脚本任务，现在关闭窗口数据无法保存，确定要关闭窗口吗？', '提示', {
+        const action = await ElMessageBox.confirm(t('has-task-close-window'), t('Hint'), {
             type: 'warning',
         }).catch(action => action);
         confirming = false;
