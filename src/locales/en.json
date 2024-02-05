@@ -134,7 +134,7 @@
   "open-local-term": "Open local terminal",
   "Open ": "Open ",
   "confirm-close-windows": "Are you sure want to shut down your computer when all tasks are finished?",
-  "close-windows-btn": "Shut down the computer after completing tasks",
+  "close-windows-btn": "Shutdown the computer after tasks cleared",
   "cancel-close-windows-btn": "Cancel the shutdown setting",
   "excute-logs": "Excute Logs",
   "current-shell": "Current Script",
@@ -216,5 +216,7 @@
   "script-num": "Script {num} : ",
   "upload-file-path": "Uploaded local file path",
   "format-hms": "H:mm:ss",
-  "Status": "Status"
+  "Status": "Status",
+  "connect-lose-term": "The connection is not unavailable",
+  "copyed": "Copyed"
 }

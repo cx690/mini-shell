@@ -216,5 +216,7 @@
   "script-num": "脚本{num}：",
   "upload-file-path": "上传的本地文件地址",
   "format-hms": "H时mm分ss秒",
-  "Status": "状态"
+  "Status": "状态",
+  "connect-lose-term": "连接未建立，终端不可用",
+  "copyed": "已复制到剪切板"
 }

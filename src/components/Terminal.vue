@@ -8,12 +8,14 @@ import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
 import { Terminal } from 'xterm';
 import type { ChannelType } from 'electron/ssh2';
 import { ElMessage } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 const props = defineProps<{ init?: boolean }>()
 const clientStore = useClient();
 const div = ref<HTMLDivElement>()
 const term = new Terminal();
 
 const channel = ref<ChannelType | null | undefined>(null);
+const { t } = useI18n();
 // useResize(div, term)
 onMounted(() => {
     term.open(div.value!);
@@ -21,7 +23,7 @@ onMounted(() => {
     props.init && initShell();
     term.onKey((e) => {
         if (clientStore.status !== 2) {
-            ElMessage.warning('连接未建立，终端不可用！');
+            ElMessage.warning(t('connect-lose-term'));
         }
         if (e.key === '\x16') {// 粘贴
             window.navigator.clipboard.readText().then(res => {
@@ -34,7 +36,7 @@ onMounted(() => {
     term.onSelectionChange(() => {
         if (term.getSelection()) {
             window.document.execCommand('copy');
-            ElMessage.success('已复制到剪切板！');
+            ElMessage.success(t('copyed'));
         }
     })
 })
