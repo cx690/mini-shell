@@ -218,5 +218,7 @@
   "format-hms": "H:mm:ss",
   "Status": "Status",
   "connect-lose-term": "The connection is not unavailable",
-  "copyed": "Copyed"
+  "copyed": "Copyed",
+  "Back-main": "Back",
+  "404-title": "Sorry, the page you want to view does not exist!"
 }

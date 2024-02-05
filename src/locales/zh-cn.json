@@ -218,5 +218,7 @@
   "format-hms": "H时mm分ss秒",
   "Status": "状态",
   "connect-lose-term": "连接未建立，终端不可用",
-  "copyed": "已复制到剪切板"
+  "copyed": "已复制到剪切板",
+  "Back-main": "返回首页",
+  "404-title": "对不起，您要查看的页面不存在！"
 }
