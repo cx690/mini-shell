@@ -79,8 +79,9 @@
                                 </el-checkbox-group>
                                 <div>
                                     <el-button type="primary" :disabled="!formData.checkList.length"
-                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">{{ t('excute-select')
-                                        }}</el-button>
+                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">
+                                        {{ t('excute-select') }}
+                                    </el-button>
                                 </div>
                             </el-popover>
                             <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell" :icon="View">{{
@@ -97,8 +98,9 @@
                             <el-popconfirm :title="t('confirm-close-windows')"
                                 v-if="state.excuteData.length && win.close === false" @confirm="closeWin">
                                 <template #reference>
-                                    <el-button type="danger" class="mgL10" :icon="SwitchButton">{{ t('close-windows-btn')
-                                    }}</el-button>
+                                    <el-button type="danger" class="mgL10" :icon="SwitchButton">
+                                        {{ t('close-windows-btn') }}
+                                    </el-button>
                                 </template>
                             </el-popconfirm>
                             <el-button class="mgL10" v-if="win.close" @click="onCancelColose" :icon="Remove">{{
@@ -223,8 +225,9 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button type="primary" @click="onDownLoad" :loading="state.uploadLoading">{{ t('downloadfile')
-                }}</el-button>
+                <el-button type="primary" @click="onDownLoad" :loading="state.uploadLoading">
+                    {{ t('downloadfile') }}
+                </el-button>
                 <el-button @click="state.showDownload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>

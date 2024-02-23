@@ -62,9 +62,9 @@ export function addRefresh(name: string | string[]) {
     return reFresh;
 }
 
-export function useEnum<T extends Record<string, any> = Record<string, any>>(callback: (t: any) => T) {
+export function useEnum<T extends Record<string, string> = Record<string, string>>(callback: (t: (...args: any[]) => string) => T) {
     const { t } = useI18n();
-    return computed(() => callback(t));
+    return computed<T>(() => callback(t));
 }
 
 //term 内部bug https://github.com/xtermjs/xterm.js/issues/4841
