@@ -162,6 +162,7 @@ function getClient() {
                         return;
                     }
                     resolve(true);
+                    sftp.end();
                 });
             }).catch((err: Error) => err);
             return status;

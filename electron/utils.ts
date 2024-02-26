@@ -24,26 +24,61 @@ export async function getAllFiles(dir: string, exclud?: RegExp) {
     return allFiles
 }
 
+const queue: (() => Promise<any>)[] = [];//上传文件队列
+let running = false;
 /**
  * 并行执行指定数量的任务
  * @param tasks 生成任务的函数
  * @param maxCount 最多并行任务
- * @returns 
  */
 export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCount = 10) {
-    const list: T[] = [];
     const source = [...tasks];
-    async function excuteTask(i: number) {
-        const task = tasks.shift();
-        if (task) {
-            const res = await task();
-            list[i] = res;
-            if (tasks.length) {
-                await excuteTask(source.indexOf(task));
+    const PInfo = withResolvers<T[]>();
+    const taskFn = () => new Promise(async (resolve) => {
+        const list: T[] = [];
+        async function excuteTask() {
+            const task = tasks.shift();
+            if (task) {
+                const i = source.indexOf(task);
+                const res = await task();
+                list[i] = res;
+                if (tasks.length) {
+                    await excuteTask();
+                }
             }
+            return true;
         }
-        return true;
+        await Promise.all(tasks.slice(0, maxCount).map(() => excuteTask()));
+        resolve(list);
+        PInfo.resolve(list);
+    })
+    queue.push(taskFn);
+    startTask();
+    return await PInfo.promise;
+}
+
+/** 执行队列任务 */
+async function startTask() {
+    if (running) {
+        return;
+    };
+    const taskFn = queue.shift();
+    if (!taskFn) {
+        return;
     }
-    await Promise.all(tasks.slice(0, maxCount).map((item, i) => excuteTask(i)));
-    return list;
+    if (taskFn) {
+        running = true;
+        await taskFn().catch(err => console.error(err));
+        running = false;
+        return await startTask();
+    }
+}
+
+export function withResolvers<T = any>() {
+    let resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void;
+    const promise = new Promise<T>((rl, rj) => {
+        resolve = rl;
+        reject = rj;
+    })
+    return { promise, resolve: resolve!, reject: reject! };
 }

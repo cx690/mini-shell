@@ -141,7 +141,13 @@
                                     <span v-if="row.endTime">{{ utilTime(row.endTime) }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="time" :label="t('excute-duration')" width="160px" />
+                            <el-table-column prop="time" :label="t('excute-duration')" width="160px">
+                                <template #default="{ row }">
+                                    <span v-if="row.startTime && row.endTime">
+                                        {{ computedTime(row.startTime, row.endTime) }}
+                                    </span>
+                                </template>
+                            </el-table-column>
                             <el-table-column prop="status" :label="t('Status')" width="100px">
                                 <template #default="{ row }">
                                     <Status :status="row.status" />
@@ -374,7 +380,9 @@ async function onUpload() {
         return;
     }
     state.showUpload = false;
+    console.time('上传')
     await (clientStore.client!.uploadFile(formData.file, formData.uploadDir));
+    console.timeEnd('上传')
 }
 
 async function onDownLoad() {

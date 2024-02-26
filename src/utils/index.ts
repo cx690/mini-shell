@@ -40,7 +40,11 @@ export function useShellTypeEnum() {
 
 export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>, t: (...args: any) => string) {
     let str = t('excute-script-list') + '\n';
-    const shellTypeEnum = useShellTypeEnum().value;
+    const shellTypeEnum = {
+        1: t('remote-script'),
+        2: t('local-script'),
+        3: t('upload-script'),
+    };
     for (const item of shells) {
         const { type } = item;
         str += `${shellTypeEnum[type]}：\n`;
