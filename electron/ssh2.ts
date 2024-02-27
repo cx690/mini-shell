@@ -59,7 +59,7 @@ function getClient() {
                         }
                         callbackInfo?.(str);
                     }).stderr.on('data', (data) => {
-                        callbackInfo?.(`${data}`)
+                        callbackInfo?.(`${data}`);
                     });
                     resolve({
                         write: function (command: string) {
@@ -179,6 +179,8 @@ function getClient() {
                     if (err) {
                         console.error(err);
                         resolve(err);
+                        sftp.end();
+                        return;
                     };
                     const { base } = path.parse(remotePath);
                     const localPath = localDir + '/' + base;
@@ -188,6 +190,7 @@ function getClient() {
                             resolve(err);
                         };
                         resolve(true);
+                        sftp.end();
                     });
                 });
             }).catch((err: Error) => err)
