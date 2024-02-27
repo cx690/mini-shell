@@ -113,6 +113,7 @@ function getClient() {
                     if (err) {
                         console.error(err);
                         resolve(err);
+                        sftp.end();
                         return;
                     };
                     const mkRemotedir = getMkRemoteDir(client);
@@ -157,12 +158,12 @@ function getClient() {
                         })
                     });
                     const errs = (await parallelTask(tasks)).filter(item => item !== true) as Error[];
+                    sftp.end();
                     if (errs.length) {
                         resolve(errs[0]);
                         return;
                     }
                     resolve(true);
-                    sftp.end();
                 });
             }).catch((err: Error) => err);
             return status;
