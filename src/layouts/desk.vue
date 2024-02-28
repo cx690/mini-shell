@@ -133,12 +133,12 @@ function onCancelColose() {
 
 const { t, locale } = useI18n();
 
-function onChangeLocal(command: string) {
+function onChangeLocal(command?: string) {
     locale.value = command === 'en' ? 'en' : 'zh-cn';
     localStorage.locale = locale.value;
     electronAPI.switchLocale(locale.value);
 }
-
+onChangeLocal(localStorage.locale);
 </script>
 
 <style scoped lang="less">
