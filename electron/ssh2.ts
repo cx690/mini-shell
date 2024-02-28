@@ -24,12 +24,12 @@ function getClient() {
                         console.error(err);
                     }
                     channel.on('close', (code: number, signal: number) => {
-                        callbackInfo?.(`Stream closed with code:${code}${signal != null ? `, signal:${signal}` : ''}\n`);
+                        callbackInfo?.(`<p class="${code === 0 ? 'success' : 'error'}">Stream closed with code:${code}${signal != null ? `, signal:${signal}` : ''}</p>`);
                         resolve(code);
                     }).on('data', (data: any) => {
-                        callbackInfo?.(`${data}`);
+                        callbackInfo?.(`<pre class="success">${data}</pre>`);
                     }).stderr.on('data', (data) => {
-                        callbackInfo?.(`${data}`);
+                        callbackInfo?.(`<pre class="error">${data}</pre>`);
                     });
                 })
             })

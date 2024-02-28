@@ -460,7 +460,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
     excuteAbort[uuid] = new AbortController();
     let abort = false;
     function abortRecord() {
-        logInfo(t('canceled-excute'));
+        logInfo(`<p class="cancel">${t('canceled-excute')}</p>`);
         ElMessage.warning(t('canceled-excute-item', { shellName: exceteRecord.shellName }));
         excuteResult(4, exceteRecord);
     }
@@ -472,14 +472,14 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
     for (let i = 0, l = baseScripts.length; i < l; i++) {
         const item = baseScripts[i];
         if (checkList?.length && !checkList.includes(item)) {
-            logInfo(t('skip-script' + '\n', { num: i + 1, type: shellTypeEnum.value[item.type] }));
+            logInfo(`<p class="cancel">${t('skip-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
             continue;
         };
-        if (item.type === 1) {
-            logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
+        if (item.type === 1) {//remote
+            logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
-                logInfo(t('excute-script-cmd', { cmd }) + '\n');
+                logInfo(`<p class="subtitle">${t('excute-script-cmd')}</p><pre class="cmd">${cmd}</pre>`);
                 const code = await clientStore.client!.exec(cmd, (data: string) => {
                     logInfo(data);
                 });
@@ -488,53 +488,53 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                     return;
                 }
                 if (code !== 0) {
-                    logInfo(t('excute-script-error', { type: shellTypeEnum.value[item.type] }));
+                    logInfo(`<p class="error">${t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
                 }
             }
-        } else if (item.type === 2) {
-            logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
+        } else if (item.type === 2) {//local
+            logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
                 const { type } = excuteItem;
-                logInfo(t('excute-script-type', { type: type ? type : 'powershell', cmd }) + '\n');
+                logInfo(`<p class="subtitle">${t('excute-script-type', { type: type ? type : 'powershell' })}</p><pre class="cmd">${cmd}</pre>`);
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
-                    logInfo(t('env-var-detail', { env: JSON.stringify(env) }) + '\n');
+                    logInfo(`<p class="env">${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
                 }
                 const { code, data } = await electronAPI.execCmd(cmd, type, env);
-                logInfo(data);
+                logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
                 if (abort) {
                     abortRecord();
                     return;
                 }
                 if (code !== 0) {
-                    logInfo(t('excute-script-error', { type: shellTypeEnum.value[item.type] }));
+                    logInfo(`<p class="error">$t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
                 }
             }
-        } else if (item.type === 3) {
+        } else if (item.type === 3) {//upload
             const { remoteDir, localFile } = item;
             if (!remoteDir || !localFile) {
                 ElMessage.warning(t('no-upload-found'));
             } else {
-                logInfo(t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] }) + '\n');
+                logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
-                logInfo(t('upload-config', { local, remote }) + '\n');
+                logInfo(`<p class="subtitle">${t('upload-config', { local, remote })}</p>`);
                 const result = await (clientStore.client!.uploadFile(local, remote, true));
                 if (result === true) {
-                    logInfo(t('upload-success') + '\n');
+                    logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {
                         abortRecord();
                         return;
                     }
                 } else {
-                    logInfo(t('upload-err', { err: result + '' }) + '\n');
+                    logInfo(`<p class="error">${t('upload-err', { err: result + '' })}</p>`);
                     if (abort) {
                         abortRecord();
                         return;
