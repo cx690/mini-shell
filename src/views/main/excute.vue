@@ -525,7 +525,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                 logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
-                logInfo(`<p class="subtitle">${t('upload-config', { local, remote })}</p>`);
+                logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
                 const result = await (clientStore.client!.uploadFile(local, remote, true));
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
