@@ -511,7 +511,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                     return;
                 }
                 if (code !== 0) {
-                    logInfo(`<p class="error">$t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
+                    logInfo(`<p class="error">${t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
                     excuteResult(2, exceteRecord);
                     return;
