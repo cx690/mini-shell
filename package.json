@@ -1,6 +1,5 @@
 {
   "name": "mini-shell",
-  "private": true,
   "version": "1.0.0",
   "license": "Apache-2.0",
   "main": "dist-electron/main.js",
@@ -8,6 +7,15 @@
     "name": "caixue",
     "email": "caixue233@gmail.com"
   },
+  "keywords": [
+    "shell",
+    "jinkens",
+    "execute",
+    "ssh",
+    "cmd",
+    "powershell",
+    "terminal"
+  ],
   "description": "A tool that can automate scripts (like jinkens).",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
