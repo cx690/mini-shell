@@ -16,7 +16,7 @@
     "powershell",
     "terminal"
   ],
-  "description": "A tool that can automate scripts (like jinkens).",
+  "description": "A tool that can automate scripts (like jenkins).",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "dev:f": "vite --force --host 0.0.0.0",
