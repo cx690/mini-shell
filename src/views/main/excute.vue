@@ -25,15 +25,16 @@
                 </el-popconfirm>
                 <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showUpload = true"
                     :icon="Upload">{{ t('uploadfile') }}</el-button>
-                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10" @click="state.showDownload = true"
-                    :icon="Download">{{ t('downloadfile') }}</el-button>
+                <el-button type="primary" v-if="clientStore.status === 2" class="mgL10"
+                    @click="state.showDownload = true" :icon="Download">{{ t('downloadfile') }}</el-button>
             </div>
         </template>
         <el-form :model="formData" inline>
             <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
                 @tab-change="onActiveChange">
                 <el-tab-pane label="Exce" name="Exce">
-                    <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
+                    <el-button v-show="state.currentRecord" @click="state.currentRecord = null"
+                        style="margin: 4px 10px;">
                         {{ t('Back') }}
                     </el-button>
                     <template v-if="state.currentRecord">
@@ -43,7 +44,8 @@
                     <Output ref="outputRef" v-if="state.currentRecord" />
                     <div style="padding: 24px;" v-show="!state.currentRecord">
                         <el-form-item :label="t('group-select')">
-                            <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable style="width: 160px;">
+                            <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable
+                                style="width: 160px;">
                                 <el-option v-for="(item, index) of state.groupList" :key="index" :label="item"
                                     :value="item" />
                             </el-select>
@@ -52,7 +54,8 @@
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
                                 :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup">
                             </el-select-v2>
-                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">{{ t('refresh-data') }}</el-button>
+                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">{{ t('refresh-data')
+                                }}</el-button>
                             <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell"
                                 :icon="CaretRight">
                                 {{ t('excute-script') }}
@@ -65,8 +68,8 @@
                                     </el-button>
                                 </template>
                                 <el-checkbox-group v-model="(formData.checkList as any)" class="select-shell-scripts">
-                                    <el-checkbox v-for="(item, index) of formData.selectShell.baseScripts" :label="item" :value="item"
-                                        :key="item.key">
+                                    <el-checkbox v-for="(item, index) of formData.selectShell.baseScripts" :label="item"
+                                        :value="item" :key="item.key">
                                         <el-tooltip placement="top">
                                             <span>{{ (index + 1) + '、' + shellTypeEnum[item.type] }}</span>
                                             <template #content>
@@ -84,14 +87,16 @@
                                     </el-button>
                                 </div>
                             </el-popover>
-                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell" :icon="View">{{
-                                t('view-script') }}</el-button>
+                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell"
+                                :icon="View">{{
+                                    t('view-script') }}</el-button>
                             <el-dropdown @command="openPowershell">
                                 <el-button class="mgL10">{{ t('open-local-term') }}</el-button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
                                         <el-dropdown-item command="cmd">{{ t('Open ') }}CMD</el-dropdown-item>
-                                        <el-dropdown-item command="powershell">{{ t('Open ') }}Powershell</el-dropdown-item>
+                                        <el-dropdown-item command="powershell">{{ t('Open ')
+                                            }}Powershell</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -113,15 +118,15 @@
                                     {{ t('current-shell') }}
                                 </el-radio-button>
                                 <el-radio-button label="currentGroup" value="currentGroup">{{ t('current-group')
-                                }}</el-radio-button>
+                                    }}</el-radio-button>
                                 <el-radio-button label="currentHost" value="currentHost">{{ t('current-host')
-                                }}</el-radio-button>
+                                    }}</el-radio-button>
                                 <el-radio-button label="all" value="all">{{ t('all-logs') }}</el-radio-button>
                             </el-radio-group>
                             <span class="mgL10">
                                 <el-button @click="onExport" size="small" :icon="Download">{{ t('Export') }}</el-button>
                                 <el-button type="danger" size="small" @click="onDelete" :icon="Delete">{{ t('Delete')
-                                }}</el-button>
+                                    }}</el-button>
                             </span>
                         </div>
                         <Table :data="history" @selection-change="onSelect">
@@ -183,7 +188,8 @@
                     </template>
                     <Terminal v-if="createdTerm" ref="holdTermRef" />
                 </el-tab-pane>
-                <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index" class="terminal-pane">
+                <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index"
+                    class="terminal-pane">
                     <template #label>
                         <span>{{ item.shellName }}</span>
                         <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
@@ -211,7 +217,8 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">{{ t('uploadfile') }}</el-button>
+                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">{{ t('uploadfile')
+                    }}</el-button>
                 <el-button @click="state.showUpload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
@@ -673,18 +680,22 @@ async function openPowershell(command: 'powershell' | 'cmd') {
 const shellListGroup = computed(() => {
     const groups = [{
         label: t('prefect-script'),
+        value: 'prefect-script',
         options: [] as { label: string, value: number }[]
     },
     {
         label: t('only-group'),
+        value: 'only-group',
         options: [] as { label: string, value: number }[]
     },
     {
         label: t('only-host'),
+        value: 'only-host',
         options: [] as { label: string, value: number }[]
     },
     {
         label: t('fail-script'),
+        value: 'fail-script',
         options: [] as { label: string, value: number }[]
     }];
     const host = clientStore.config?.host || '0.0.0.0';
