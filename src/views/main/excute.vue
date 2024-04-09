@@ -840,7 +840,7 @@ function onCancelColose() {
 
     .connect-status {
         display: inline-block;
-        width: 120px;
+        min-width: 120px;
     }
 }
 
