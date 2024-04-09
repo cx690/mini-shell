@@ -2,7 +2,7 @@ import { onActivated, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from 'vue-i18n';
 
-// import type { Terminal } from "xterm";
+// import type { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "xterm-addon-fit";
 // import { debounce } from ".";
 

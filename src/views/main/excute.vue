@@ -43,7 +43,7 @@
                     <Output ref="outputRef" v-if="state.currentRecord" />
                     <div style="padding: 24px;" v-show="!state.currentRecord">
                         <el-form-item :label="t('group-select')">
-                            <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable>
+                            <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable style="width: 160px;">
                                 <el-option v-for="(item, index) of state.groupList" :key="index" :label="item"
                                     :value="item" />
                             </el-select>
@@ -65,7 +65,7 @@
                                     </el-button>
                                 </template>
                                 <el-checkbox-group v-model="(formData.checkList as any)" class="select-shell-scripts">
-                                    <el-checkbox v-for="(item, index) of formData.selectShell.baseScripts" :label="item"
+                                    <el-checkbox v-for="(item, index) of formData.selectShell.baseScripts" :label="item" :value="item"
                                         :key="item.key">
                                         <el-tooltip placement="top">
                                             <span>{{ (index + 1) + '、' + shellTypeEnum[item.type] }}</span>
