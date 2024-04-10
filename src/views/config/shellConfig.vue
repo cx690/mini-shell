@@ -145,7 +145,7 @@
                                 <template v-if="base.type === 2">
                                     <el-divider v-if="index > 0" />
                                     <el-form-item :label="t('script-type')">
-                                        <el-select v-model="item.type" :placeholder="t('default-cmd')">
+                                        <el-select v-model="item.type" :placeholder="t('default-cmd')" style="width: 200px;">
                                             <el-option label="powershell" value="powershell">powershell</el-option>
                                             <el-option label="bat" value="bat">bat</el-option>
                                             <el-option label="native" value="native">native</el-option>
