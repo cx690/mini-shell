@@ -387,9 +387,7 @@ async function onUpload() {
         return;
     }
     state.showUpload = false;
-    console.time('上传')
     await (clientStore.client!.uploadFile(formData.file, formData.uploadDir));
-    console.timeEnd('上传')
 }
 
 async function onDownLoad() {
