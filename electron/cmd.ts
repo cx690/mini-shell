@@ -21,7 +21,7 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
         exec(cmd, { encoding: 'buffer', env: (typeof env === 'object' && env) ? env : {} }, (err, stdout, stderr) => {
             if (base) {
-                unlink(cmd).catch((err) => console.log(err));
+                unlink(cmd).catch((err) => console.error(err));
             }
             if (err) {
                 resolve({ code: err.code ?? 1, data: decode(stderr, 'cp936') });
