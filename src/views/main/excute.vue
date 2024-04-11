@@ -617,6 +617,7 @@ function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
         if (typeof state.activeName === 'string') return;
         if (formData.terminals.length === 0) {
             state.activeName = 'Terminal';
+            onActiveChange('Terminal');
             return;
         }
         if (targetName <= state.activeName) {
