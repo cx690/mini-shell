@@ -40,6 +40,8 @@
                     <template v-if="state.currentRecord">
                         <span>{{ t('script-name') }}：</span>
                         <span>{{ state.currentRecord.shellName }}</span>
+                        <span>{{ t('de-host') }}：</span>
+                        <span>{{ state.currentRecord.host }}</span>
                         <span class="mgL10">{{ t('excute-status') }}：</span>
                         <Status :status="state.currentRecord.status" />
                     </template>
