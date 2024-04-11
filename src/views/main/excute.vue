@@ -38,7 +38,9 @@
                         {{ t('Back') }}
                     </el-button>
                     <template v-if="state.currentRecord">
-                        <span>{{ t('excute-status') }}：</span>
+                        <span>{{ t('script-name') }}：</span>
+                        <span>{{ state.currentRecord.shellName }}</span>
+                        <span class="mgL10">{{ t('excute-status') }}：</span>
                         <Status :status="state.currentRecord.status" />
                     </template>
                     <Output ref="outputRef" v-if="state.currentRecord" />
