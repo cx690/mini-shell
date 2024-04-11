@@ -156,9 +156,9 @@ export async function exportData(text: any, option?: SaveDialogOptions, t?: Retu
     if (!res.canceled && res.filePath) {
         const status = await electronAPI.writeFile(res.filePath, text);
         if (status === true) {
-            ElMessage.success(t('file-save-success', { filePath: res.filePath }));
+            ElMessage.success(t ? t('file-save-success', { filePath: res.filePath }) : `File saved to ${res.filePath}`);
         } else {
-            ElMessage.error(t('file-save-error', { err: status + '' }));
+            ElMessage.error(t ? t('file-save-error', { err: status + '' }) : `File save failed, reson: ${status}`);
         }
         return status;
     }

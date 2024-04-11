@@ -7,9 +7,9 @@
                         :placeholder="t('enter-script-config-name')" clearable />
                 </el-form-item>
                 <el-form-item :label="t('group-name')">
-                    <el-autocomplete v-model.trim="state.formData.group" class="g-input" @keypress.enter.native="onSearch"
-                        clearable :placeholder="t('enter-group-name')" :fetch-suggestions="getGroupOpt" @select="onSearch"
-                        @clear="onSearch" />
+                    <el-autocomplete v-model.trim="state.formData.group" class="g-input"
+                        @keypress.enter.native="onSearch" clearable :placeholder="t('enter-group-name')"
+                        :fetch-suggestions="getGroupOpt" @select="onSearch" @clear="onSearch" />
                 </el-form-item>
                 <el-form-item>
                     <el-button @Click="onSearch" :icon="Search">{{ t('Search') }}</el-button>
@@ -47,8 +47,8 @@
                         :placeholder="t('enter-script-config-name')" />
                 </el-form-item>
                 <el-form-item :label="t('group-name')" prop="group">
-                    <el-autocomplete v-model.trim="state.currentRow.group" clearable :placeholder="t('enter-group-name')"
-                        :fetch-suggestions="getGroupOpt" />
+                    <el-autocomplete v-model.trim="state.currentRow.group" clearable
+                        :placeholder="t('enter-group-name')" :fetch-suggestions="getGroupOpt" />
                 </el-form-item>
                 <el-form-item :label="t('relevancy-host')" prop="host">
                     <el-autocomplete v-model.trim="state.currentRow.host" clearable :placeholder="t('default-host')"
@@ -82,8 +82,8 @@
                         <el-form-item :label="t('local-dir-var-name')" prop="localDir">
                             <el-select v-model="state.currentRow.localDir" :placeholder="t('start-d')" clearable
                                 style="width: 300px;">
-                                <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
-                                    :value="item" />
+                                <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index"
+                                    :label="item" :value="item" />
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -91,8 +91,8 @@
                         <el-form-item :label="t('remote-dir-var-name')" prop="mainPath">
                             <el-select v-model="state.currentRow.mainPath" :placeholder="t('upload-d')" clearable
                                 style="width: 300px;">
-                                <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index" :label="item"
-                                    :value="item" />
+                                <el-option v-for="(item, index) in state.parseEnvVarOpt" :key="item + index"
+                                    :label="item" :value="item" />
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -145,7 +145,8 @@
                                 <template v-if="base.type === 2">
                                     <el-divider v-if="index > 0" />
                                     <el-form-item :label="t('script-type')">
-                                        <el-select v-model="item.type" :placeholder="t('default-cmd')" style="width: 200px;">
+                                        <el-select v-model="item.type" :placeholder="t('default-cmd')"
+                                            style="width: 200px;">
                                             <el-option label="powershell" value="powershell">powershell</el-option>
                                             <el-option label="bat" value="bat">bat</el-option>
                                             <el-option label="native" value="native">native</el-option>
@@ -158,8 +159,8 @@
                                             clearable :spellcheck="false" />
                                     </el-form-item>
                                 </template>
-                                <el-form-item :prop="`baseScripts.${num}.baseScripts.${index}.value`" :rules="scriptRules"
-                                    :label="t('script-code')">
+                                <el-form-item :prop="`baseScripts.${num}.baseScripts.${index}.value`"
+                                    :rules="scriptRules" :label="t('script-code')">
                                     <el-row class="row-content" :gutter="8">
                                         <el-col :span="20">
                                             <el-input type="textarea" :autosize="{ minRows: 2 }" v-model="item.value"
@@ -404,7 +405,7 @@ function onExport() {
     const text = JSON.stringify({
         shellList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
-    exportData(text, { defaultPath: 'shellList' });
+    exportData(text, { defaultPath: 'shellList' }, t);
 }
 
 async function delItem(id: number | number[]) {
@@ -456,7 +457,7 @@ async function onConfim() {
             request = objectStore.add(rest);
         }
         request.onsuccess = () => {
-            ElMessage.success('操作成功！');
+            ElMessage.success(t('op-success'));
             getTableData();
             state.showAdd = false;
         };
@@ -481,14 +482,14 @@ function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
         try {
             env = JSON.parse(row.envVar) || {};
         } catch (err) {
-            ElMessage.error('脚本变量配置设置错误！');
+            ElMessage.error(t('var-json-error'));
             return;
         }
     } else {
         env = row.envVar;
     }
     if (!row.baseScripts?.length) {
-        ElMessage.error('请设置脚本后查看！');
+        ElMessage.error(t('view-after-set'));
         return;
     };
     state.shellShow = true;
@@ -503,7 +504,7 @@ function rowKey(row: ShellListRecoed) {
     return (row.id || row.uuid) + '';
 }
 </script>
-<style lang="less" scoped >
+<style lang="less" scoped>
 .multi-row {
     width: 100%;
     min-width: 900px;

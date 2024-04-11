@@ -39,8 +39,8 @@
             </el-table-column>
         </Table>
         <el-dialog v-if="state.showAdd"
-            :title="state.currentRow?.id ? t('edit-connection-config') : t('add-connection-config')" v-model="state.showAdd"
-            width="600px" :close-on-click-modal="false">
+            :title="state.currentRow?.id ? t('edit-connection-config') : t('add-connection-config')"
+            v-model="state.showAdd" width="600px" :close-on-click-modal="false">
             <el-form ref="addForm" :model="state.currentRow" :rules="rules" label-width="100px">
                 <el-form-item :label="t('Name')" prop="name">
                     <el-input v-model.trim="state.currentRow.name" :placeholder="t('enter-name')" clearable />
@@ -55,11 +55,12 @@
                     <el-input v-model.trim="state.currentRow.username" :placeholder="t('enter-username')" clearable />
                 </el-form-item>
                 <el-form-item :label="t('Password')" prop="password">
-                    <el-input type.trim="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
-                        clearable />
+                    <el-input type.trim="password" v-model="state.currentRow.password"
+                        :placeholder="t('enter-password')" clearable />
                 </el-form-item>
                 <el-form-item :label="t('desc')" prop="desc">
-                    <el-input v-model="state.currentRow.desc" :placeholder="t('enter-desc')" :maxLength="20" clearable />
+                    <el-input v-model="state.currentRow.desc" :placeholder="t('enter-desc')" :maxLength="20"
+                        clearable />
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -173,7 +174,7 @@ function onExport() {
     const text = JSON.stringify({
         serverList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
-    exportData(text, { defaultPath: 'serverList' });
+    exportData(text, { defaultPath: 'serverList' }, t);
 }
 
 async function delItem(id: number | number[]) {
@@ -234,7 +235,7 @@ function activeClassName({ row }: { row: ServerListRecord }) {
     return '';
 }
 </script>
-<style lang="less" scoped >
+<style lang="less" scoped>
 :deep(.active) {
     color: var(--el-color-danger);
 }

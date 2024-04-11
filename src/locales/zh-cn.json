@@ -220,5 +220,8 @@
   "connect-lose-term": "连接未建立，终端不可用",
   "copyed": "已复制到剪切板",
   "Back-main": "返回首页",
-  "404-title": "对不起，您要查看的页面不存在！"
+  "404-title": "对不起，您要查看的页面不存在！",
+  "op-success": "操作成功",
+  "var-json-error": "脚本变量配置设置错误！",
+  "view-after-set": "请设置脚本后查看！"
 }

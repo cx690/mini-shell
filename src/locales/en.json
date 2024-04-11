@@ -220,5 +220,8 @@
   "connect-lose-term": "The connection is not unavailable",
   "copyed": "Copyed",
   "Back-main": "Back",
-  "404-title": "Sorry, the page you want to view does not exist!"
+  "404-title": "Sorry, the page you want to view does not exist!",
+  "op-success": "Operate successfully",
+  "var-json-error": "JSON parse error!",
+  "view-after-set": "Please set scripts!"
 }

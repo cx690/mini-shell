@@ -769,7 +769,7 @@ function onExport() {
     const text = JSON.stringify({
         excuteList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
-    exportData(text, { defaultPath: 'logs' });
+    exportData(text, { defaultPath: 'logs' }, t);
 }
 
 async function delItem(id: number | number[]) {
