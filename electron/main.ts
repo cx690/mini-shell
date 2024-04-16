@@ -11,11 +11,11 @@ if (process.env.NODE_ENV === 'development') {
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();//始终阻止第二实例
+    process.env.NODE_ENV !== 'production' && console.log(`\x1B[33mCan't create second instance! Please exit this instance and try again.\x1B[0m`);
 } else {
     app.on('second-instance', () => {
         // 有人试图运行第二个实例，实例中的浏览器不可以对相同的indexDB中数据库进行操作
         createWindow();
-        process.env.NODE_ENV !== 'production' && console.log(`\x1B[33mCan't create second instance! Please exit this instance and try again.\x1B[0m`);
     })
 
     app.whenReady().then(() => {
