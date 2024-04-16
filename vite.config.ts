@@ -68,7 +68,7 @@ export default defineConfig({
     'process.env.version': JSON.stringify(version),
   },
   build: {
-    target: ['chrome122'],
+    target: ['chrome124'],
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1024,//超过1mb警告
     rollupOptions: {

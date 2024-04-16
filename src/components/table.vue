@@ -8,7 +8,7 @@
 </template>
  
 <script setup lang="ts">
-import { TableProps } from 'element-plus/es/components';
+import type { TableProps } from 'element-plus/es/components';
 import { computed, reactive, useAttrs } from 'vue';
 
 defineOptions({
