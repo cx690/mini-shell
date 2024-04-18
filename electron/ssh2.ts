@@ -124,52 +124,48 @@ function getClient() {
                         status: 1,
                     })
 
-                    await mkRemotedir(remoteDir);//创建远程文件上传根目录
-                    const tasks = uploadPathList.map(({ base, id, dir }) => () => {
-                        return new Promise<true | Error>(async (rst, reject) => {
-                            const gapDir = path.relative(localDir, dir);
-                            const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
-                            if (mkstatus !== true) {
+                    await mkRemotedir(remoteDir).catch(err => { sftp.end(); throw err; });//创建远程文件上传根目录
+                    const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
+                        const gapDir = path.relative(localDir, dir);
+                        const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
+                        if (mkstatus !== true) {
+                            emit({
+                                successNum,
+                                errorNum,
+                                total,
+                                status: 3,
+                                message: mkstatus + '',
+                            })
+                            throw mkstatus;
+                        } else {
+                            const remotePath = path.join(remoteDir, gapDir, base);
+                            const status = await fastPut(sftp, id, remotePath);
+                            if (status !== true) {
+                                errorNum++;
                                 emit({
                                     successNum,
                                     errorNum,
                                     total,
                                     status: 3,
-                                    message: mkstatus + '',
-                                })
-                                reject(mkstatus);
-                            } else {
-                                const remotePath = path.join(remoteDir, gapDir, base);
-                                const status = await fastPut(sftp, id, remotePath);
-                                if (status !== true) {
-                                    errorNum++;
-                                    reject(status);
-                                } else {
-                                    successNum++;
-                                }
-                                emit({
-                                    successNum,
-                                    errorNum,
-                                    total,
-                                    status: (successNum + errorNum) === total ? 2 : 1,
                                     message: status + '',
                                 })
-                                rst(status);
+                                throw status;
+                            } else {
+                                successNum++;
                             }
-                        })
-                    });
-                    try {
-                        const errs = (await parallelTask(tasks)).filter(item => item !== true) as Error[];
-                        if (errs.length) {
-                            resolve(errs[0]);
-                            return;
+                            emit({
+                                successNum,
+                                errorNum,
+                                total,
+                                status: (successNum + errorNum) === total ? 2 : 1,
+                                message: status + '',
+                            })
+                            return status;
                         }
-                        resolve(true);
-                    } catch (err) {
-                        resolve(err as Error);
-                    } finally {
+                    });
+                    await parallelTask(tasks).finally(() => {
                         sftp.end();
-                    }
+                    })
                 });
             }).catch((err: Error) => err);
             return status;
@@ -239,7 +235,7 @@ async function mkRemotedir(client: Client, dir: string) {
 
 async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string) {
     return new Promise<true | Error>((resolve) => {
-        sftp.fastPut(localPath, remotePath.replaceAll(/\\/g, '/'), {}, function (err) {
+        sftp.fastPut(localPath, remotePath.replaceAll(/\\/g, '/'), function (err) {
             if (err) {
                 console.error(err);
                 resolve(err);

@@ -34,7 +34,7 @@ let running = false;
 export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCount = 10) {
     const source = [...tasks];
     const PInfo = withResolvers<T[]>();
-    const taskFn = () => new Promise(async (resolve) => {
+    const taskFn = async () => {
         const list: T[] = [];
         async function excuteTask() {
             const task = tasks.shift();
@@ -52,9 +52,9 @@ export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCoun
             return true;
         }
         await Promise.all(tasks.slice(0, maxCount).map(() => excuteTask()));
-        resolve(list);
         PInfo.resolve(list);
-    })
+        return list;
+    }
     queue.push(taskFn);
     startTask();
     return await PInfo.promise;
