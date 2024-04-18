@@ -176,6 +176,7 @@ function getClient() {
                     await parallelTask(tasks).finally(() => {
                         sftp.end();
                     })
+                    resolve(true);
                 });
             }).catch((err: Error) => err);
             return status;
