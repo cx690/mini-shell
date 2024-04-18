@@ -4277,10 +4277,10 @@ vite-plugin-electron@^0.28.4:
   resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.28.4.tgz#ce06f8626b76890b7e6883a26763dee1d87d1b3f"
   integrity sha512-OcWQQZk1ygkG4g/nj6cQ0zMu5q9yPcxEtDNcY8xagWqjQ3PxZbWuf1VyElZSo16GqPa71vBzoz+XAukia/TgNQ==
 
-vite@^5.2.8:
-  version "5.2.8"
-  resolved "https://registry.npmmirror.com/vite/-/vite-5.2.8.tgz#a99e09939f1a502992381395ce93efa40a2844aa"
-  integrity sha512-OyZR+c1CE8yeHw5V5t59aXsUPPVTHMDjEZz8MgguLL/Q7NblxhZUlTu9xSPqlsUO/y+X7dlU05jdhvyycD55DA==
+vite@^5.2.9:
+  version "5.2.9"
+  resolved "https://registry.npmmirror.com/vite/-/vite-5.2.9.tgz#cd9a356c6ff5f7456c09c5ce74068ffa8df743d9"
+  integrity sha512-uOQWfuZBlc6Y3W/DTuQ1Sr+oIXWvqljLvS881SVmAj00d5RdgShLcuXWxseWPd4HXwiYBFW/vXHfKFeqj9uQnw==
   dependencies:
     esbuild "^0.20.1"
     postcss "^8.4.38"

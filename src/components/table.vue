@@ -6,7 +6,7 @@
         v-model:current-page="state.currentPage" :total="props.data ? props.data.length : 0"
         layout="sizes, prev, pager, next, jumper, ->, total" />
 </template>
- 
+
 <script setup lang="ts">
 import type { TableProps } from 'element-plus/es/components';
 import { computed, reactive, useAttrs } from 'vue';
@@ -22,16 +22,15 @@ const state = reactive({
 const attrs = useAttrs();
 const props = defineProps<TableProps<any>>();
 
-const data = computed(() => {
-    const { data } = props;
-    const { currentPage, pageSize } = state;
-    if (data) {
-        return data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-    }
-    return data;
-})
-
 const tableProps = computed(() => {
-    return Object.assign({}, attrs, props, { data: data.value, fit: props.fit === false, showHeader: props.showHeader === false });//存在两个数据值不一致
+    let data: any[];
+    const { data: source } = props;
+    const { currentPage, pageSize } = state;
+    if (source) {
+        data = source.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    } else {
+        data = source;
+    }
+    return Object.assign({}, attrs, props, { data, fit: props.fit === false, showHeader: props.showHeader === false });//存在两个数据值不一致
 })
 </script>
