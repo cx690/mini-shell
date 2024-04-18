@@ -312,8 +312,8 @@ type ShellItem = {
 
 const formData = reactive({
     cmd: '',
-    file: 'D:\\workspace\\yaosu\\data-assets-enterprise-feature\\dist',
-    uploadDir: '/root/aa',
+    file: '',
+    uploadDir: '/root',
     terminals: [] as ShellItem[],
     selectShell: null as null | ShellListRecoed | undefined,
     selectShellCode: null as any,
