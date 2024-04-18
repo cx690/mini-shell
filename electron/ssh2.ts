@@ -124,7 +124,17 @@ function getClient() {
                         status: 1,
                     })
 
-                    await mkRemotedir(remoteDir).catch(err => { sftp.end(); throw err; });//创建远程文件上传根目录
+                    await mkRemotedir(remoteDir).catch(err => {
+                        sftp.end();
+                        emit({
+                            successNum,
+                            errorNum,
+                            total,
+                            status: 3,
+                            message: err + '',
+                        })
+                        throw err;
+                    });//创建远程文件上传根目录
                     const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
                         const gapDir = path.relative(localDir, dir);
                         const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
