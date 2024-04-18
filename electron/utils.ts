@@ -40,7 +40,10 @@ export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCoun
             const task = tasks.shift();
             if (task) {
                 const i = source.indexOf(task);
-                const res = await task();
+                const res = await task().catch(err => {
+                    PInfo.reject(err);
+                    throw err;//终止当前上传
+                });
                 list[i] = res;
                 if (tasks.length) {
                     await excuteTask();
