@@ -24,6 +24,7 @@ const electronAPI = {
         node: process.versions.node,
         electron: process.versions.electron,
     },
+    platform: process.platform,
     /** 在默认浏览器中打开外部链接 */
     openExternal: (url: string, options?: OpenExternalOptions) => ipcRenderer.invoke('open-external', url, options) as Promise<void>,
 }

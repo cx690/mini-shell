@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { decode } from 'iconv-lite';
 import path from 'path';
 import fs from 'fs';
-import { writeFile, unlink } from 'fs/promises'
+import { writeFile, unlink } from 'fs/promises';
 
 const temp = path.resolve(process.cwd(), 'temp');
 export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native', env = {} as Record<string, any>) {
