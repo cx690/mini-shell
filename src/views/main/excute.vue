@@ -266,6 +266,7 @@ import dayjs from 'dayjs';
 import useWin from '@/store/useWin';
 import Status from './status.vue';
 import { useI18n } from 'vue-i18n';
+const isMac = electronAPI.platform === 'darwin';
 const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
 const StatusEnum = useStatusEnum();
@@ -508,7 +509,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
                 const { type } = excuteItem;
-                logInfo(`<p class="subtitle">${t('excute-script-type', { type: type ? type : 'powershell' })}</p><pre class="cmd">${cmd}</pre>`);
+                logInfo(`<p class="subtitle">${t('excute-script-type', { type: isMac ? (type ? (type === 'bat' ? 'sh' : type) : 'native') : (type ? type : 'powershell') })}</p><pre class="cmd">${cmd}</pre>`);
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
                     logInfo(`<p class="env">${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);

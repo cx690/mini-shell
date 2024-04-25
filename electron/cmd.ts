@@ -5,18 +5,31 @@ import fs from 'fs';
 import { writeFile, unlink } from 'fs/promises';
 
 const temp = path.resolve(process.cwd(), 'temp');
-export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native', env = {} as Record<string, any>) {
-    let cmd = `powershell -Command "${command}"`;
+export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native' | 'sh', env = {} as Record<string, any>) {
+    let cmd = command;
     let base = '';
-    if (type === 'bat') {
-        if (!fs.existsSync(temp)) {
-            fs.mkdirSync(temp);
+    if (process.platform === 'darwin') {
+        if (type === 'bat' || type === 'sh') {
+            if (!fs.existsSync(temp)) {
+                fs.mkdirSync(temp);
+            }
+            base = `${Date.now()}${Math.random()}.sh`;
+            cmd = path.resolve(temp, base);
+            await writeFile(cmd, command);
         }
-        base = `${Date.now()}${Math.random()}.bat`;
-        cmd = path.resolve(temp, base);
-        await writeFile(cmd, command);
-    } else if (type === 'native') {
-        cmd = command;
+    } else {
+        if (type === 'bat' || type === 'sh') {
+            if (!fs.existsSync(temp)) {
+                fs.mkdirSync(temp);
+            }
+            base = `${Date.now()}${Math.random()}.bat`;
+            cmd = path.resolve(temp, base);
+            await writeFile(cmd, command);
+        } else if (type === 'native') {
+            cmd = command;
+        } else {
+            cmd = `powershell -Command "${command}"`;
+        }
     }
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
         exec(cmd, { encoding: 'buffer', env: (typeof env === 'object' && env) ? env : {} }, (err, stdout, stderr) => {

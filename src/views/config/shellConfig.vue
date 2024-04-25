@@ -147,8 +147,10 @@
                                     <el-form-item :label="t('script-type')">
                                         <el-select v-model="item.type" :placeholder="t('default-cmd')"
                                             style="width: 200px;">
-                                            <el-option label="powershell" value="powershell">powershell</el-option>
-                                            <el-option label="bat" value="bat">bat</el-option>
+                                            <el-option label="powershell" v-if="!isMac"
+                                                value="powershell">powershell</el-option>
+                                            <el-option label="bat" v-if="!isMac" value="bat">bat</el-option>
+                                            <el-option label="sh" v-if="isMac" value="sh">sh</el-option>
                                             <el-option label="native" value="native">native</el-option>
                                         </el-select>
                                     </el-form-item>
@@ -503,6 +505,8 @@ function onSelect(rows: ShellListRecoed[]) {
 function rowKey(row: ShellListRecoed) {
     return (row.id || row.uuid) + '';
 }
+
+const isMac = electronAPI.platform === 'darwin';
 </script>
 <style lang="less" scoped>
 .multi-row {
