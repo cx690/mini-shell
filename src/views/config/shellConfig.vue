@@ -155,9 +155,17 @@
                                         </el-select>
                                     </el-form-item>
                                     <el-form-item :label="t('env-var')"
-                                        :prop="`baseScripts.${num}.baseScripts.${index}.env`" :rules="envRules">
+                                        :prop="`baseScripts.${num}.baseScripts.${index}.mergeEnv`">
+                                        <el-radio-group :model-value="!!item.mergeEnv"
+                                            @update:model-value="(value) => item.mergeEnv = !!value">
+                                            <el-radio :label="false">{{ t('env-only') }}</el-radio>
+                                            <el-radio :label="true">{{ t('env-merge') }}</el-radio>
+                                        </el-radio-group>
+                                    </el-form-item>
+                                    <el-form-item label=" " :prop="`baseScripts.${num}.baseScripts.${index}.env`"
+                                        :rules="envRules">
                                         <el-input type="textarea" :autosize="{ minRows: 1 }" v-model="item.env"
-                                            style="word-break: break-all;width: 700px;" :placeholder="envPlacehold"
+                                            style="word-break: break-all;width: 900px;" :placeholder="envPlacehold"
                                             clearable :spellcheck="false" />
                                     </el-form-item>
                                 </template>
@@ -257,7 +265,7 @@ const state = reactive({
     selects: [] as ShellListRecoed[],
     showInset: false,
 })
-const validaterJSON = (rule: any, value: string, callback: any) => {
+function validaterJSON(rule: any, value: string, callback: any) {
     try {
         JSON.parse(value); // 尝试解析 JSON
         callback(); // 解析成功，调用 callback() 表示验证通过
@@ -302,7 +310,7 @@ const configPleaseHold = computed(() => `${t('enter-json')}：
     "mainPath": "/root/apps"
 }`);
 
-const envPlacehold = computed(() => `${t('enter-json')}：{"NODE_ENV": "production"}`);
+const envPlacehold = computed(() => `${t('enter-json')}：{"NODE_ENV": "production","JAVA_HOME": "C:\\Java\\jdk1.8.0_351"}`);
 
 onMounted(onSearch);
 

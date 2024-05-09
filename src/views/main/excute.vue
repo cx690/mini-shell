@@ -94,7 +94,7 @@
                             <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell"
                                 :icon="View">{{
                                     t('view-script') }}</el-button>
-                            <el-dropdown @command="openPowershell">
+                            <el-dropdown @command="openPowershell" v-if="isWin32">
                                 <el-button class="mgL10">{{ t('open-local-term') }}</el-button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
@@ -266,6 +266,7 @@ import useWin from '@/store/useWin';
 import Status from './status.vue';
 import { useI18n } from 'vue-i18n';
 const isMac = electronAPI.platform === 'darwin';
+const isWin32 = electronAPI.platform === 'win32';
 const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
 const StatusEnum = useStatusEnum();
@@ -507,13 +508,13 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
             logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
             for (const excuteItem of item.baseScripts) {
                 const cmd = formatterShell(envVar, excuteItem.value);
-                const { type } = excuteItem;
+                const { type, mergeEnv } = excuteItem;
                 logInfo(`<p class="subtitle">${t('excute-script-type', { type: isMac ? (type ? (type === 'bat' ? 'sh' : type) : 'native') : (type ? type : 'powershell') })}</p><pre class="cmd">${cmd}</pre>`);
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
                     logInfo(`<p class="env">${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
                 }
-                const { code, data } = await electronAPI.execCmd(cmd, type, env);
+                const { code, data } = await electronAPI.execCmd(cmd, type, { env, mergeEnv });
                 logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
                 if (abort) {
                     abortRecord();

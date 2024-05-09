@@ -223,5 +223,7 @@
   "404-title": "Sorry, the page you want to view does not exist!",
   "op-success": "Operate successfully",
   "var-json-error": "JSON parse error!",
-  "view-after-set": "Please set scripts!"
+  "view-after-set": "Please set scripts!",
+  "env-only": "Use only the following environment variables",
+  "env-merge": "Merge the following environment variables (include system environment variables)"
 }

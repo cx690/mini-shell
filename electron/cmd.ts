@@ -5,7 +5,8 @@ import fs from 'fs';
 import { writeFile, unlink } from 'fs/promises';
 
 const temp = path.resolve(process.cwd(), 'temp');
-export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native' | 'sh', env = {} as Record<string, any>) {
+export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
+export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native' | 'sh', options?: OptionsType) {
     let cmd = command;
     let base = '';
     if (process.platform === 'darwin') {
@@ -31,8 +32,16 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
             cmd = `powershell -Command "${command}"`;
         }
     }
+    if (!options) {
+        options = {
+            env: {},
+            mergeEnv: false,
+        };
+    }
+    const env = (typeof options.env === 'object' && options.env) ? options.env : {};
+    const targetEnv = options.mergeEnv ? { ...process.env, ...env } : env;
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
-        exec(cmd, { encoding: 'buffer', env: (typeof env === 'object' && env) ? env : {} }, (err, stdout, stderr) => {
+        exec(cmd, { encoding: 'buffer', env: targetEnv }, (err, stdout, stderr) => {
             if (base) {
                 unlink(cmd).catch((err) => console.error(err));
             }

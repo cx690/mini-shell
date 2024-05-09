@@ -29,6 +29,8 @@ export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
         key: string, value: string,
         type?: 'powershell' | 'bat' | 'native',
         env?: T extends 'edit' ? string : Record<string, any>,
+        /** 是否合并设置的环境变量 */
+        mergeEnv?: boolean
     }[],
     localFile?: string,
     remoteDir?: string,
