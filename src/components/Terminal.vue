@@ -34,8 +34,9 @@ onMounted(() => {
         }
     })
     term.onSelectionChange(() => {
-        if (term.getSelection()) {
-            window.document.execCommand('copy');
+        const text = term.getSelection();
+        if (text) {
+            window.navigator.clipboard.writeText(text);
             ElMessage.success(t('copyed'));
         }
     })
