@@ -79,7 +79,7 @@ function onClick() {
 <style lang="less" scoped>
 .terminal {
     width: 100%;
-    height: 740px;
+    min-height: 740px;
     background: #000;
     overflow: hidden;
     padding: 5px 0 0 11px;

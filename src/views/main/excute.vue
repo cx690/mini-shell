@@ -29,24 +29,24 @@
                     @click="state.showDownload = true" :icon="Download">{{ t('downloadfile') }}</el-button>
             </div>
         </template>
-        <el-form :model="formData" inline>
-            <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
-                @tab-change="onActiveChange">
-                <el-tab-pane label="Exce" name="Exce">
-                    <el-button v-show="state.currentRecord" @click="state.currentRecord = null"
-                        style="margin: 4px 10px;">
-                        {{ t('Back') }}
-                    </el-button>
-                    <template v-if="state.currentRecord">
-                        <span>{{ t('script-name') }}：</span>
-                        <span>{{ state.currentRecord.shellName }}</span>
-                        <span class="mgL10">{{ t('de-host') }}：</span>
-                        <span>{{ state.currentRecord.host }}</span>
-                        <span class="mgL10">{{ t('excute-status') }}：</span>
-                        <Status :status="state.currentRecord.status" />
-                    </template>
-                    <Output ref="outputRef" v-if="state.currentRecord" />
-                    <div style="padding: 24px;" v-show="!state.currentRecord">
+
+        <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
+            @tab-change="onActiveChange">
+            <el-tab-pane label="Exce" name="Exce">
+                <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
+                    {{ t('Back') }}
+                </el-button>
+                <template v-if="state.currentRecord">
+                    <span>{{ t('script-name') }}：</span>
+                    <span>{{ state.currentRecord.shellName }}</span>
+                    <span class="mgL10">{{ t('de-host') }}：</span>
+                    <span>{{ state.currentRecord.host }}</span>
+                    <span class="mgL10">{{ t('excute-status') }}：</span>
+                    <Status :status="state.currentRecord.status" />
+                </template>
+                <Output ref="outputRef" v-if="state.currentRecord" />
+                <div style="padding: 24px;" v-show="!state.currentRecord">
+                    <el-form :model="formData" inline>
                         <el-form-item :label="t('group-select')">
                             <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable
                                 style="width: 160px;">
@@ -115,95 +115,94 @@
                             <el-button class="mgL10" v-if="win.close" @click="onCancelColose" :icon="Remove">{{
                                 t('cancel-close-windows-btn') }}</el-button>
                         </el-form-item>
-                        <div class="table-title">
-                            {{ t('excute-logs') }}：
-                            <el-radio-group v-model="state.hostType" size="small">
-                                <el-radio-button label="currentShell" value="currentShell">
-                                    {{ t('current-shell') }}
-                                </el-radio-button>
-                                <el-radio-button label="currentGroup" value="currentGroup">{{ t('current-group')
-                                    }}</el-radio-button>
-                                <el-radio-button label="currentHost" value="currentHost">{{ t('current-host')
-                                    }}</el-radio-button>
-                                <el-radio-button label="all" value="all">{{ t('all-logs') }}</el-radio-button>
-                            </el-radio-group>
-                            <span class="mgL10">
-                                <el-button @click="onExport" size="small" :icon="Download">{{ t('Export') }}</el-button>
-                                <el-button type="danger" size="small" @click="onDelete" :icon="Delete">{{ t('Delete')
-                                    }}</el-button>
-                            </span>
-                        </div>
-                        <Table :data="history" @selection-change="onSelect">
-                            <el-table-column type="selection" width="55" :selectable="selectable" />
-                            <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
-                            <el-table-column prop="host" :label="t('de-host')" width="120px;" />
-                            <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
-                            <el-table-column prop="excuteType" :label="t('excuted-script')" width="140px"
-                                show-overflow-tooltip>
-                                <template #default="{ row }">
-                                    {{ !row.excuteType ? t('All') : row.excuteType === 1 ? t('part') : row.excuteType }}
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="startTime" :label="t('excute-start-time')" width="170px;" />
-                            <el-table-column prop="endTime" :label="t('excute-end-time')" width="170px;">
-                                <template #default="{ row }">
-                                    <span v-if="row.endTime">{{ utilTime(row.endTime) }}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="time" :label="t('excute-duration')" width="160px">
-                                <template #default="{ row }">
-                                    <span v-if="row.startTime && row.endTime">
-                                        {{ computedTime(row.startTime, row.endTime) }}
-                                    </span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="status" :label="t('Status')" width="100px">
-                                <template #default="{ row }">
-                                    <Status :status="row.status" />
-                                </template>
-                            </el-table-column>
-                            <el-table-column :label="t('Action')">
-                                <template #default="{ row }">
-                                    <el-link type="primary" @click="onShowLogs(row)">{{ t('View') }}</el-link>
-                                    <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0"
-                                        @confirm="cancelExte(row.uuid)">
-                                        <template #reference>
-                                            <el-link type="danger">{{ t('cancel-excute') }}</el-link>
-                                        </template>
-                                    </el-popconfirm>
-                                    <el-popconfirm :title="t('confirm-delete-item')" v-if="row.id"
-                                        @confirm="delItem(row.id)">
-                                        <template #reference>
-                                            <el-link type="danger">{{ t('Delete') }}</el-link>
-                                        </template>
-                                    </el-popconfirm>
-                                </template>
-                            </el-table-column>
-                        </Table>
+                    </el-form>
+                    <div class="table-title">
+                        {{ t('excute-logs') }}：
+                        <el-radio-group v-model="state.hostType" size="small">
+                            <el-radio-button label="currentShell" value="currentShell">
+                                {{ t('current-shell') }}
+                            </el-radio-button>
+                            <el-radio-button label="currentGroup" value="currentGroup">{{ t('current-group')
+                                }}</el-radio-button>
+                            <el-radio-button label="currentHost" value="currentHost">{{ t('current-host')
+                                }}</el-radio-button>
+                            <el-radio-button label="all" value="all">{{ t('all-logs') }}</el-radio-button>
+                        </el-radio-group>
+                        <span class="mgL10">
+                            <el-button @click="onExport" size="small" :icon="Download">{{ t('Export') }}</el-button>
+                            <el-button type="danger" size="small" @click="onDelete" :icon="Delete">{{ t('Delete')
+                                }}</el-button>
+                        </span>
                     </div>
-                </el-tab-pane>
-                <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane">
-                    <template #label>
-                        <span>Terminal</span>
-                        <el-icon class="refresh-icon" @click="initShell()"
-                            v-if="createdTerm && state.activeName === 'Terminal'">
-                            <Refresh />
-                        </el-icon>
-                    </template>
-                    <Terminal v-if="createdTerm" ref="holdTermRef" />
-                </el-tab-pane>
-                <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index"
-                    class="terminal-pane">
-                    <template #label>
-                        <span>{{ item.shellName }}</span>
-                        <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
-                            <Refresh />
-                        </el-icon>
-                    </template>
-                    <Terminal ref="terminalsRef" init />
-                </el-tab-pane>
-            </el-tabs>
-        </el-form>
+                    <Table :data="history" @selection-change="onSelect">
+                        <el-table-column type="selection" width="55" :selectable="selectable" />
+                        <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
+                        <el-table-column prop="host" :label="t('de-host')" width="120px;" />
+                        <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
+                        <el-table-column prop="excuteType" :label="t('excuted-script')" width="140px"
+                            show-overflow-tooltip>
+                            <template #default="{ row }">
+                                {{ !row.excuteType ? t('All') : row.excuteType === 1 ? t('part') : row.excuteType }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="startTime" :label="t('excute-start-time')" width="170px;" />
+                        <el-table-column prop="endTime" :label="t('excute-end-time')" width="170px;">
+                            <template #default="{ row }">
+                                <span v-if="row.endTime">{{ utilTime(row.endTime) }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="time" :label="t('excute-duration')" width="160px">
+                            <template #default="{ row }">
+                                <span v-if="row.startTime && row.endTime">
+                                    {{ computedTime(row.startTime, row.endTime) }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="status" :label="t('Status')" width="100px">
+                            <template #default="{ row }">
+                                <Status :status="row.status" />
+                            </template>
+                        </el-table-column>
+                        <el-table-column :label="t('Action')">
+                            <template #default="{ row }">
+                                <el-link type="primary" @click="onShowLogs(row)">{{ t('View') }}</el-link>
+                                <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0"
+                                    @confirm="cancelExte(row.uuid)">
+                                    <template #reference>
+                                        <el-link type="danger">{{ t('cancel-excute') }}</el-link>
+                                    </template>
+                                </el-popconfirm>
+                                <el-popconfirm :title="t('confirm-delete-item')" v-if="row.id"
+                                    @confirm="delItem(row.id)">
+                                    <template #reference>
+                                        <el-link type="danger">{{ t('Delete') }}</el-link>
+                                    </template>
+                                </el-popconfirm>
+                            </template>
+                        </el-table-column>
+                    </Table>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane">
+                <template #label>
+                    <span>Terminal</span>
+                    <el-icon class="refresh-icon" @click="initShell()"
+                        v-if="createdTerm && state.activeName === 'Terminal'">
+                        <Refresh />
+                    </el-icon>
+                </template>
+                <Terminal v-if="createdTerm" ref="holdTermRef" />
+            </el-tab-pane>
+            <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index" class="terminal-pane">
+                <template #label>
+                    <span>{{ item.shellName }}</span>
+                    <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
+                        <Refresh />
+                    </el-icon>
+                </template>
+                <Terminal ref="terminalsRef" init />
+            </el-tab-pane>
+        </el-tabs>
         <el-dialog v-model="state.shellShow" :title="t('format-script-detail')" width="1000px" draggable>
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
@@ -874,7 +873,6 @@ function onCancelColose() {
 }
 
 .terminal-pane {
-    height: 740px;
     width: 100%;
 }
 
