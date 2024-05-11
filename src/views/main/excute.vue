@@ -58,8 +58,9 @@
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
                                 :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup">
                             </el-select-v2>
-                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">{{ t('refresh-data')
-                                }}</el-button>
+                            <el-button class="mgL10" @click="reFresh" :icon="Refresh">
+                                {{ t('refresh-data') }}
+                            </el-button>
                             <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell"
                                 :icon="CaretRight">
                                 {{ t('excute-script') }}
@@ -91,16 +92,17 @@
                                     </el-button>
                                 </div>
                             </el-popover>
-                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell"
-                                :icon="View">{{
-                                    t('view-script') }}</el-button>
+                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell" :icon="View">
+                                {{ t('view-script') }}
+                            </el-button>
                             <el-dropdown @command="openPowershell" v-if="isWin32">
                                 <el-button class="mgL10">{{ t('open-local-term') }}</el-button>
                                 <template #dropdown>
                                     <el-dropdown-menu>
                                         <el-dropdown-item command="cmd">{{ t('Open ') }}CMD</el-dropdown-item>
-                                        <el-dropdown-item command="powershell">{{ t('Open ')
-                                            }}Powershell</el-dropdown-item>
+                                        <el-dropdown-item command="powershell">
+                                            {{ t('Open ') }}Powershell
+                                        </el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -112,8 +114,9 @@
                                     </el-button>
                                 </template>
                             </el-popconfirm>
-                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose" :icon="Remove">{{
-                                t('cancel-close-windows-btn') }}</el-button>
+                            <el-button class="mgL10" v-if="win.close" @click="onCancelColose" :icon="Remove">
+                                {{ t('cancel-close-windows-btn') }}
+                            </el-button>
                         </el-form-item>
                     </el-form>
                     <div class="table-title">
@@ -130,8 +133,9 @@
                         </el-radio-group>
                         <span class="mgL10">
                             <el-button @click="onExport" size="small" :icon="Download">{{ t('Export') }}</el-button>
-                            <el-button type="danger" size="small" @click="onDelete" :icon="Delete">{{ t('Delete')
-                                }}</el-button>
+                            <el-button type="danger" size="small" @click="onDelete" :icon="Delete">
+                                {{ t('Delete') }}
+                            </el-button>
                         </span>
                     </div>
                     <Table :data="history" @selection-change="onSelect">
@@ -220,8 +224,9 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">{{ t('uploadfile')
-                    }}</el-button>
+                <el-button type="primary" @click="onUpload" :loading="state.uploadLoading">
+                    {{ t('uploadfile') }}
+                </el-button>
                 <el-button @click="state.showUpload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
