@@ -12,7 +12,7 @@ const electronAPI = {
     switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
-    /** 在powershell中执行代码 */
+    /** 本地命令行执行代码 */
     execCmd: (command: string, type?: 'powershell' | 'bat' | 'native', options?: OptionsType) => ipcRenderer.invoke('exec-cmd', command, type, options) as ReturnType<typeof import('./cmd').execCmd>,
     /** 打开某个exe，打开某个目录之类的 */
     openExe: (path: string) => ipcRenderer.invoke('open-exe', path) as ReturnType<typeof import('./cmd').openExe>,
