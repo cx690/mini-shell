@@ -25,9 +25,17 @@ const props = defineProps<TableProps<any>>();
 const tableProps = computed(() => {
     let data: any[];
     const { data: source } = props;
-    const { currentPage, pageSize } = state;
+    const { pageSize } = state;
+    let { currentPage } = state;
+    if (currentPage !== 1 && pageSize) {
+        const max = source?.length || 0;
+        const maxPage = Math.ceil(max / pageSize);
+        if (currentPage > maxPage) {
+            currentPage = maxPage;
+        }
+    }
     if (source) {
-        data = source.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+        data = source.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     } else {
         data = source;
     }
