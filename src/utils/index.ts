@@ -51,7 +51,7 @@ export function formatScriptStr(config: Record<string, any>, shells: ShellsType<
         if (type !== 3 && item.baseScripts) {
             for (let i = 0, l = item.baseScripts.length; i < l; i++) {
                 const { value, env, type: localType } = item.baseScripts[i];
-                str += t('script-num', { num: i + 1 }) + `(${electronAPI.platform === 'win32' ? (localType ?? 'powershell') : (localType ?? 'native')})\n`;
+                str += t('script-num', { num: i + 1 }) + (type === 2 ? `(${electronAPI.platform === 'win32' ? (localType ?? 'powershell') : (localType ?? 'native')})\n` : '\n');
                 if (type === 2 && env) {
                     if (typeof env === 'string') {
                         str += `${t('env-var')}：\n${env}\n`;
