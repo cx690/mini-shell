@@ -24,7 +24,9 @@ function getClient() {
                         console.error(err);
                     }
                     channel.on('close', (code: number, signal: number) => {
-                        callbackInfo?.(`<p class="${code === 0 ? 'success' : 'error'}">Stream closed with code:${code}${signal != null ? `, signal:${signal}` : ''}</p>`);
+                        if (code !== 0) {
+                            callbackInfo?.(`<p class="error">Stream closed with code:${code ?? 'unknown'}${signal != null ? `, signal:${signal}` : ''}</p>`);
+                        }
                         resolve(code);
                     }).on('data', (data: any) => {
                         callbackInfo?.(`<pre class="success">${data}</pre>`);
