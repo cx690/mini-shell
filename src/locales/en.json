@@ -26,7 +26,6 @@
   "cancel": "Cancel",
   "select-config-file": "Select import file",
   "select-error-json": "Please select a file with .json extension!",
-  "store-add-success": "Table \"{storeName}\" insert success!",
   "store-add-error": "Table \"{storeName}\" insert error, reson: {err}",
   "no-data-export": "No data found to export!",
   "select-save": "Select save location",
@@ -233,5 +232,18 @@
   "parallel-tasks": "(Scripts within the same combined script will be executed concurrently)",
   "not-found-script": "Unable to find combined script to execute:",
   "sign": "Sign",
-  "enter-sign": "Please enter sign"
+  "enter-sign": "Please enter sign",
+  "unknown-table-ignore": "Ignored unknown table: {storeName}",
+  "the-same-sign": "The same sign",
+  "confirm-same-sign": "The record({dataName}) loaded is already exists in table({tableName})，sign:{sign} ,please select action",
+  "Cover": "Cover",
+  "Always-cover": "Always cover",
+  "Merge-new": "Merge(change sign)",
+  "Always-merge-new": "Always merge(change sign)",
+  "Skip": "Skip",
+  "Always-skip": "Always skip",
+  "serverList-name": "Connection Config Table",
+  "shellList-name": "Script Config Table",
+  "excuteList-name": "Execute Logs Table",
+  "add-modify-num": "Added {addNum} records, modify {modifyNum} records"
 }

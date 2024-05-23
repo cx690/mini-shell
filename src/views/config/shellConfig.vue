@@ -26,7 +26,7 @@
 
         <Table :data="state.data" :row-key="rowKey" @selection-change="onSelect">
             <el-table-column type="selection" width="55" />
-            <el-table-column prop="uuid" :label="t('sign')" width="310" show-overflow-tooltip />
+            <el-table-column prop="uuid" :label="t('sign')" width="320" show-overflow-tooltip />
             <el-table-column prop="scriptName" :label="t('script-config-name')" />
             <el-table-column prop="group" :label="t('group-name')" />
             <el-table-column prop="host" :label="t('relevancy-host')" />

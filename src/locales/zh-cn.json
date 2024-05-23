@@ -26,7 +26,6 @@
   "cancel": "取消",
   "select-config-file": "选择导入文件",
   "select-error-json": "请选择.json扩展的文件！",
-  "store-add-success": "数据表\"{storeName}\"添加成功！",
   "store-add-error": "数据表\"{storeName}\"添加失败，原因: {err}",
   "no-data-export": "没有找到要导出的数据！",
   "select-save": "选择保存位置",
@@ -233,5 +232,18 @@
   "parallel-tasks": "（同一个组合脚本内的脚本将会并发执行）",
   "not-found-script": "找不到要执行的组合脚本：",
   "sign": "标识",
-  "enter-sign": "请输入标识"
+  "enter-sign": "请输入标识",
+  "unknown-table-ignore": "已忽略未知数据表：{storeName}",
+  "the-same-sign": "重复标识",
+  "confirm-same-sign": "导入的数据（{dataName}）在当前数据表（{tableName}）中已存在，标识：{sign} ，请选择要执行的操作",
+  "Cover": "覆盖",
+  "Always-cover": "始终覆盖",
+  "Merge-new": "合并（变更标识）",
+  "Always-merge-new": "始终合并（变更标识）",
+  "Skip": "跳过",
+  "Always-skip": "始终跳过",
+  "serverList-name": "连接配置表",
+  "shellList-name": "脚本配置表",
+  "excuteList-name": "执行日志表",
+  "add-modify-num": "已成功添加{addNum}条数据，已成功修改{modifyNum}条数据"
 }

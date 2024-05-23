@@ -1,7 +1,8 @@
 import type { SaveDialogOptions } from "electron";
 import { ElMessage } from "element-plus";
 import { exportData } from ".";
-export type AllStore = 'serverList' | 'shellList' | 'excuteList';
+export const AllStore = ['serverList', 'shellList', 'excuteList'] as const;
+export type AllStoreType = typeof AllStore[number];
 export function getDatabase() {
     const request = window.indexedDB.open("MyDatabase", 3);
     return new Promise<typeof request.result>((resolve, reject) => {
@@ -23,7 +24,7 @@ export function getDatabase() {
     })
 }
 
-export async function findAll<T = any>(store: AllStore) {
+export async function findAll<T = any>(store: AllStoreType) {
     return new Promise<T[]>(async (resolve) => {
         const data = [] as T[];
         const db = await getDatabase();
@@ -40,7 +41,7 @@ export async function findAll<T = any>(store: AllStore) {
 }
 
 /** 清空某个表的数据 */
-export async function clearStore(store: AllStore) {
+export async function clearStore(store: AllStoreType) {
     return new Promise<void>(async (resolve) => {
         const db = await getDatabase();
         const table = db.transaction([store], 'readwrite').objectStore(store);
@@ -54,6 +55,22 @@ export async function clearStore(store: AllStore) {
             resolve();
         }
     })
+}
+
+/** 新增或者修改数据 */
+export async function addOrPut(option: { db: IDBDatabase, type: 'put' | 'add', record: Record<string, any>, storeName: AllStoreType }) {
+    const { resolve, reject, promise } = Promise.withResolvers<void>();
+    const { db, storeName, record, type } = option;
+    const transaction = db.transaction([storeName], 'readwrite');
+    const objectStore = transaction.objectStore(storeName);
+    objectStore[type](record);
+    transaction.oncomplete = () => {
+        resolve();
+    }
+    transaction.onerror = (err) => {
+        reject(err);
+    }
+    return await promise;
 }
 
 export async function exportTables(t?: ReturnType<typeof import('vue-i18n').useI18n>['t'], option?: SaveDialogOptions, tabls?: string[]) {
@@ -142,7 +159,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
     }
 }
 
-export async function deleteItemsById(store: AllStore, id: number | number[]) {
+export async function deleteItemsById(store: AllStoreType, id: number | number[]) {
     const db = await getDatabase();
     await deleteItems(db.transaction([store], 'readwrite').objectStore(store), id);
 }
