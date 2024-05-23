@@ -2,13 +2,17 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
+                <el-form-item :label="t('sign')">
+                    <el-input v-model.trim="state.formData.sign" class="g-input" @keypress.enter.native="onSearch"
+                        :placeholder="t('enter-sign')" clearable @clear="onSearch" />
+                </el-form-item>
                 <el-form-item :label="t('Name')">
                     <el-input v-model="state.formData.name" class="g-input" @keypress.enter.native="onSearch"
-                        :placeholder="t('enter-name')" clearable />
+                        :placeholder="t('enter-name')" clearable @clear="onSearch" />
                 </el-form-item>
                 <el-form-item :label="t('Host')">
                     <el-input v-model="state.formData.host" class="g-input" @keypress.enter.native="onSearch"
-                        :placeholder="t('enter-host')" clearable />
+                        :placeholder="t('enter-host')" clearable @clear="onSearch" />
                 </el-form-item>
                 <el-form-item>
                     <el-button @Click="onSearch" :icon="Search">{{ t('Search') }}</el-button>
@@ -21,6 +25,7 @@
 
         <Table :data="state.data" row-key="id" @selection-change="onSelect" :row-class-name="activeClassName">
             <el-table-column type="selection" width="55" />
+            <el-table-column prop="uuid" :label="t('sign')" width="310" show-overflow-tooltip />
             <el-table-column prop="name" :label="t('Name')" />
             <el-table-column prop="host" :label="t('Host')" />
             <el-table-column prop="port" :label="t('Port')" />
@@ -55,8 +60,8 @@
                     <el-input v-model.trim="state.currentRow.username" :placeholder="t('enter-username')" clearable />
                 </el-form-item>
                 <el-form-item :label="t('Password')" prop="password">
-                    <el-input type.trim="password" v-model="state.currentRow.password"
-                        :placeholder="t('enter-password')" clearable />
+                    <el-input type="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
+                        clearable show-password />
                 </el-form-item>
                 <el-form-item :label="t('desc')" prop="desc">
                     <el-input v-model="state.currentRow.desc" :placeholder="t('enter-desc')" :maxLength="20"
@@ -78,7 +83,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Search, Plus, Download, Delete } from '@element-plus/icons-vue';
-import { deleteItems, findAll, getDatabase } from '@/utils/database';
+import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import useClient from '@/store/useClient';
 import { ServerListRecord } from '@/utils/tables';
 import { v4 } from 'uuid';
@@ -90,6 +95,7 @@ const state = reactive({
     data: [] as ServerListRecord[],
     total: 0,
     formData: {
+        sign: '',
         name: '',
         host: '',
     },
@@ -131,6 +137,9 @@ function onSearch() {
 
 async function getTableData() {
     let data = await findAll<ServerListRecord>('serverList');
+    if (state.formData.sign) {
+        data = data.filter(item => item.uuid?.includes(state.formData.sign))
+    }
     if (state.formData.host) {
         data = data.filter(item => item.host?.includes(state.formData.host))
     }
@@ -178,8 +187,7 @@ function onExport() {
 }
 
 async function delItem(id: number | number[]) {
-    const db = await getDatabase();
-    await deleteItems(db.transaction(["serverList"], 'readwrite').objectStore("serverList"), id);
+    await deleteItemsById("serverList", id);
     getTableData();
 }
 

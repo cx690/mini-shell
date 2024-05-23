@@ -61,7 +61,7 @@
                             <el-button class="mgL10" @click="reFresh" :icon="Refresh">
                                 {{ t('refresh-data') }}
                             </el-button>
-                            <el-button type="primary" @click="excuteShell()" :disabled="!formData.selectShell"
+                            <el-button type="primary" @click="checkAndExcute()" :disabled="!formData.selectShell"
                                 :icon="CaretRight">
                                 {{ t('excute-script') }}
                             </el-button>
@@ -87,7 +87,7 @@
                                 </el-checkbox-group>
                                 <div>
                                     <el-button type="primary" :disabled="!formData.checkList.length"
-                                        @click="excuteShell(formData.checkList)" :icon="CaretRight">
+                                        @click="checkAndExcute(formData.checkList)" :icon="CaretRight">
                                         {{ t('excute-select') }}
                                     </el-button>
                                 </div>
@@ -138,7 +138,7 @@
                             </el-button>
                         </span>
                     </div>
-                    <Table :data="history" @selection-change="onSelect">
+                    <Table :data="history" :row-key="rowKey" @selection-change="onSelect" ref="table">
                         <el-table-column type="selection" width="55" :selectable="selectable" />
                         <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
                         <el-table-column prop="host" :label="t('de-host')" width="120px;" />
@@ -170,8 +170,8 @@
                         <el-table-column :label="t('Action')">
                             <template #default="{ row }">
                                 <el-link type="primary" @click="onShowLogs(row)">{{ t('View') }}</el-link>
-                                <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0"
-                                    @confirm="cancelExte(row.uuid)">
+                                <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0 && !row.pid"
+                                    @confirm="cancelExecute(row)">
                                     <template #reference>
                                         <el-link type="danger">{{ t('cancel-excute') }}</el-link>
                                     </template>
@@ -262,7 +262,7 @@ import { Download, Delete, Refresh, Upload, CaretRight, View, Switch, Close, Con
 import { onBeforeUnmount, reactive, ref, nextTick, computed, watchEffect, onActivated } from 'vue';
 import Output from '@/components/output.vue';
 import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, useShellTypeEnum, formatEnv } from '@/utils';
-import { deleteItems, findAll, getDatabase } from '@/utils/database';
+import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import Terminal from '@/components/Terminal.vue';
 import { ExcuteListRecoed, ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
@@ -273,6 +273,7 @@ import { useI18n } from 'vue-i18n';
 const isMac = electronAPI.platform === 'darwin';
 const isWin32 = electronAPI.platform === 'win32';
 const { t } = useI18n();
+const table = ref<InstanceType<typeof Table>>();
 const shellTypeEnum = useShellTypeEnum();
 const StatusEnum = useStatusEnum();
 const clientStore = useClient();
@@ -293,7 +294,6 @@ watchEffect(() => {
                 holdTermRef.value?.focus();
             }
         })
-
     }
 }, {
     flush: 'post'
@@ -364,7 +364,7 @@ const state = reactive({
     excuteLogs: [] as ExcuteListRecoed[],
     excuteData: [] as ExcuteListRecoed[],
     groupList: [] as string[],
-    selects: [] as ExcuteListRecoed[]
+    selects: [] as ExcuteListRecoed[],
 })
 
 const outputRef = ref<any>();
@@ -416,20 +416,20 @@ async function onDownLoad() {
     })
 }
 
-function hasType(type: 1 | 2 | 3) {
-    if (!formData.selectShell) return false;
-    const { baseScripts } = formData.selectShell;
+function hasType(selectShell: ShellListRecoed, type: 1 | 2 | 3 | 4) {
+    if (!selectShell) return false;
+    const { baseScripts } = selectShell;
     return !!baseScripts.find(item => item.type === type);
 }
 const excuteAbort: Record<string, AbortController> = {};
-async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
+async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
     let type = [1, 2, 3];
     if (checkList?.length) {
         type = checkList.map(item => item.type);
     }
     if (!formData.selectShell) return;
     const selectShell = formData.selectShell;
-    if (clientStore.status === 2 && selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3)) && (hasType(1) || hasType(3))) {
+    if (clientStore.status === 2 && selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3)) && (hasType(selectShell, 1) || hasType(selectShell, 3))) {
         const action = await ElMessageBox.confirm(t('excute-unsame-host-script', { scriptName: selectShell.scriptName ?? t('unnamed'), host: selectShell.host }), t('Hint'), {
             type: 'warning',
         }).catch(action => action);
@@ -458,7 +458,7 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
     const uuid = v4();
     state.excuteData.unshift({
         shellName: selectShell.scriptName ?? t('unnamed'),
-        host: (hasType(1) || hasType(3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0',
+        host: (hasType(selectShell, 1) || hasType(selectShell, 3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0',
         startTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         endTime: '',
         time: '',
@@ -470,20 +470,29 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
         uuid,
     });
     const exceteRecord = state.excuteData[0];
+    const status = await executeShell(exceteRecord, selectShell, checkList);
+    if (status === 1) {
+        ElMessage.success(t('tip-excute-end', { shellName: exceteRecord.shellName }));
+    }
+    excuteResult(status, exceteRecord, true);
+}
+async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellListRecoed, checkList?: ShellListRecoed['baseScripts']): Promise<0 | 1 | 2 | 3 | 4> {
+    const uuid = exceteRecord.uuid;
     const { envVar, baseScripts } = selectShell;
     const logInfo = logInfoFn(exceteRecord);
     excuteAbort[uuid] = new AbortController();
     let abort = false;
-    function abortRecord() {
+    function abortRecord(): 4 {
         logInfo(`<p class="cancel">${t('canceled-excute')}</p>`);
         ElMessage.warning(t('canceled-excute-item', { shellName: exceteRecord.shellName }));
-        excuteResult(4, exceteRecord);
+        return 4;
     }
     excuteAbort[uuid].signal.addEventListener('abort', () => {
-        ElMessage.warning(t('set-canceled', { shellName: exceteRecord.shellName }));
+        !exceteRecord.pid && ElMessage.warning(t('set-canceled', { shellName: exceteRecord.shellName }));
         exceteRecord.status = 3;
         abort = true;
     })
+    expandItem(exceteRecord, selectShell);
     for (let i = 0, l = baseScripts.length; i < l; i++) {
         const item = baseScripts[i];
         if (checkList?.length && !checkList.includes(item)) {
@@ -499,14 +508,12 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                     logInfo(data);
                 });
                 if (abort) {
-                    abortRecord();
-                    return;
+                    return abortRecord();
                 }
                 if (code !== 0) {
                     logInfo(`<p class="error">${t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
-                    excuteResult(2, exceteRecord);
-                    return;
+                    return 2;
                 }
             }
         } else if (item.type === 2) {//local
@@ -522,14 +529,13 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                 const { code, data } = await electronAPI.execCmd(cmd, type, { env, mergeEnv });
                 logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
                 if (abort) {
-                    abortRecord();
-                    return;
+                    return abortRecord();
                 }
                 if (code !== 0) {
                     logInfo(`<p class="error">${t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
-                    excuteResult(2, exceteRecord);
-                    return;
+                    return 2;
+
                 }
             }
         } else if (item.type === 3) {//upload
@@ -545,31 +551,83 @@ async function excuteShell(checkList?: ShellListRecoed['baseScripts']) {
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {
-                        abortRecord();
-                        return;
+                        return abortRecord();
                     }
                 } else {
                     logInfo(`<p class="error">${t('upload-err', { err: result + '' })}</p>`);
                     if (abort) {
-                        abortRecord();
-                        return;
+                        return abortRecord();
                     }
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
-                    excuteResult(2, exceteRecord);
-                    return;
+                    return 2;
                 }
+            }
+        } else if (item.type === 4) {
+            const { combine } = item;
+            if (combine?.length) {
+                logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
+                logInfo(`<p class="subtitle">${t('excute-script-cmd')}</p><pre class="cmd">${combine.map(item => `${t('script-name')}:${item.name || 'unknown'} ${t('sign')}:${item.value}`).join('; ')}</pre>`);
+                const notFound: any[] = []
+                const shells = combine.map(item => {
+                    const find = state.shellList.find(shell => shell.uuid === item.value);
+                    if (!find) {
+                        logInfo(`<p class="error">${t('not-found-script')} ${item.name || 'unknow'} (${item.value})</p>`);
+                        notFound.push(item);
+                    }
+                    return find;
+                }) as ShellListRecoed[];
+                if (notFound.length) {
+                    return 2;
+                }
+                exceteRecord.children = shells.map(selectShell => {
+                    const uuid = v4();
+                    return {
+                        shellName: selectShell.scriptName ?? t('unnamed'),
+                        host: (hasType(selectShell, 1) || hasType(selectShell, 3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0',
+                        startTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                        endTime: '',
+                        time: '',
+                        excuteId: selectShell.uuid,
+                        excuteGroup: selectShell.group,
+                        excuteType: 0,
+                        status: 0,
+                        logs: '',
+                        uuid,
+                        pid: exceteRecord.uuid,
+                    }
+                })
+                async function executeItem(exceteRecord: ExcuteListRecoed, shell: ShellListRecoed) {
+                    const status = await executeShell(exceteRecord, shell);
+                    return await excuteResult(status, exceteRecord);
+                }
+                const res = await Promise.all(exceteRecord.children.map((exceteRecord, index) => executeItem(exceteRecord, shells[index])));
+                if (abort) {
+                    return abortRecord();
+                }
+                if (!res.every(item => item === 1)) {
+                    logInfo(`<p class="error">${t('excute-script-error', { type: shellTypeEnum.value[item.type] })}</p>`);
+                    return 2;
+                }
+            } else {
+                logInfo(`<p class="error">no script found!</p>`);
             }
         } else {
             ElMessage.warning(t('skip-unknown-type', { type: item.type }) + '\n');
         }
     }
-    excuteResult(1, exceteRecord);
-    ElMessage.success(t('tip-excute-end', { shellName: exceteRecord.shellName }));
+    return 1;
 }
 
-function cancelExte(uuid: string) {
+function cancelExecute(row: ExcuteListRecoed) {
+    const { uuid, children } = row;
     if (excuteAbort[uuid]) {
         excuteAbort[uuid].abort();
+        //取消子任务
+        if (children?.length) {
+            for (const item of children) {
+                cancelExecute(item);
+            }
+        }
     } else {
         ElMessage.error(t('abort-404'));
     }
@@ -593,22 +651,41 @@ function onShowLogs(currentRecord: ExcuteListRecoed) {
 }
 
 /** 脚本运行完毕后添加数据 */
-async function excuteResult(status: ExcuteListRecoed['status'], record: ExcuteListRecoed) {
+async function excuteResult(status: ExcuteListRecoed['status'], record: ExcuteListRecoed, save = false) {
     delete excuteAbort[record.uuid];
     record.status = status;
-    const db = await getDatabase();
-    const transaction = db.transaction(['excuteList'], 'readwrite');
-    const objectStore = transaction.objectStore("excuteList");
     const startTime = record.startTime;
     record.endTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
     record.time = computedTime(startTime, record.endTime);
-    const request = objectStore.add(JSON.parse(JSON.stringify(record)));
-    request.onerror = () => {
-        ElMessage.error(t('record-log-error', { shellName: record.shellName }));
-    };
-    request.onsuccess = () => {
-        state.excuteData.splice(state.excuteData.indexOf(record), 1);
-        reFresh();
+    if (save) {
+        const db = await getDatabase();
+        const transaction = db.transaction(['excuteList'], 'readwrite');
+        const objectStore = transaction.objectStore("excuteList");
+        await new Promise<void>((resolve => {
+            const request = objectStore.add(JSON.parse(JSON.stringify(record)));
+            request.onerror = () => {
+                ElMessage.error(t('record-log-error', { shellName: record.shellName }));
+                resolve();
+            };
+            request.onsuccess = () => {
+                state.excuteData.splice(state.excuteData.indexOf(record), 1);
+                reFresh().then(() => {
+                    resolve();
+                });
+            }
+        }))
+    }
+    return status;
+}
+/** 展开某一行 */
+function expandItem(exceteRecord: ExcuteListRecoed, selectShell: ShellListRecoed) {
+    for (const item of selectShell.baseScripts) {
+        if (item.type === 4 && item.combine?.length) {
+            nextTick(() => {
+                table.value?.table.toggleRowExpansion(exceteRecord, true);
+            })
+            break;
+        }
     }
 }
 
@@ -653,7 +730,7 @@ function onActiveChange(activeName: any) {
 
 function onSelectShell(id: number) {
     formData.selectShell = state.shellList.find(item => item.id === id);
-    formData.uploadDir = formData.selectShell?.mainPath ? (formData.selectShell?.envVar[formData.selectShell.mainPath] ?? '/root') : '/root';
+    formData.uploadDir = formData.selectShell?.mainPath ? (formData.selectShell?.envVar?.[formData.selectShell.mainPath] ?? '/root') : '/root';
     formData.checkList = [];
 }
 function showShell() {
@@ -666,7 +743,7 @@ function showShell() {
 }
 
 async function openPowershell(command: 'powershell' | 'cmd') {
-    const pwd = formData.selectShell?.localDir ? (formData.selectShell?.envVar[formData.selectShell.localDir] ?? '') : '';
+    const pwd = formData.selectShell?.localDir ? (formData.selectShell?.envVar?.[formData.selectShell.localDir] ?? '') : '';
     let open: {
         code: number;
         data: string;
@@ -780,21 +857,20 @@ function onExport() {
 }
 
 async function delItem(id: number | number[]) {
-    const db = await getDatabase();
-    await deleteItems(db.transaction(["excuteList"], 'readwrite').objectStore("excuteList"), id);
+    await deleteItemsById("excuteList", id);
     getExcuteList();
 }
 
 async function onDelete() {
     if (!state.selects.length) {
-        ElMessage.error(t('pls-select-item'));
+        ElMessage.error(t('pls-select-record'));
         return;
     }
     const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: state.selects.length }), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {
-        delItem(state.selects.map(item => item.id!));
+        delItem(state.selects.map(item => item.id!).filter(Boolean));
     }
 }
 
@@ -836,6 +912,9 @@ function closeWin() {
 
 function onCancelColose() {
     electronAPI.setCloseWhenTask0(false);
+}
+function rowKey(row: ShellListRecoed) {
+    return (row.id || row.uuid) + '';
 }
 </script>
 <style lang="less" scoped>

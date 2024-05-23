@@ -1,7 +1,7 @@
 import type { SaveDialogOptions } from "electron";
 import { ElMessage } from "element-plus";
 import { exportData } from ".";
-
+export type AllStore = 'serverList' | 'shellList' | 'excuteList';
 export function getDatabase() {
     const request = window.indexedDB.open("MyDatabase", 3);
     return new Promise<typeof request.result>((resolve, reject) => {
@@ -12,7 +12,7 @@ export function getDatabase() {
             //脚本表
             createStore(db, 'shellList', ['scriptName', 'host', 'envVar', 'localDir', 'mainPath', 'baseScripts', 'group', 'uuid']);
             //执行记录表
-            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid']);
+            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children']);
         }
         request.onsuccess = function () {
             resolve(request.result);
@@ -23,7 +23,7 @@ export function getDatabase() {
     })
 }
 
-export async function findAll<T = any>(store: 'serverList' | 'shellList' | 'excuteList') {
+export async function findAll<T = any>(store: AllStore) {
     return new Promise<T[]>(async (resolve) => {
         const data = [] as T[];
         const db = await getDatabase();
@@ -40,7 +40,7 @@ export async function findAll<T = any>(store: 'serverList' | 'shellList' | 'excu
 }
 
 /** 清空某个表的数据 */
-export async function clearStore(store: 'serverList' | 'shellList' | 'excuteList') {
+export async function clearStore(store: AllStore) {
     return new Promise<void>(async (resolve) => {
         const db = await getDatabase();
         const table = db.transaction([store], 'readwrite').objectStore(store);
@@ -140,4 +140,9 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
             throw err;
         })
     }
+}
+
+export async function deleteItemsById(store: AllStore, id: number | number[]) {
+    const db = await getDatabase();
+    await deleteItems(db.transaction([store], 'readwrite').objectStore(store), id);
 }

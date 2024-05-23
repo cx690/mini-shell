@@ -4,11 +4,11 @@
             <el-form inline labelPosition="right">
                 <el-form-item :label="t('Name')">
                     <el-input v-model="state.formData.name" class="g-input" @keypress.enter.native="onSearch"
-                        :placeholder="t('enter-name')" clearable />
+                        :placeholder="t('enter-name')" clearable @clear="onSearch" />
                 </el-form-item>
                 <el-form-item :label="t('Host')">
                     <el-input v-model="state.formData.host" class="g-input" @keypress.enter.native="onSearch"
-                        :placeholder="t('enter-host')" clearable />
+                        :placeholder="t('enter-host')" clearable @clear="onSearch" />
                 </el-form-item>
                 <el-form-item>
                     <el-button @Click="onSearch" :icon="Search">{{ t('Search') }}</el-button>
@@ -23,7 +23,7 @@
                 </el-link>
             </RouterLink>
         </template>
-        <Table :data="state.data" :row-class-name="activeClassName">
+        <Table :data="state.data" row-key="id" :row-class-name="activeClassName">
             <el-table-column prop="name" :label="t('Name')" />
             <el-table-column prop="host" :label="t('Host')" />
             <el-table-column prop="port" :label="t('Port')" />
@@ -53,8 +53,8 @@
                         clearablereadonly />
                 </el-form-item>
                 <el-form-item :label="t('Password')" prop="password">
-                    <el-input type.trim="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
-                        clearable readonly />
+                    <el-input type="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
+                        clearable readonly show-password />
                 </el-form-item>
                 <el-form-item :label="t('desc')" prop="desc">
                     <el-input v-model="state.currentRow.desc" :placeholder="t('enter-desc')" :maxLength="20" clearable
@@ -168,7 +168,7 @@ function activeClassName({ row }: { row: ServerListRecord }) {
     return '';
 }
 </script>
-<style lang="less" scoped >
+<style lang="less" scoped>
 :deep(.active) {
     color: var(--el-color-danger);
 }

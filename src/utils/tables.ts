@@ -23,7 +23,7 @@ export interface ServerListRecord extends BaseItem {
 }
 
 export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
-    type: 1 | 2 | 3,
+    type: 1 | 2 | 3 | 4,
     key: string,
     baseScripts: {
         key: string, value: string,
@@ -34,13 +34,15 @@ export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
     }[],
     localFile?: string,
     remoteDir?: string,
+    /** 组合脚本组 */
+    combine?: { value: string, name: string }[],
 }[]
 
 /** 脚本表 */
 export interface ShellListRecoed<T extends 'edit' | 'record' = 'record'> extends BaseItem {
     id: T extends 'edit' ? (number | null | undefined) : number;
     scriptName: string,
-    envVar: T extends 'edit' ? string : Record<string, any>,
+    envVar?: T extends 'edit' ? string : Record<string, any>,
     baseScripts: ShellsType<T>,
     /** 本地目录 */
     localDir?: string,
@@ -74,11 +76,15 @@ export interface ExcuteListRecoed extends BaseItem {
     /** 执行脚本的群组 */
     excuteGroup?: string,
     /** 执行的脚本分类 */
-    excuteType?: 0 | 1 | string;
+    excuteType?: 0 | 1 | string,
     /** 执行状态 */
     status: 0 | 1 | 2 | 3 | 4,
     /** 日志 */
-    logs?: string;
+    logs?: string,
     /** 已计算的时长 */
-    time?: string;
+    time?: string,
+    /** 组合脚本中执行的其他脚本数据 */
+    children?: ExcuteListRecoed[],
+    /** 只有在作为子记录的时候存在 */
+    pid?: string,
 }

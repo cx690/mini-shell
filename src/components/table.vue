@@ -1,5 +1,5 @@
 <template>
-    <el-table v-bind="tableProps">
+    <el-table v-bind="tableProps" ref="table">
         <slot></slot>
     </el-table>
     <el-pagination v-if="props.data && props.data.length > 10" v-model:page-size="state.pageSize"
@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import type { TableProps } from 'element-plus/es/components';
-import { computed, reactive, useAttrs } from 'vue';
+import { computed, reactive, ref, useAttrs } from 'vue';
 
 defineOptions({
     inheritAttrs: false,//取消默认透传，因为组件已经指明了透传
@@ -21,6 +21,8 @@ const state = reactive({
 
 const attrs = useAttrs();
 const props = defineProps<TableProps<any>>();
+const table = ref<any>();
+defineExpose({ table });
 
 const tableProps = computed(() => {
     let data: any[];

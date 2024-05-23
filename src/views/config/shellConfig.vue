@@ -2,9 +2,13 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
+                <el-form-item :label="t('sign')">
+                    <el-input v-model.trim="state.formData.sign" class="g-input" @keypress.enter.native="onSearch"
+                        :placeholder="t('enter-sign')" clearable @clear="onSearch" />
+                </el-form-item>
                 <el-form-item :label="t('script-config-name')">
                     <el-input v-model.trim="state.formData.scriptName" class="g-input" @keypress.enter.native="onSearch"
-                        :placeholder="t('enter-script-config-name')" clearable />
+                        :placeholder="t('enter-script-config-name')" clearable @clear="onSearch" />
                 </el-form-item>
                 <el-form-item :label="t('group-name')">
                     <el-autocomplete v-model.trim="state.formData.group" class="g-input"
@@ -22,6 +26,7 @@
 
         <Table :data="state.data" :row-key="rowKey" @selection-change="onSelect">
             <el-table-column type="selection" width="55" />
+            <el-table-column prop="uuid" :label="t('sign')" width="310" show-overflow-tooltip />
             <el-table-column prop="scriptName" :label="t('script-config-name')" />
             <el-table-column prop="group" :label="t('group-name')" />
             <el-table-column prop="host" :label="t('relevancy-host')" />
@@ -54,7 +59,7 @@
                     <el-autocomplete v-model.trim="state.currentRow.host" clearable :placeholder="t('default-host')"
                         :fetch-suggestions="getHostOpt" />
                 </el-form-item>
-                <el-form-item prop="envVar">
+                <el-form-item prop="envVar" :rules="envRules">
                     <template #label>
                         <div>
                             <span class="script-config">
@@ -121,6 +126,9 @@
                             <el-button :icon="Plus" @click="addShellType(3)">
                                 {{ t('Add ') }}{{ shellTypeEnum[3] }}
                             </el-button>
+                            <el-button :icon="Plus" @click="addShellType(4)">
+                                {{ t('Add ') }}{{ shellTypeEnum[4] }}
+                            </el-button>
                             <el-button type="primary" @click="showShell(state.currentRow)" :icon="View">
                                 {{ t('view-format-script') }}
                             </el-button>
@@ -131,7 +139,8 @@
                     <el-card class="shells" v-for="(base, num) of state.currentRow.baseScripts" :key="base.key">
                         <template #header>
                             <div class="card-header">
-                                <span>{{ shellTypeEnum[base.type] }}</span>
+                                <span>{{ shellTypeEnum[base.type] }} <span v-if="base.type === 4">{{ t('parallel-tasks')
+                                        }}</span></span>
                                 <div>
                                     <el-button :icon="RemoveFilled" type="danger" circle
                                         @click="removeShellType(num)"></el-button>
@@ -140,7 +149,7 @@
                             </div>
                         </template>
                         <VueDraggable v-model="base.baseScripts" handle=".sort-handle" class="multi-row"
-                            v-if="base.type !== 3">
+                            v-if="base.type === 1 || base.type === 2">
                             <div v-for="(item, index) in base.baseScripts" :key="item.key">
                                 <template v-if="base.type === 2">
                                     <el-divider v-if="index > 0" />
@@ -189,7 +198,7 @@
                                 </el-form-item>
                             </div>
                         </VueDraggable>
-                        <el-row v-else :gutter="8">
+                        <el-row v-else-if="base.type === 3" :gutter="8">
                             <el-col :span="12">
                                 <el-form-item :label="t('local-dir')"
                                     :rules="{ required: true, message: t('enter-local-dir') }"
@@ -207,6 +216,30 @@
                                 </el-form-item>
                             </el-col>
                         </el-row>
+                        <div v-else-if="base.type === 4">
+                            <template v-if="base.combine">
+                                <el-row :gutter="8" v-for="(item, index) of base.combine">
+                                    <el-col :span="20">
+                                        <el-form-item :label="t('select-script')">
+                                            <el-select v-model="item.value" :placeholder="t('pls-select-script')"
+                                                style="width: 100%;" @change="setItemName(item)">
+                                                <el-option v-for="item of selectScripts" :key="item.id"
+                                                    :value="item.uuid" :label="item.scriptName">
+                                                    {{ item.scriptName }}
+                                                </el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-button :icon="CirclePlusFilled" @click="addCombineItem(num)" circle
+                                            type="primary" v-if="index === base.combine.length - 1"></el-button>
+                                        <el-button :icon="RemoveFilled" circle type="danger"
+                                            @click="removeCombineItem(num, index)"></el-button>
+                                    </el-col>
+                                </el-row>
+                            </template>
+                        </div>
+                        <el-result icon="error" v-else :title="t('unknown-script')" />
                     </el-card>
                 </VueDraggable>
             </el-form>
@@ -229,7 +262,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
-import { deleteItems, findAll, getDatabase } from '@/utils/database';
+import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
@@ -245,6 +278,7 @@ const state = reactive({
     data: [] as ShellListRecoed[],
     total: 0,
     formData: {
+        sign: '',
         scriptName: '',
         group: '',
     },
@@ -278,14 +312,6 @@ const rules = computed(() => ({
         required: true,
         message: t('enter-script-config-name')
     },
-    envVar: [
-        {
-            required: true,
-            message: t('enter-script-var-config')
-        },
-        { validator: validaterJSON, trigger: 'blur' }
-
-    ],
 }))
 
 const scriptRules = computed(() => ({
@@ -321,6 +347,9 @@ function onSearch() {
 async function getTableData() {
     state.selects = [];
     let data = await findAll<ShellListRecoed>('shellList');
+    if (state.formData.sign) {
+        data = data.filter(item => item.uuid?.includes(state.formData.sign))
+    }
     if (state.formData.scriptName) {
         data = data.filter(item => item.scriptName?.includes(state.formData.scriptName))
     }
@@ -362,20 +391,27 @@ function handleFormat() {
     }
 }
 
-function addShellType(type: 1 | 2 | 3) {
-    if (type !== 3) {
+function addShellType(type: 1 | 2 | 3 | 4) {
+    if (type === 1 || type === 2) {
         state.currentRow.baseScripts.push({
             type,
             key: v4(),
             baseScripts: [{ key: v4(), value: '' }]
         })
-    } else {
+    } else if (type === 3) {
         state.currentRow.baseScripts.push({
             type,
             key: v4(),
             baseScripts: [],
             localFile: '',
             remoteDir: ''
+        })
+    } else if (type === 4) {
+        state.currentRow.baseScripts.push({
+            type,
+            key: v4(),
+            baseScripts: [],
+            combine: [{ value: '', name: '' }]
         })
     }
 }
@@ -391,6 +427,17 @@ function addScriptItem(num: number) {
 function removeScriptItem(num: number, index: number) {
     state.currentRow.baseScripts[num].baseScripts.splice(index, 1);
     if (state.currentRow.baseScripts[num].baseScripts.length === 0) {
+        state.currentRow.baseScripts.splice(num, 1);
+    }
+}
+
+function addCombineItem(num: number) {
+    state.currentRow.baseScripts[num].combine?.push({ value: '', name: '' });
+}
+
+function removeCombineItem(num: number, index: number) {
+    state.currentRow.baseScripts[num].combine?.splice(index, 1);
+    if (state.currentRow.baseScripts[num].combine?.length === 0) {
         state.currentRow.baseScripts.splice(num, 1);
     }
 }
@@ -419,8 +466,7 @@ function onExport() {
 }
 
 async function delItem(id: number | number[]) {
-    const db = await getDatabase();
-    await deleteItems(db.transaction(["shellList"], 'readwrite').objectStore("shellList"), id);
+    await deleteItemsById("shellList", id);
     getTableData();
 }
 
@@ -452,7 +498,7 @@ async function onConfim() {
         ...state.currentRow,
         uuid: state.currentRow.uuid ? state.currentRow.uuid : v4(),//添加唯一键
         baseScripts,
-        envVar: JSON.parse(state.currentRow.envVar),
+        ...(state.currentRow.envVar ? { envVar: JSON.parse(state.currentRow.envVar) } : {}),
     }
     const valid = await addForm.value!.validate().catch(() => false);
     if (valid) {
@@ -487,7 +533,7 @@ function getGroupOpt(queryString: string, cb: any) {
 }
 
 function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
-    let env: Record<string, any>;
+    let env: Record<string, any> | undefined;
     if (typeof row.envVar === 'string') {
         try {
             env = JSON.parse(row.envVar) || {};
@@ -515,6 +561,22 @@ function rowKey(row: ShellListRecoed) {
 }
 
 const isMac = electronAPI.platform === 'darwin';
+
+const selectScripts = computed(() => {
+    const { data, currentRow } = state;
+    if (!currentRow) return [];
+    const { uuid } = currentRow;
+    return data?.filter(item => item.uuid !== uuid) || [];
+})
+
+function setItemName(item: { name: string, value: string }) {
+    const { value } = item;
+    if (!value) {
+        item.name = '';
+        return;
+    }
+    item.name = selectScripts.value.find(shell => shell.uuid === value)?.scriptName || '';
+}
 </script>
 <style lang="less" scoped>
 .multi-row {

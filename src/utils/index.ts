@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { ShellsType } from "./tables";
+import { ShellListRecoed, ShellsType } from "./tables";
 import duration from 'dayjs/plugin/duration';
 import { ElMessage } from "element-plus";
 import type { SaveDialogOptions } from "electron";
@@ -10,9 +10,9 @@ dayjs.extend(duration);
 export const defaultEnv = {
     NOW_TIME: "YYYY-MM-DD~HH:mm:ss",
 }
-export function formatterShell(config: Record<string, any>, shell: string): string;
-export function formatterShell(config: Record<string, any>, shell: string[]): string[];
-export function formatterShell<T extends string | string[]>(config: Record<string, any>, shell: T): T {
+export function formatterShell(config: Record<string, any> | undefined | null, shell: string): string;
+export function formatterShell(config: Record<string, any> | undefined | null, shell: string[]): string[];
+export function formatterShell<T extends string | string[]>(config: Record<string, any> | undefined | null, shell: T): T {
     config = { ...defaultEnv, ...config };
     config.NOW_TIME = dayjs().format(config.NOW_TIME);
     if (Array.isArray(shell)) {
@@ -35,20 +35,23 @@ export function useShellTypeEnum() {
         1: t('remote-script'),
         2: t('local-script'),
         3: t('upload-script'),
+        4: t('combined-script'),
     }))
 }
 
-export function formatScriptStr(config: Record<string, any>, shells: ShellsType<'edit'> | ShellsType<'record'>, t: (...args: any) => string) {
+export function formatScriptStr(config: Record<string, any> | undefined | null, shells: ShellsType<'edit'> | ShellsType<'record'>, t: (...args: any) => string) {
+    config = config || {};
     let str = t('excute-script-list') + '\n';
     const shellTypeEnum = {
         1: t('remote-script'),
         2: t('local-script'),
         3: t('upload-script'),
+        4: t('combined-script'),
     };
     for (const item of shells) {
         const { type } = item;
         str += `${shellTypeEnum[type]}：\n`;
-        if (type !== 3 && item.baseScripts) {
+        if ((type === 1 || type === 2) && item.baseScripts) {
             for (let i = 0, l = item.baseScripts.length; i < l; i++) {
                 const { value, env, type: localType } = item.baseScripts[i];
                 str += t('script-num', { num: i + 1 }) + (type === 2 ? `(${electronAPI.platform === 'win32' ? (localType ?? 'powershell') : (localType ?? 'native')})\n` : '\n');
@@ -64,14 +67,16 @@ export function formatScriptStr(config: Record<string, any>, shells: ShellsType<
                 }
                 str += `${formatterShell(config, value)}\n`;
             }
-        } else {
+        } else if (type === 3) {
             str += `${t('upload-file-path')}：${formatterShell(config, item.localFile ?? '')}\n${t('remote-path-dir')}：${formatterShell(config, item.remoteDir ?? '')}\n`;
+        } else if (type === 4) {
+            str += item.combine?.map(item => `${t('script-name')}:${item.name} ${t('sign')}:${item.value} `)?.join('; ') || '';
         }
     }
     return str;
 }
 
-export function formatEnv(config: Record<string, any>, env?: null | Record<string, any>) {
+export function formatEnv(config: Record<string, any> | null | undefined, env?: null | Record<string, any>) {
     if (env && typeof env === 'object') {
         const obj: Record<string, any> = {};
         for (const key in env) {
@@ -163,4 +168,9 @@ export async function exportData(text: any, option?: SaveDialogOptions, t?: Retu
         return status;
     }
     return false;
+}
+
+/** 检查是否存在循环引用的问题 */
+export function checkScript(shell: ShellListRecoed | ShellListRecoed<'edit'>) {
+    console.log(shell)
 }

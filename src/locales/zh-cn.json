@@ -225,5 +225,13 @@
   "var-json-error": "脚本变量配置设置错误！",
   "view-after-set": "请设置脚本后查看！",
   "env-only": "仅使用以下环境变量",
-  "env-merge": "合并以下环境变量（包含系统环境变量）"
+  "env-merge": "合并以下环境变量（包含系统环境变量）",
+  "combined-script": "组合脚本",
+  "unknown-script": "未知脚本",
+  "pls-select-script": "请选择脚本",
+  "select-script": "选择脚本",
+  "parallel-tasks": "（同一个组合脚本内的脚本将会并发执行）",
+  "not-found-script": "找不到要执行的组合脚本：",
+  "sign": "标识",
+  "enter-sign": "请输入标识"
 }

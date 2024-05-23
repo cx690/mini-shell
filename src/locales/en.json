@@ -225,5 +225,13 @@
   "var-json-error": "JSON parse error!",
   "view-after-set": "Please set scripts!",
   "env-only": "Use only the following environment variables",
-  "env-merge": "Merge the following environment variables (include system environment variables)"
+  "env-merge": "Merge the following environment variables (include system environment variables)",
+  "combined-script": "Combined script",
+  "unknown-script": "Unknown script",
+  "pls-select-script": "Please select a script",
+  "select-script": "Select a script",
+  "parallel-tasks": "(Scripts within the same combined script will be executed concurrently)",
+  "not-found-script": "Unable to find combined script to execute:",
+  "sign": "Sign",
+  "enter-sign": "Please enter sign"
 }
