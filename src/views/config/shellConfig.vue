@@ -276,6 +276,7 @@ import dayjs from 'dayjs';
 import { ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
 import { useI18n } from 'vue-i18n';
+import { checkLoop } from '@/utils/valid';
 const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
 const addForm = ref<InstanceType<typeof ElForm>>();
@@ -490,6 +491,8 @@ async function onDelete() {
 }
 
 async function onConfim() {
+    const valid = await addForm.value!.validate().catch(() => false);
+    if (!valid) return;
     const baseScripts: ShellListRecoed<'edit'>['baseScripts'] = JSON.parse(JSON.stringify(state.currentRow.baseScripts));
     if (baseScripts?.length) {
         baseScripts.forEach(base => {
@@ -505,25 +508,24 @@ async function onConfim() {
         uuid: state.currentRow.uuid ? state.currentRow.uuid : v4(),//添加唯一键
         baseScripts,
         ...(state.currentRow.envVar ? { envVar: JSON.parse(state.currentRow.envVar) } : {}),
+    } as ShellListRecoed;
+    const pass = await checkLoop(param, t);
+    if (!pass) return;
+    const db = await getDatabase();
+    const transaction = db.transaction(['shellList'], 'readwrite');
+    const objectStore = transaction.objectStore("shellList");
+    let request: IDBRequest;
+    if (state.currentRow.id) {
+        request = objectStore.put(param);
+    } else {
+        const { id, ...rest } = param
+        request = objectStore.add(rest);
     }
-    const valid = await addForm.value!.validate().catch(() => false);
-    if (valid) {
-        const db = await getDatabase();
-        const transaction = db.transaction(['shellList'], 'readwrite');
-        const objectStore = transaction.objectStore("shellList");
-        let request: any;
-        if (state.currentRow.id) {
-            request = objectStore.put(param);
-        } else {
-            const { id, ...rest } = param
-            request = objectStore.add(rest);
-        }
-        request.onsuccess = () => {
-            ElMessage.success(t('op-success'));
-            getTableData();
-            state.showAdd = false;
-        };
-    }
+    request.onsuccess = () => {
+        ElMessage.success(t('op-success'));
+        getTableData();
+        state.showAdd = false;
+    };
 }
 
 function getHostOpt(queryString: string, cb: any) {
@@ -541,11 +543,13 @@ function getGroupOpt(queryString: string, cb: any) {
 function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
     let env: Record<string, any> | undefined;
     if (typeof row.envVar === 'string') {
-        try {
-            env = JSON.parse(row.envVar) || {};
-        } catch (err) {
-            ElMessage.error(t('var-json-error'));
-            return;
+        if (row.envVar.trim() !== '') {
+            try {
+                env = JSON.parse(row.envVar);
+            } catch (err) {
+                ElMessage.error(t('var-json-error'));
+                return;
+            }
         }
     } else {
         env = row.envVar;
@@ -573,6 +577,9 @@ const selectScripts = computed(() => {
     const { data, currentRow } = state;
     if (!currentRow) return [];
     const { uuid } = currentRow;
+    if (!uuid) {
+        return data;
+    }
     return data?.filter(item => item.uuid !== uuid) || [];
 })
 

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { ShellListRecoed, ShellsType } from "./tables";
+import { ShellsType } from "./tables";
 import duration from 'dayjs/plugin/duration';
 import { ElMessage } from "element-plus";
 import type { SaveDialogOptions } from "electron";
@@ -170,7 +170,3 @@ export async function exportData(text: any, option?: SaveDialogOptions, t?: Retu
     return false;
 }
 
-/** 检查是否存在循环引用的问题 */
-export function checkScript(shell: ShellListRecoed | ShellListRecoed<'edit'>) {
-    console.log(shell)
-}

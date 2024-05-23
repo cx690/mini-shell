@@ -245,5 +245,7 @@
   "serverList-name": "Connection Config Table",
   "shellList-name": "Script Config Table",
   "excuteList-name": "Execute Logs Table",
-  "add-modify-num": "Added {addNum} records, modify {modifyNum} records"
+  "add-modify-num": "Added {addNum} records, modify {modifyNum} records",
+  "not-found-combine-script": "Can't find the script in 'combined script' : {path}",
+  "Circular-dependency": "Circular dependency in 'combine-script': {path}"
 }

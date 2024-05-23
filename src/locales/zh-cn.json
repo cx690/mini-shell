@@ -245,5 +245,7 @@
   "serverList-name": "连接配置表",
   "shellList-name": "脚本配置表",
   "excuteList-name": "执行日志表",
-  "add-modify-num": "已成功添加{addNum}条数据，已成功修改{modifyNum}条数据"
+  "add-modify-num": "已成功添加{addNum}条数据，已成功修改{modifyNum}条数据",
+  "not-found-combine-script": "找不到指定的组合脚本：{path}",
+  "Circular-dependency": "组合脚本中存在循环依赖：{path}"
 }

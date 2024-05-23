@@ -270,6 +270,7 @@ import dayjs from 'dayjs';
 import useWin from '@/store/useWin';
 import Status from './status.vue';
 import { useI18n } from 'vue-i18n';
+import { checkLoop } from '@/utils/valid';
 const isMac = electronAPI.platform === 'darwin';
 const isWin32 = electronAPI.platform === 'win32';
 const { t } = useI18n();
@@ -455,6 +456,10 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
         ElMessage.error(t('contans-remote-script-unexcute'));
         return;
     }
+
+    const pass = await checkLoop(selectShell, t, state.shellList)
+    if (!pass) return;
+
     const uuid = v4();
     state.excuteData.unshift({
         shellName: selectShell.scriptName ?? t('unnamed'),
