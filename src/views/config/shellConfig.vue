@@ -230,7 +230,11 @@
                                             </el-select>
                                         </el-form-item>
                                     </el-col>
-                                    <el-col :span="4">
+                                    <el-col :span="1">
+                                        <el-button @click="showChild(item.value)" v-if="item.value" :icon="View"
+                                            circle />
+                                    </el-col>
+                                    <el-col :span="3">
                                         <el-button :icon="CirclePlusFilled" @click="addCombineItem(num)" circle
                                             type="primary" v-if="index === base.combine.length - 1"></el-button>
                                         <el-button :icon="RemoveFilled" circle type="danger"
@@ -250,7 +254,8 @@
                 </span>
             </template>
         </el-dialog>
-        <el-dialog v-model="state.shellShow" :title="t('format-script-detail')" width="1000px" draggable>
+        <el-dialog v-model="state.shellShow" :title="`${t('format-script-detail')} - ${state.scriptName ?? ''}`"
+            width="1000px" draggable>
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
         <el-dialog v-model="state.showInset" :title="t('built-in-detail')" draggable>
@@ -295,6 +300,7 @@ const state = reactive({
     showAdd: false,
     parseEnvVarOpt: [] as string[],
     shellShow: false,
+    scriptName: '',
     shellStr: '',
     selects: [] as ShellListRecoed[],
     showInset: false,
@@ -549,6 +555,7 @@ function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
         return;
     };
     state.shellShow = true;
+    state.scriptName = row.scriptName;
     state.shellStr = formatScriptStr(env, row.baseScripts, t);
 }
 
@@ -576,6 +583,13 @@ function setItemName(item: { name: string, value: string }) {
         return;
     }
     item.name = selectScripts.value.find(shell => shell.uuid === value)?.scriptName || '';
+}
+
+function showChild(value?: string) {
+    if (!value) return;
+    const item = selectScripts.value.find(shell => shell.uuid === value);
+    if (!item) return;
+    showShell(item);
 }
 </script>
 <style lang="less" scoped>
