@@ -17,5 +17,3 @@ app.component('BasePage', BasePage);
 app.use(i18n);
 app.use(createPinia()).use(router);
 app.mount('#app');
-
-console.info('构建时间：%s', process.env.buildTime);

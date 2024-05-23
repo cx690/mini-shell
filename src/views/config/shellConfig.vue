@@ -2,6 +2,13 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
+                <el-form-item :label="t('view-type')">
+                    <el-radio-group v-model="state.formData.viewType" @change="onSearch">
+                        <el-radio-button :label="t('Default')" value="default" />
+                        <el-radio-button :label="t('Hidden')" value="hidden" />
+                        <el-radio-button :label="t('All')" value="all" />
+                    </el-radio-group>
+                </el-form-item>
                 <el-form-item :label="t('sign')">
                     <el-input v-model.trim="state.formData.sign" class="g-input" @keypress.enter.native="onSearch"
                         :placeholder="t('enter-sign')" clearable @clear="onSearch" />
@@ -284,6 +291,7 @@ const state = reactive({
     data: [] as ShellListRecoed[],
     total: 0,
     formData: {
+        viewType: 'default' as 'default' | 'hidden' | 'all',
         sign: '',
         scriptName: '',
         group: '',
