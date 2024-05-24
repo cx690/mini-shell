@@ -8,14 +8,16 @@
 </template>
 
 <script setup lang="ts">
+import useSettings from '@/store/useSetting';
 import type { TableProps } from 'element-plus/es/components';
 import { computed, reactive, ref, useAttrs } from 'vue';
+const settings = useSettings();
 
 defineOptions({
     inheritAttrs: false,//取消默认透传，因为组件已经指明了透传
 })
 const state = reactive({
-    pageSize: 10,
+    pageSize: settings.config.pageSize,
     currentPage: 1,
 })
 

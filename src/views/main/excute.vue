@@ -276,9 +276,11 @@ import useWin from '@/store/useWin';
 import Status from './status.vue';
 import { useI18n } from 'vue-i18n';
 import { checkLoop } from '@/utils/valid';
+import useSettings from '@/store/useSetting';
 const isMac = electronAPI.platform === 'darwin';
 const isWin32 = electronAPI.platform === 'win32';
 const { t } = useI18n();
+const settings = useSettings();
 const table = ref<InstanceType<typeof Table>>();
 const shellTypeEnum = useShellTypeEnum();
 const StatusEnum = useStatusEnum();
@@ -563,7 +565,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
                 logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
-                const result = await (clientStore.client!.uploadFile(local, remote, true));
+                const result = await (clientStore.client!.uploadFile(local, remote, !settings.config.showUploadProcess));
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {

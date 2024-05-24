@@ -24,6 +24,16 @@ function getTemplate(local = 'zh-cn') {
         {
             label: isEn ? 'File' : '文件',
             submenu: [
+                {
+                    label: isEn ? 'settings' : '设置',
+                    click: (MenuItem: any, win: BrowserWindow) => {
+                        const url = new URL(win.webContents.getURL());
+                        if (url.hash !== '#/about/settings') {
+                            url.hash = '#/about/settings';
+                            win.loadURL(url.href);
+                        }
+                    }
+                },
                 { role: isMac ? 'close' : 'quit', label: isEn ? 'quit' : '退出' }
             ]
         },

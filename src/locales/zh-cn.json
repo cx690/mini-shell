@@ -13,6 +13,7 @@
   "route-about": "关于",
   "route-system": "系统信息",
   "route-license": "开源协议",
+  "route-settings": "系统设置",
   "version": "软件版本",
   "buildTime": "发布日期",
   "developer": "开发者",
@@ -255,5 +256,8 @@
   "Hide": "隐藏",
   "Show": "显示",
   "Show-All": "显示全部",
-  "no-script-found": "未找到要执行的脚本"
+  "no-script-found": "未找到要执行的脚本",
+  "View-Settings": "视图设置",
+  "Default-pageSize": "默认分页大小",
+  "Show-upload-process": "脚本中的上传显示进度"
 }

@@ -108,6 +108,15 @@ export const routes: RouteRecordRaw[] = [
         },
         children: [
             {
+                path: 'settings',
+                name: 'settings',
+                component: () => import('@/views/about/settings.vue'),
+                meta: {
+                    title: '系统设置',
+                    t: 'route-settings',
+                },
+            },
+            {
                 path: 'system',
                 name: 'system',
                 component: () => import('@/views/about/system.vue'),

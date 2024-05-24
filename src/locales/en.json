@@ -13,6 +13,7 @@
   "route-about": "About",
   "route-system": "System",
   "route-license": "License",
+  "route-settings": "Settings",
   "version": "version",
   "buildTime": "Release Date",
   "developer": "Developer",
@@ -255,5 +256,8 @@
   "Hide": "Hide",
   "Show": "Show",
   "Show-All": "Show All",
-  "no-script-found": "No execute script found"
+  "no-script-found": "No execute script found",
+  "View-Settings": "View Settings",
+  "Default-pageSize": "Default page size",
+  "Show-upload-process": "Show Upload Process"
 }
