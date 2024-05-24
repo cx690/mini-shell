@@ -8,7 +8,7 @@
                         <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">
                             {{ t('cancel_close_windows') }}
                         </el-button>
-                        <el-switch v-model="settings.config.dark" style="margin-left: 24px">
+                        <el-switch v-model="settings.config.dark" style="margin-left: 24px;margin: 0 10px;">
                             <template #active-action>
                                 <Moon />
                             </template>
