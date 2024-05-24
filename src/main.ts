@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import 'normalize.css';
-import 'element-plus/theme-chalk/index.css'
+import 'element-plus/theme-chalk/index.css';
+import 'element-plus/theme-chalk/dark/css-vars.css';
 import '@/assets/styles/index.less';
 import '@xterm/xterm/css/xterm.css';
 import App from './App.vue';

@@ -9,14 +9,23 @@ ul {
     list-style: none;
 }
 
+:root {
+    --app-bg-color: #f5f5f5;
+}
+
 html,
 body {
     width: 100%;
     min-width: 1200px;
     height: 100vh;
-    color: #333;
+    color: var(--el-text-color-primary);
     font-size: 14px;
     overflow-y: hidden;
+}
+
+html.dark {
+    --el-bg-color: #141414;
+    --app-bg-color: #282828;
 }
 
 a {
@@ -28,26 +37,17 @@ a {
     height: 100%;
 }
 
-// 遮罩块样式
-#fetch-loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    font-size: 20px;
-}
-
 .el-table {
     --el-table-header-bg-color: #f5f7fa !important;
 
     &+.el-pagination {
         margin-top: @gap;
+    }
+}
+
+html.dark {
+    .el-table {
+        --el-table-header-bg-color: var(--el-bg-color-overlay) !important;
     }
 }
 

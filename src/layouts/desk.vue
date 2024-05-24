@@ -158,7 +158,7 @@ function openGithub() {
     width: 100%;
     height: 100%;
     min-height: 600px;
-    background: #f5f5f5;
+    background: var(--app-bg-color);
     --layout-breadcrumb-header: 50px;
 
     :deep(>.content) {
@@ -166,14 +166,14 @@ function openGithub() {
         height: 100%;
 
         .el-main {
-            background: #fff;
+            background: var(--el-bg-color);
             padding: 0;
             margin: @gap;
         }
 
         .el-aside,
         .el-header {
-            background: #fff;
+            background: var(--el-bg-color);
         }
 
         .aside-menu .el-menu-item {
@@ -194,7 +194,7 @@ function openGithub() {
     }
 
     .layout-breadcrumb {
-        background: #fff;
+        background: var(--el-bg-color);
         height: var(--layout-breadcrumb-header);
         display: flex;
         align-items: center;
