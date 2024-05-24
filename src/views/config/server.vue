@@ -2,7 +2,7 @@
     <base-page>
         <template #form>
             <el-form inline labelPosition="right">
-                <el-form-item :label="t('sign')">
+                <el-form-item :label="t('Sign')">
                     <el-input v-model.trim="state.formData.sign" class="g-input" @keypress.enter.native="onSearch"
                         :placeholder="t('enter-sign')" clearable @clear="onSearch" />
                 </el-form-item>
@@ -25,7 +25,7 @@
 
         <Table :data="state.data" row-key="id" @selection-change="onSelect" :row-class-name="activeClassName">
             <el-table-column type="selection" width="55" />
-            <el-table-column prop="uuid" :label="t('sign')" width="320" show-overflow-tooltip />
+            <el-table-column prop="uuid" :label="t('Sign')" width="320" show-overflow-tooltip />
             <el-table-column prop="name" :label="t('Name')" />
             <el-table-column prop="host" :label="t('Host')" />
             <el-table-column prop="port" :label="t('Port')" />

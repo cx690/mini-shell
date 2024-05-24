@@ -231,7 +231,7 @@
   "select-script": "选择脚本",
   "parallel-tasks": "（同一个组合脚本内的脚本将会并发执行）",
   "not-found-script": "找不到要执行的组合脚本：",
-  "sign": "标识",
+  "Sign": "标识",
   "enter-sign": "请输入标识",
   "unknown-table-ignore": "已忽略未知数据表：{storeName}",
   "the-same-sign": "重复标识",

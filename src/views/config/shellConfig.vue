@@ -9,7 +9,7 @@
                         <el-radio-button :label="t('All')" value="all" />
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item :label="t('sign')">
+                <el-form-item :label="t('Sign')">
                     <el-input v-model.trim="state.formData.sign" class="g-input" @keypress.enter.native="onSearch"
                         :placeholder="t('enter-sign')" clearable @clear="onSearch" />
                 </el-form-item>
@@ -33,7 +33,7 @@
 
         <Table :data="state.data" :row-key="rowKey" @selection-change="onSelect">
             <el-table-column type="selection" width="55" />
-            <el-table-column prop="uuid" :label="t('sign')" width="320" show-overflow-tooltip />
+            <el-table-column prop="uuid" :label="t('Sign')" width="320" show-overflow-tooltip />
             <el-table-column prop="scriptName" :label="t('script-config-name')" />
             <el-table-column prop="group" :label="t('group-name')" />
             <el-table-column prop="host" :label="t('relevancy-host')" />
@@ -237,11 +237,20 @@
                                     <el-col :span="20">
                                         <el-form-item :label="t('select-script')">
                                             <el-select v-model="item.value" :placeholder="t('pls-select-script')"
-                                                style="width: 100%;" @change="setItemName(item)">
-                                                <el-option v-for="item of selectScripts" :key="item.id"
-                                                    :value="item.uuid" :label="item.scriptName">
-                                                    {{ item.scriptName }}
-                                                </el-option>
+                                                style="width: 100%;" @change="setItemName(item)" filterable>
+                                                <el-popover v-for="item of selectScripts" :key="item.id"
+                                                    :value="item.uuid" :label="item.scriptName" placement="top"
+                                                    :title="item.scriptName">
+                                                    <p>{{ t('Sign') }}：{{ item.uuid }}</p>
+                                                    <p>{{ t('group-name') }}：{{ item.group }}</p>
+                                                    <p>{{ t('relevancy-host') }}：{{ item.host }}</p>
+                                                    <template #reference>
+                                                        <el-option :key="item.id" :value="item.uuid"
+                                                            :label="item.scriptName">
+                                                            {{ item.scriptName }}
+                                                        </el-option>
+                                                    </template>
+                                                </el-popover>
                                             </el-select>
                                         </el-form-item>
                                     </el-col>

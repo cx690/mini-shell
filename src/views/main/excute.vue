@@ -49,14 +49,15 @@
                     <el-form :model="formData" inline>
                         <el-form-item :label="t('group-select')">
                             <el-select v-model="formData.group" :placeholder="t('pls-select')" clearable
-                                style="width: 160px;">
+                                style="width: 160px;" filterable>
                                 <el-option v-for="(item, index) of state.groupList" :key="index" :label="item"
                                     :value="item" />
                             </el-select>
                         </el-form-item>
                         <el-form-item :label="t('script-select')" class="script-btns">
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
-                                :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup">
+                                :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup"
+                                filterable>
                                 <template #header>
                                     {{ t('Show-All') }}
                                     <el-switch v-model="state.showAll" />
@@ -581,7 +582,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
             const { combine } = item;
             if (combine?.length) {
                 logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
-                logInfo(`<p class="subtitle">${t('excute-script-cmd')}</p><pre class="cmd">${combine.map(item => `${t('script-name')}:${item.name || 'unknown'} ${t('sign')}:${item.value}`).join('; ')}</pre>`);
+                logInfo(`<p class="subtitle">${t('excute-script-cmd')}</p><pre class="cmd">${combine.map(item => `${t('script-name')}:${item.name || 'unknown'} ${t('Sign')}:${item.value}`).join('; ')}</pre>`);
                 const notFound: any[] = []
                 const shells = combine.map(item => {
                     const find = state.shellList.find(shell => shell.uuid === item.value);

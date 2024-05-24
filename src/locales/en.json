@@ -231,7 +231,7 @@
   "select-script": "Select a script",
   "parallel-tasks": "(Scripts within the same combined script will be executed concurrently)",
   "not-found-script": "Unable to find combined script to execute:",
-  "sign": "Sign",
+  "Sign": "Sign",
   "enter-sign": "Please enter sign",
   "unknown-table-ignore": "Ignored unknown table: {storeName}",
   "the-same-sign": "The same sign",
