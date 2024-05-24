@@ -565,7 +565,9 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
                 logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
+                const start = dayjs();
                 const result = await (clientStore.client!.uploadFile(local, remote, !settings.config.showUploadProcess));
+                logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {
