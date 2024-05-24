@@ -15,6 +15,9 @@ Scripts that can be executed on the local machine, including PowerShell, bat, an
 - File Upload Scripts
 Used to upload local folders or files to a remote SSH-connected Linux server.
 
+- Combined scripts
+Run other scripts you set, multiple scripts can be running simultaneously.
+
 ### Create Server Connection Configurations
 Create the necessary SSH connections to Linux servers in the "Connection Configuration" section, including information such as username, password, port, etc.
 

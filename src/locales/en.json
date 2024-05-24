@@ -226,7 +226,7 @@
   "view-after-set": "Please set scripts!",
   "env-only": "Use only the following environment variables",
   "env-merge": "Merge the following environment variables (include system environment variables)",
-  "combined-script": "Combined script",
+  "combined-script": "Combined scripts",
   "unknown-script": "Unknown script",
   "pls-select-script": "Please select a script",
   "select-script": "Select a script",
