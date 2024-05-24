@@ -5,8 +5,17 @@
                 <div class="header">
                     <div>{{ t('title') }}</div>
                     <div class="extra">
-                        <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">{{ t('cancel_close_windows')
-                            }}</el-button>
+                        <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">
+                            {{ t('cancel_close_windows') }}
+                        </el-button>
+                        <el-switch v-model="settings.config.dark" style="margin-left: 24px">
+                            <template #active-action>
+                                <Moon />
+                            </template>
+                            <template #inactive-action>
+                                <Sunny />
+                            </template>
+                        </el-switch>
                         <el-dropdown @command="onChangeLocal">
                             <i class="el-icon" style="font-size: 24px;">
                                 <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" width="1.2em"
@@ -90,10 +99,11 @@
 import { menus, MetaType } from '@/router';
 import { useRoute, useRouter } from 'vue-router';
 import { RouterLink, RouterView } from 'vue-router';
-import { computed } from 'vue';
-import { Remove, Plus } from '@element-plus/icons-vue';
+import { computed, ref } from 'vue';
+import { Remove, Plus, Moon, Sunny } from '@element-plus/icons-vue';
 import useWin from '@/store/useWin';
 import { useI18n } from 'vue-i18n';
+import useSettings from '@/store/useSetting';
 
 const route = useRoute();
 const router = useRouter();
@@ -151,6 +161,8 @@ onChangeLocal(localStorage.locale);
 function openGithub() {
     electronAPI.openExternal('https://github.com/cx690/mini-shell');
 }
+
+const settings = useSettings();
 </script>
 
 <style scoped lang="less">
@@ -217,6 +229,16 @@ function openGithub() {
             gap: 10px;
             align-items: center;
         }
+    }
+}
+
+:deep(.el-switch__core) {
+    --el-switch-on-color: var(--bg-color-mute);
+    --el-switch-off-color: var(--bg-color-mute);
+    --el-switch-border-color: var(--el-border-color);
+
+    >.el-switch__action {
+        color: var(--el-text-color-primary);
     }
 }
 </style>

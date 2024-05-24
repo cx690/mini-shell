@@ -6,12 +6,14 @@ export const pageSizes = [10, 20, 30, 40, 50, 100] as const;
 export type ConfigType = {
     pageSize: (typeof pageSizes)[number],
     showUploadProcess: boolean,
+    dark: boolean,
 }
 
 const useSettings = defineStore('settings', () => {
     const config = reactive<ConfigType>({
         pageSize: 10,
         showUploadProcess: false,
+        dark: false
     })
 
     window.addEventListener('storage', (e: WindowEventMap['storage']) => {
@@ -28,6 +30,7 @@ const useSettings = defineStore('settings', () => {
                 const data = JSON.parse(str) as ConfigType;
                 config.pageSize = data.pageSize || 10;
                 config.showUploadProcess = !!data.showUploadProcess;
+                config.dark = !!data.dark;
             } catch (error) {
                 localStorage.removeItem('config');
             }
@@ -37,6 +40,12 @@ const useSettings = defineStore('settings', () => {
     initConfig();
     watch(config, () => {
         localStorage.setItem('config', JSON.stringify(config));
+        if (config.dark) {
+            document.querySelector('html')!.classList.add('dark');
+        } else {
+            document.querySelector('html')!.classList.remove('dark');
+        }
+        electronAPI.changeThemeSource(config.dark ? 'dark' : 'light');
     })
     return {
         config,

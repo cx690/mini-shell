@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog } from "electron";
+import { ipcMain, BrowserWindow, dialog, nativeTheme } from "electron";
 import { exec } from 'child_process';
 import createWindow from "./createwin";
 import type { InfoTyoe } from "./preload2Render";
@@ -34,6 +34,10 @@ function events() {
 
     ipcMain.on('switch-locale', function (e, locale?: string) {
         setApplicationMenu(locale);
+    })
+
+    ipcMain.on('change-theme-source', function (e, theme: 'dark' | 'light' | 'system') {
+        nativeTheme.themeSource = theme;
     })
 }
 export default events;

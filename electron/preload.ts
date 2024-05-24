@@ -28,6 +28,8 @@ const electronAPI = {
     platform: process.platform,
     /** 在默认浏览器中打开外部链接 */
     openExternal: (url: string, options?: OpenExternalOptions) => ipcRenderer.invoke('open-external', url, options) as Promise<void>,
+    /** 修改主题样式 */
+    changeThemeSource: (theme: 'dark' | 'light' | 'system') => ipcRenderer.send('change-theme-source', theme),
 }
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 
