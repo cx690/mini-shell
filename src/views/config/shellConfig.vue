@@ -398,7 +398,7 @@ function showDetail(row: ShellListRecoed, isCopy = false) {
         delete param.id;
         delete param.uuid;
     }
-    param.envVar = JSON.stringify(envVar, null, '\t');
+    param.envVar = envVar ? JSON.stringify(envVar, null, '\t') : '';
     param.baseScripts?.forEach((base: any) => {
         if (base.type === 2) {
             base.baseScripts?.forEach((item: any) => {
@@ -408,7 +408,7 @@ function showDetail(row: ShellListRecoed, isCopy = false) {
             })
         }
     });
-    state.parseEnvVarOpt = Object.keys(JSON.parse(param.envVar));
+    state.parseEnvVarOpt = envVar ? Object.keys(envVar) : [];
     state.currentRow = param;
 }
 
