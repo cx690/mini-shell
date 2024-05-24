@@ -35,18 +35,23 @@ const useSettings = defineStore('settings', () => {
                 localStorage.removeItem('config');
             }
         }
+        setTheme();
     }
 
     initConfig();
     watch(config, () => {
         localStorage.setItem('config', JSON.stringify(config));
+        setTheme();
+    })
+
+    function setTheme() {
         if (config.dark) {
             document.querySelector('html')!.classList.add('dark');
         } else {
             document.querySelector('html')!.classList.remove('dark');
         }
         electronAPI.changeThemeSource(config.dark ? 'dark' : 'light');
-    })
+    }
     return {
         config,
     }
