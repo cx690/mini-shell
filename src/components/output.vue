@@ -67,6 +67,10 @@ defineExpose({
             color: #fff;
         }
 
+        .warning {
+            color: var(--el-color-warning);
+        }
+
         .error {
             color: var(--el-color-danger-dark-2);
         }

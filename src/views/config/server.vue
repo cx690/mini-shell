@@ -83,7 +83,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Search, Plus, Download, Delete } from '@element-plus/icons-vue';
-import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
+import { addOrPut, deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import useClient from '@/store/useClient';
 import { ServerListRecord } from '@/utils/tables';
 import { v4 } from 'uuid';
@@ -207,21 +207,14 @@ async function onDelete() {
 async function onConfim() {
     const valid = await addForm.value!.validate().catch(() => false);
     if (valid) {
-        const db = await getDatabase();
-        const transaction = db.transaction(['serverList'], 'readwrite');
-        const objectStore = transaction.objectStore("serverList");
-        let request: any;
-        if (state.currentRow.id) {
-            request = objectStore.put({ ...state.currentRow, uuid: state.currentRow.uuid ? state.currentRow.uuid : v4() });
-        } else {
-            delete state.currentRow.id;
-            request = objectStore.add({ ...state.currentRow, uuid: state.currentRow.uuid ? state.currentRow.uuid : v4() });
-        }
-        request.onsuccess = () => {
+        try {
+            addOrPut({ record: state.currentRow, type: state.currentRow.id ? 'put' : 'add', storeName: 'serverList' });
             ElMessage.success(t('action-success'));
             state.showAdd = false;
             getTableData();
-        };
+        } catch (err) {
+            ElMessage.error(err + '');
+        }
     }
 }
 const clientStore = useClient();

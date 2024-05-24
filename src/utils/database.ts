@@ -1,6 +1,7 @@
 import type { SaveDialogOptions } from "electron";
 import { ElMessage } from "element-plus";
 import { exportData } from ".";
+import { v4 } from "uuid";
 export const AllStore = ['serverList', 'shellList', 'excuteList'] as const;
 export type AllStoreType = typeof AllStore[number];
 export function getDatabase() {
@@ -11,7 +12,7 @@ export function getDatabase() {
             //会话表
             createStore(db, 'serverList', ['name', 'host', 'port', 'username', 'password', 'desc', 'uuid', 'aa']);
             //脚本表
-            createStore(db, 'shellList', ['scriptName', 'host', 'envVar', 'localDir', 'mainPath', 'baseScripts', 'group', 'uuid']);
+            createStore(db, 'shellList', ['scriptName', 'host', 'envVar', 'localDir', 'mainPath', 'baseScripts', 'group', 'uuid', 'hidden']);
             //执行记录表
             createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children']);
         }
@@ -58,16 +59,31 @@ export async function clearStore(store: AllStoreType) {
 }
 
 /** 新增或者修改数据 */
-export async function addOrPut(option: { db: IDBDatabase, type: 'put' | 'add', record: Record<string, any>, storeName: AllStoreType }) {
+export async function addOrPut(option: { db?: IDBDatabase, type: 'put' | 'add', record: Record<string, any>, storeName: AllStoreType }) {
     const { resolve, reject, promise } = Promise.withResolvers<void>();
-    const { db, storeName, record, type } = option;
+    const { storeName, record, type } = option;
+    let { db } = option;
+    if (!db) {
+        db = await getDatabase();
+    }
     const transaction = db.transaction([storeName], 'readwrite');
     const objectStore = transaction.objectStore(storeName);
-    objectStore[type](record);
-    transaction.oncomplete = () => {
-        resolve();
-    }
-    transaction.onerror = (err) => {
+    try {
+        const tagrget = Object.assign({}, record);
+        if (!tagrget.uuid) {
+            tagrget.uuid = v4();
+        }
+        if (type === 'add') {
+            delete tagrget.id;
+        }
+        const action = objectStore[type](tagrget);
+        action.onsuccess = () => {
+            resolve();
+        }
+        action.onerror = (err) => {
+            reject(err);
+        }
+    } catch (err) {
         reject(err);
     }
     return await promise;

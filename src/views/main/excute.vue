@@ -57,6 +57,10 @@
                         <el-form-item :label="t('script-select')" class="script-btns">
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
                                 :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup">
+                                <template #header>
+                                    {{ t('Show-All') }}
+                                    <el-switch v-model="state.showAll" />
+                                </template>
                             </el-select-v2>
                             <el-button class="mgL10" @click="reFresh" :icon="Refresh">
                                 {{ t('refresh-data') }}
@@ -359,6 +363,7 @@ const state = reactive({
     shellNum: 1,
     shellShow: false,
     shellStr: '',
+    /** 全部shell数据 */
     shellList: [] as ShellListRecoed[],
     hostType: 'currentShell' as 'currentHost' | 'all' | 'currentShell' | 'currentGroup',
     currentRecord: null as ExcuteListRecoed | null,
@@ -366,6 +371,7 @@ const state = reactive({
     excuteData: [] as ExcuteListRecoed[],
     groupList: [] as string[],
     selects: [] as ExcuteListRecoed[],
+    showAll: false,
 })
 
 const outputRef = ref<any>();
@@ -497,6 +503,10 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
         exceteRecord.status = 3;
         abort = true;
     })
+    if (!baseScripts?.length) {
+        logInfo(`<p class="warning">${t('no-script-found')}</p>`);
+        return 1;
+    }
     expandItem(exceteRecord, selectShell);
     for (let i = 0, l = baseScripts.length; i < l; i++) {
         const item = baseScripts[i];
@@ -790,7 +800,11 @@ const shellListGroup = computed(() => {
         options: [] as { label: string, value: number }[]
     }];
     const host = clientStore.config?.host || '0.0.0.0';
-    for (const shell of state.shellList) {
+    let shellList = state.shellList;
+    if (!state.showAll) {
+        shellList = shellList.filter(item => !item.hidden);
+    }
+    for (const shell of shellList) {
         const shell_host = shell.host || '0.0.0.0';
         if (shell_host === host && shell.group === formData.group) {
             groups[0].options.push({ value: shell.id!, label: shell.scriptName });

@@ -247,5 +247,13 @@
   "excuteList-name": "执行日志表",
   "add-modify-num": "已成功添加{addNum}条数据，已成功修改{modifyNum}条数据",
   "not-found-combine-script": "找不到指定的组合脚本：{path}",
-  "Circular-dependency": "组合脚本中存在循环依赖：{path}"
+  "Circular-dependency": "组合脚本中存在循环依赖：{path}",
+  "Default": "默认",
+  "Hidden": "隐藏",
+  "view-type": "视图类型",
+  "confirm-hidden-item": "确定要隐藏这条数据吗？",
+  "Hide": "隐藏",
+  "Show": "显示",
+  "Show-All": "显示全部",
+  "no-script-found": "未找到要执行的脚本"
 }

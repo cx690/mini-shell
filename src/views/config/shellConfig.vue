@@ -48,6 +48,14 @@
                             <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
+                    <el-popconfirm :title="t('confirm-hidden-item')" @confirm="hideItem(row, true)" v-if="!row.hidden">
+                        <template #reference>
+                            <el-link type="warning" :underline="false">{{ t('Hide') }}</el-link>
+                        </template>
+                    </el-popconfirm>
+                    <el-link v-else type="warning" :underline="false" @click="hideItem(row, false)">
+                        {{ t('Show') }}
+                    </el-link>
                 </template>
             </el-table-column>
         </Table>
@@ -274,7 +282,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
-import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
+import { addOrPut, deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
@@ -288,6 +296,8 @@ const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
 const addForm = ref<InstanceType<typeof ElForm>>();
 const state = reactive({
+    /** 全部shell数据 */
+    shellList: [] as ShellListRecoed[],
     data: [] as ShellListRecoed[],
     total: 0,
     formData: {
@@ -362,14 +372,20 @@ function onSearch() {
 async function getTableData() {
     state.selects = [];
     let data = await findAll<ShellListRecoed>('shellList');
+    state.shellList = data;
     if (state.formData.sign) {
-        data = data.filter(item => item.uuid?.includes(state.formData.sign))
+        data = data.filter(item => item.uuid?.includes(state.formData.sign));
     }
     if (state.formData.scriptName) {
-        data = data.filter(item => item.scriptName?.includes(state.formData.scriptName))
+        data = data.filter(item => item.scriptName?.includes(state.formData.scriptName));
     }
     if (state.formData.group) {
-        data = data.filter(item => item.group?.includes(state.formData.group))
+        data = data.filter(item => item.group?.includes(state.formData.group));
+    }
+    if (state.formData.viewType === 'default') {
+        data = data.filter(item => !item.hidden);
+    } else if (state.formData.viewType === 'hidden') {
+        data = data.filter(item => !!item.hidden);
     }
     state.data = data;
 }
@@ -485,6 +501,13 @@ async function delItem(id: number | number[]) {
     getTableData();
 }
 
+async function hideItem(row: ShellListRecoed, hidden: boolean) {
+    await addOrPut({ storeName: 'shellList', type: 'put', record: { ...JSON.parse(JSON.stringify(row)), hidden } }).catch((err) => {
+        ElMessage.error(err + '');
+    });
+    getTableData();
+}
+
 async function onDelete() {
     if (!state.selects.length) {
         ElMessage.error(t('pls-select-record'));
@@ -511,29 +534,22 @@ async function onConfim() {
             })
         })
     }
-    const param = {
+    const record = {
         ...state.currentRow,
         uuid: state.currentRow.uuid ? state.currentRow.uuid : v4(),//添加唯一键
         baseScripts,
         ...(state.currentRow.envVar ? { envVar: JSON.parse(state.currentRow.envVar) } : {}),
     } as ShellListRecoed;
-    const pass = await checkLoop(param, t);
+    const pass = await checkLoop(record, t);
     if (!pass) return;
-    const db = await getDatabase();
-    const transaction = db.transaction(['shellList'], 'readwrite');
-    const objectStore = transaction.objectStore("shellList");
-    let request: IDBRequest;
-    if (state.currentRow.id) {
-        request = objectStore.put(param);
-    } else {
-        const { id, ...rest } = param
-        request = objectStore.add(rest);
-    }
-    request.onsuccess = () => {
+    try {
+        await addOrPut({ storeName: 'shellList', type: state.currentRow.id ? 'put' : 'add', record });
         ElMessage.success(t('op-success'));
         getTableData();
         state.showAdd = false;
-    };
+    } catch (err) {
+        ElMessage.error(err + '');
+    }
 }
 
 function getHostOpt(queryString: string, cb: any) {
@@ -582,13 +598,13 @@ function rowKey(row: ShellListRecoed) {
 const isMac = electronAPI.platform === 'darwin';
 
 const selectScripts = computed(() => {
-    const { data, currentRow } = state;
+    const { shellList, currentRow } = state;
     if (!currentRow) return [];
     const { uuid } = currentRow;
     if (!uuid) {
-        return data;
+        return shellList;
     }
-    return data?.filter(item => item.uuid !== uuid) || [];
+    return shellList?.filter(item => item.uuid !== uuid) || [];
 })
 
 function setItemName(item: { name: string, value: string }) {

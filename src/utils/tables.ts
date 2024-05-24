@@ -50,6 +50,8 @@ export interface ShellListRecoed<T extends 'edit' | 'record' = 'record'> extends
     mainPath?: string,
     group?: string,
     host?: string,
+    /** 是否在列表中隐藏数据，默认展示 */
+    hidden?: boolean,
 }
 
 export function useExcuteListRecoedStatus() {
