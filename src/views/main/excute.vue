@@ -57,7 +57,7 @@
                         <el-form-item :label="t('script-select')" class="script-btns">
                             <el-select-v2 v-model="formData.selectShellCode" @change="onSelectShell"
                                 :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup"
-                                filterable>
+                                filterable clearable>
                                 <template #header>
                                     {{ t('Show-All') }}
                                     <el-switch v-model="state.showAll" />
@@ -433,20 +433,14 @@ function hasType(selectShell: ShellListRecoed, type: 1 | 2 | 3 | 4) {
 }
 const excuteAbort: Record<string, AbortController> = {};
 async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
-    let type = [1, 2, 3];
-    if (checkList?.length) {
-        type = checkList.map(item => item.type);
-    }
     if (!formData.selectShell) return;
     const selectShell = formData.selectShell;
-    if (clientStore.status === 2 && selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3)) && (hasType(selectShell, 1) || hasType(selectShell, 3))) {
-        const action = await ElMessageBox.confirm(t('excute-unsame-host-script', { scriptName: selectShell.scriptName ?? t('unnamed'), host: selectShell.host }), t('Hint'), {
-            type: 'warning',
-        }).catch(action => action);
-        if (action !== 'confirm') {
-            return;
-        }
-    }
+    if (!selectShell.baseScripts?.length) {
+        ElMessage.error(t('set-config-excute'));
+        return
+    };
+
+    // 重复执行检查
     for (const item of state.excuteData) {
         if (item.excuteId === selectShell?.uuid && (item.status === 0 || item.status === 3)) {
             const action = await ElMessageBox.confirm(t('already-excute', { scriptName: selectShell.scriptName ?? t('unnamed') }), t('Hint'), {
@@ -457,17 +451,36 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
             }
         }
     }
-    if (!selectShell.baseScripts?.length) {
-        ElMessage.error(t('set-config-excute'));
-        return
-    };
-    if (clientStore.status !== 2 && selectShell.baseScripts.find(item => item.type === 1 || item.type === 3) && (type.includes(1) || type.includes(3))) {
+    /** 要执行的脚本含有的类型 */
+    let type: number[];
+    if (checkList?.length) {
+        type = Array.from(new Set(checkList.map(item => item.type)));
+    } else {
+        type = Array.from(new Set(selectShell.baseScripts.map(item => item.type)));
+    }
+
+    if (type.includes(4)) {
+        const { pass, shellsFlat } = await checkLoop(selectShell, t, state.shellList);
+        if (!pass) return;
+        if (type.length !== 4) {
+            type = Array.from(shellsFlat.map(shell => shell.baseScripts.map(item => item.type)).flat());
+        }
+    }
+
+    if (clientStore.status !== 2 && (type.includes(1) || type.includes(3))) {
         ElMessage.error(t('contans-remote-script-unexcute'));
         return;
     }
 
-    const pass = await checkLoop(selectShell, t, state.shellList)
-    if (!pass) return;
+    // host 检查，不检查子脚本中的host
+    if (clientStore.status === 2 && selectShell.host !== clientStore.config?.host && (type.includes(1) || type.includes(3))) {
+        const action = await ElMessageBox.confirm(t('excute-unsame-host-script', { scriptName: selectShell.scriptName ?? t('unnamed'), host: selectShell.host }), t('Hint'), {
+            type: 'warning',
+        }).catch(action => action);
+        if (action !== 'confirm') {
+            return;
+        }
+    }
 
     const uuid = v4();
     state.excuteData.unshift({
@@ -478,7 +491,7 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
         time: '',
         excuteId: selectShell.uuid,
         excuteGroup: selectShell.group,
-        excuteType: (checkList && checkList.length) ? (checkList.length === selectShell.baseScripts.length ? 0 : 1) : 0,
+        excuteType: checkList?.length ? (checkList.length === selectShell.baseScripts.length ? 0 : 1) : 0,
         status: 0,
         logs: '',
         uuid,
@@ -586,7 +599,10 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
             const { combine } = item;
             if (combine?.length) {
                 logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
-                logInfo(`<p class="subtitle">${t('excute-script-cmd')}</p><pre class="cmd">${combine.map(item => `${t('script-name')}:${item.name || 'unknown'} ${t('Sign')}:${item.value}`).join('; ')}</pre>`);
+                logInfo(`
+                    <p class="subtitle">${t('excute-script-cmd')}</p>
+                    <p class="cmd">${combine.map(item => `${t('script-name')}:${item.name || 'unknown'} ${t('Sign')}:${item.value}`).join('<br/>')}</p>
+                `);
                 const notFound: any[] = []
                 const shells = combine.map(item => {
                     const find = state.shellList.find(shell => shell.uuid === item.value);

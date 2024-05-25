@@ -10,6 +10,7 @@ export async function checkLoop(shell: ShellListRecoed | ShellListRecoed<'edit'>
     }
     const notFound: PathItem[][] = [];
     const circle: PathItem[][] = [];
+    const shellsFlat: (ShellListRecoed | ShellListRecoed<'edit'>)[] = [shell];
     function checkComine(shell: ShellListRecoed | ShellListRecoed<'edit'>, parent: PathItem[] = []) {
         if (parent.length) {
             const find = parent.find(item => item.value === shell.uuid);
@@ -32,6 +33,7 @@ export async function checkLoop(shell: ShellListRecoed | ShellListRecoed<'edit'>
                     notFound.push([...parent, { name: shell.scriptName, value: shell.uuid }]);
                     return;
                 } else {
+                    shellsFlat.push(target);
                     checkComine(target, [...parent, { name: shell.scriptName, value: shell.uuid }]);
                 }
             }
@@ -57,7 +59,7 @@ export async function checkLoop(shell: ShellListRecoed | ShellListRecoed<'edit'>
         })
         pass = false;
     }
-    return pass;
+    return { pass, notFound, circle, shellsFlat };
 }
 
 export function formatPath(arr: PathItem[][]) {

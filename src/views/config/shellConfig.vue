@@ -235,7 +235,8 @@
                             <template v-if="base.combine">
                                 <el-row :gutter="8" v-for="(item, index) of base.combine">
                                     <el-col :span="20">
-                                        <el-form-item :label="t('select-script')">
+                                        <el-form-item :label="t('select-script')" :rules="combineRules"
+                                            :prop="`baseScripts.${num}.combine.${index}.value`">
                                             <el-select v-model="item.value" :placeholder="t('pls-select-script')"
                                                 style="width: 100%;" @change="setItemName(item)" filterable>
                                                 <el-popover v-for="item of selectScripts" :key="item.id"
@@ -364,6 +365,11 @@ const envRules = {
     },
     trigger: 'blur'
 }
+
+const combineRules = computed(() => ({
+    required: true,
+    message: t('pls-select-script')
+}))
 
 const configPleaseHold = computed(() => `${t('enter-json')}：
 {
@@ -549,7 +555,7 @@ async function onConfim() {
         baseScripts,
         ...(state.currentRow.envVar ? { envVar: JSON.parse(state.currentRow.envVar) } : {}),
     } as ShellListRecoed;
-    const pass = await checkLoop(record, t);
+    const { pass } = await checkLoop(record, t);
     if (!pass) return;
     try {
         await addOrPut({ storeName: 'shellList', type: state.currentRow.id ? 'put' : 'add', record });
