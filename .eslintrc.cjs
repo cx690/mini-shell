@@ -4,7 +4,6 @@ module.exports = {
     ecmaVersion: 2020,
     parser: '@typescript-eslint/parser',
     sourceType: 'module',
-    extraFileExtensions: ['.vue'],
   },
   plugins: ["@typescript-eslint"],
   // "extends": ["plugin:@typescript-eslint/recommended"],
