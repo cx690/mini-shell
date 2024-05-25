@@ -292,7 +292,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
-import { addOrPut, deleteItemsById, findAll, getDatabase } from '@/utils/database';
+import { addOrPut, deleteItemsById, findAll } from '@/utils/database';
 import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
@@ -506,6 +506,7 @@ function onExport() {
         return;
     }
     const text = JSON.stringify({
+         /* eslint-disable-next-line */
         shellList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
     exportData(text, { defaultPath: 'shellList' }, t);

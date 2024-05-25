@@ -893,6 +893,7 @@ function onExport() {
         return;
     }
     const text = JSON.stringify({
+         /* eslint-disable-next-line */
         excuteList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
     exportData(text, { defaultPath: 'logs' }, t);

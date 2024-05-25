@@ -83,10 +83,9 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { Search, Plus, Download, Delete } from '@element-plus/icons-vue';
-import { addOrPut, deleteItemsById, findAll, getDatabase } from '@/utils/database';
+import { addOrPut, deleteItemsById, findAll } from '@/utils/database';
 import useClient from '@/store/useClient';
 import { ServerListRecord } from '@/utils/tables';
-import { v4 } from 'uuid';
 import { exportData } from '@/utils';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -181,6 +180,7 @@ function onExport() {
         return;
     }
     const text = JSON.stringify({
+        /* eslint-disable-next-line */
         serverList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
     exportData(text, { defaultPath: 'serverList' }, t);

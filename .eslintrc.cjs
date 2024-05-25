@@ -1,13 +1,16 @@
 module.exports = {
-  parser: "@typescript-eslint/parser",
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    ecmaVersion: 2020,
+    parser: '@typescript-eslint/parser',
+    sourceType: 'module',
+    extraFileExtensions: ['.vue'],
+  },
   plugins: ["@typescript-eslint"],
   // "extends": ["plugin:@typescript-eslint/recommended"],
   env: {
     "node": true,
     "es6": true
-  },
-  parserOptions: {
-    ecmaVersion: 2020
   },
   rules: {
     "@typescript-eslint/no-unused-vars": 1,//未使用变量

@@ -23,7 +23,7 @@ export default defineConfig({
         initialIsOpen: false,
       },
       eslint: {
-        lintCommand: 'eslint --ext .js,.ts,.tsx ./src ./electron',
+        lintCommand: 'eslint --ext .js,.ts,.tsx,.vue ./src ./electron',
       },
       enableBuild: false,
     }),
