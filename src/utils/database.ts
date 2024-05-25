@@ -100,7 +100,7 @@ export async function exportTables(t?: ReturnType<typeof import('vue-i18n').useI
                 const storeName = objectStoreNames[i];
                 const res = await findAll(storeName);
                 const resWithoutId = res.map((item: any) => {
-                    const { id, ...rest } = item;/* eslint-disable-line */
+                    const { id, ...rest } = item;
                     return rest;
                 });
                 dataObj[storeName] = resWithoutId

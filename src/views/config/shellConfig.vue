@@ -506,7 +506,6 @@ function onExport() {
         return;
     }
     const text = JSON.stringify({
-         /* eslint-disable-next-line */
         shellList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
     exportData(text, { defaultPath: 'shellList' }, t);
