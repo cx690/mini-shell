@@ -8,7 +8,7 @@
                         <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">
                             {{ t('cancel_close_windows') }}
                         </el-button>
-                        <el-switch v-model="settings.config.dark" style="margin-left: 24px;margin: 0 10px;">
+                        <el-switch v-model="settings.config.dark" style="margin-left: 24px;margin: 0 10px;" class="theme-switch">
                             <template #active-action>
                                 <Moon />
                             </template>
@@ -232,7 +232,7 @@ const settings = useSettings();
     }
 }
 
-:deep(.el-switch__core) {
+.theme-switch :deep(.el-switch__core) {
     --el-switch-on-color: var(--bg-color-mute);
     --el-switch-off-color: var(--bg-color-mute);
     --el-switch-border-color: var(--el-border-color);
