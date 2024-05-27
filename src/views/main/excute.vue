@@ -59,8 +59,10 @@
                                 :placeholder="t('pls-select')" style="width: 220px;" :options="shellListGroup"
                                 filterable clearable>
                                 <template #header>
-                                    {{ t('Show-All') }}
-                                    <el-switch v-model="state.showAll" />
+                                    <header class="sholl-all">
+                                        <span> {{ t('Show-All') }}</span>
+                                        <el-switch class="mgL10" v-model="state.showAll" />
+                                    </header>
                                 </template>
                             </el-select-v2>
                             <el-button class="mgL10" @click="reFresh" :icon="Refresh">
@@ -1035,6 +1037,10 @@ function rowKey(row: ShellListRecoed) {
     margin-left: 10px;
 }
 
+.sholl-all {
+    display: flex;
+    align-items: center;
+}
 
 .select-shell-scripts {
     display: grid;
