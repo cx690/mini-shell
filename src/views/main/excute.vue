@@ -895,7 +895,7 @@ function onExport() {
         return;
     }
     const text = JSON.stringify({
-        excuteList: state.selects.map(({ id, ...rest }) => rest),
+        excuteList: state.selects.map(({ id, ...rest }) => id ? rest : null).filter(Boolean),
     }, null, 5)
     exportData(text, { defaultPath: 'logs' }, t);
 }
