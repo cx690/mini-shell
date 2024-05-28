@@ -3,7 +3,7 @@
 </template>
 <script setup lang="ts" name="Terminal">
 import useClient from '@/store/useClient';
-// import { useResize } from '@/utils/hooks';
+import { useResize } from '@/utils/hooks';
 import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
 import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/ssh2';
@@ -16,10 +16,9 @@ const term = new Terminal();
 
 const channel = ref<ChannelType | null | undefined>(null);
 const { t } = useI18n();
-// useResize(div, term)
+useResize(div, term, channel);
 onMounted(() => {
     term.open(div.value!);
-    term.resize(120, 43);//直接固定宽高列
     props.init && initShell();
     term.onKey((e) => {
         if (clientStore.status !== 2) {
@@ -80,7 +79,7 @@ function onClick() {
 <style lang="less" scoped>
 .terminal {
     width: 100%;
-    min-width: 1200px;
+    min-width: 900px;
     min-height: 740px;
     background: #000;
     overflow: hidden;

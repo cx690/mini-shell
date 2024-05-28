@@ -1,6 +1,10 @@
-import { onActivated, computed } from "vue";
+import { onActivated, computed, Ref, onMounted, onBeforeMount, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from 'vue-i18n';
+import { FitAddon } from '@xterm/addon-fit';
+import { Terminal } from "@xterm/xterm";
+import { debounce } from ".";
+import type { ChannelType } from 'electron/ssh2';
 
 // import type { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "xterm-addon-fit";
@@ -67,26 +71,34 @@ export function useEnum<T extends Record<string, string> = Record<string, string
     return computed<T>(() => callback(t));
 }
 
-//term 内部bug https://github.com/xtermjs/xterm.js/issues/4841
-// export function useResize(div: Ref<HTMLDivElement | null | undefined>, term: Terminal) {
-//     const fitAddon = new FitAddon();
-//     term.loadAddon(fitAddon);
+/** 重置视图大小并通知channel重置大小 */
+export function useResize(div: Ref<HTMLDivElement | null | undefined>, term: Terminal, channel: Ref<ChannelType | null | undefined>) {
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
 
-//     const fit = debounce(() => {
-//         fitAddon.fit();
-//     })
-//     const rob = new ResizeObserver((entries) => {
-//         const el = entries.find(el => el.target === div.value)?.target as (HTMLDivElement | undefined);
-//         if (el && el.offsetHeight && el.offsetWidth) {
-//             fit();
-//         }
-//     })
-//     onMounted(() => {
-//         div.value && rob.observe(div.value);
-//     })
+    const fit = debounce((opt: { width: number, height: number }) => {
+        fitAddon.fit();
+        channel.value?.setWindow(Object.assign(opt, fitAddon.proposeDimensions()));
+    })
+    const rob = new ResizeObserver((entries) => {
+        const el = entries.find(el => el.target === div.value)?.target as (HTMLDivElement | undefined);
+        if (el && el.offsetHeight && el.offsetWidth) {
+            fit({ width: el.offsetWidth, height: el.offsetHeight });
+        }
+    })
 
-//     onBeforeMount(() => {
-//         div.value && rob.unobserve(div.value);
-//     })
-//     return fit;
-// }
+    onMounted(() => {
+        div.value && rob.observe(div.value);
+    })
+
+    onBeforeMount(() => {
+        div.value && rob.unobserve(div.value);
+    })
+
+    watch(channel, () => {
+        if (div.value && channel.value) {
+            fit({ width: div.value.offsetWidth, height: div.value.offsetHeight });
+        }
+    })
+    return fit;
+}

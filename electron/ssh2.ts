@@ -42,7 +42,6 @@ function getClient() {
                     if (err) {
                         console.error(err);
                     }
-                    channel.setWindow(43, 120, 740, 1200);
                     channel.on('close', (code: number, signal: number) => {
                         callbackInfo?.({
                             code: code ?? -1,
@@ -74,6 +73,9 @@ function getClient() {
                         },
                         end: function (...args: any[]) {
                             channel.end(...args);
+                        },
+                        setWindow: function ({ cols, rows, width, height }: { cols: number, rows: number, height: number, width: number }) {
+                            channel.setWindow(rows, cols, height, width);
                         }
                     });
                 })
@@ -274,5 +276,6 @@ function emitUpload(quiet: boolean) {
 export type ClientType = ReturnType<typeof getClient>;
 export type ChannelType = {
     write(command: string): void,
-    end(...args: any[]): void
+    end(...args: any[]): void,
+    setWindow(opt: { cols: number, rows: number, height: number, width: number }): void,
 }
