@@ -19,7 +19,7 @@ const { t } = useI18n();
 // useResize(div, term)
 onMounted(() => {
     term.open(div.value!);
-    term.resize(80, 43);//直接固定宽高列
+    term.resize(120, 43);//直接固定宽高列
     props.init && initShell();
     term.onKey((e) => {
         if (clientStore.status !== 2) {
@@ -80,6 +80,7 @@ function onClick() {
 <style lang="less" scoped>
 .terminal {
     width: 100%;
+    min-width: 1200px;
     min-height: 740px;
     background: #000;
     overflow: hidden;

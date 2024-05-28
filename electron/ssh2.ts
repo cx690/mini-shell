@@ -42,6 +42,7 @@ function getClient() {
                     if (err) {
                         console.error(err);
                     }
+                    channel.setWindow(43, 120, 740, 1200);
                     channel.on('close', (code: number, signal: number) => {
                         callbackInfo?.({
                             code: code ?? -1,
