@@ -25,7 +25,8 @@ module.exports = {
             'README.md',
             '.gitignore',
             'forge.config.js',
-            'temp'
+            'temp',
+            'img'
         ]
     }
 }
