@@ -37,9 +37,12 @@ defineExpose({
     font-size: 15px;
     font-family: monospace;
 
-    &::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 1);
-        box-shadow: inset 0 0 5px rgba(255, 255, 255, 1);
+    &::-webkit-scrollbar-thumb {
+        background-color: #fff3;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: #fff6;
     }
 
     :deep(>div) {

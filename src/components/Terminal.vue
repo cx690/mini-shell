@@ -1,5 +1,5 @@
 <template>
-    <div class="terminal" ref="div" @click="onClick"></div>
+    <div class="terminal dark" ref="div" @click="onClick"></div>
 </template>
 <script setup lang="ts" name="Terminal">
 import useClient from '@/store/useClient';
@@ -84,12 +84,5 @@ function onClick() {
     background: #000;
     overflow: hidden;
     padding: 5px 0 0 11px;
-
-    :deep(.xterm-viewport) {
-        &::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 1);
-            box-shadow: inset 0 0 5px rgba(255, 255, 255, 1);
-        }
-    }
 }
 </style>
