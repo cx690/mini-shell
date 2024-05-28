@@ -910,11 +910,12 @@ async function onDelete() {
         ElMessage.error(t('pls-select-record'));
         return;
     }
-    const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: state.selects.length }), t('delete-confirm'), {
+    const selects = state.selects.map(item => item.id!).filter(Boolean);
+    const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: selects.length }), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {
-        delItem(state.selects.map(item => item.id!).filter(Boolean));
+        delItem(selects);
     }
 }
 
