@@ -7,7 +7,7 @@ module.exports = {
   },
   plugins: ["@typescript-eslint"],
   extends: ["plugin:@typescript-eslint/recommended"],
-  ignorePatterns: ["src/extend.d.ts"],
+  ignorePatterns: ["*.d.ts"],
   env: {
     "node": true,
     "es6": true
