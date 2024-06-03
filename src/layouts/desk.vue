@@ -8,7 +8,8 @@
                         <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">
                             {{ t('cancel_close_windows') }}
                         </el-button>
-                        <el-switch v-model="settings.config.dark" style="margin-left: 24px;margin: 0 10px;" class="theme-switch">
+                        <el-switch v-model="settings.config.dark" style="margin-left: 24px;margin: 0 10px;"
+                            class="theme-switch">
                             <template #active-action>
                                 <Moon />
                             </template>
@@ -27,8 +28,9 @@
                             </i>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item command="zh-cn">中文</el-dropdown-item>
-                                    <el-dropdown-item command="en">English</el-dropdown-item>
+                                    <el-dropdown-item v-for="item of localeOptions" :command="item.value">
+                                        {{ item.name }}
+                                    </el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
@@ -104,6 +106,7 @@ import { Remove, Plus, Moon, Sunny } from '@element-plus/icons-vue';
 import useWin from '@/store/useWin';
 import { useI18n } from 'vue-i18n';
 import useSettings from '@/store/useSetting';
+import { localeOptions } from '@/i18n';
 
 const route = useRoute();
 const router = useRouter();
@@ -152,9 +155,38 @@ function onCancelColose() {
 const { t, locale } = useI18n();
 
 function onChangeLocal(command?: string) {
-    locale.value = command === 'en' ? 'en' : 'zh-cn';
+    locale.value = command ?? 'zh-cn';
     localStorage.locale = locale.value;
-    electronAPI.switchLocale(locale.value);
+    electronAPI.switchLocale(locale.value,{
+        menu:{
+            File: t('menu.File'),
+            settings: t('menu.settings'),
+            quit: t('menu.quit'),
+            Edit: t('menu.Edit'),
+            undo: t('menu.undo'),
+            redo: t('menu.redo'),
+            cut: t('menu.cut'),
+            copy: t('menu.copy'),
+            paste: t('menu.paste'),
+            delete: t('menu.delete'),
+            selectAll: t('menu.selectAll'),
+            View: t('menu.View'),
+            reload: t('menu.reload'),
+            forceReload: t('menu.forceReload'),
+            toggleDevTools: t('menu.toggleDevTools'),
+            resetZoom: t('menu.resetZoom'),
+            zoomIn: t('menu.zoomIn'),
+            togglefullscreen: t('menu.togglefullscreen'),
+            zoomOut: t('menu.zoomOut'),
+            Window: t('menu.Window'),
+            minimize: t('menu.minimize'),
+            maxmize: t('menu.maxmize'),
+            restore: t('menu.restore'),
+            close: t('menu.close'),
+            LearnMore: t('menu.LearnMore'),
+            Help: t('menu.Help'),
+        }
+    });
 }
 onChangeLocal(localStorage.locale);
 

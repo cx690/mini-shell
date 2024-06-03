@@ -2,8 +2,7 @@ import { app, Menu, shell, BrowserWindow } from 'electron';
 
 const isMac = process.platform === 'darwin';
 
-function getTemplate(local = 'zh-cn') {
-    const isEn = local === 'en';
+function getTemplate(munu?: MenuLocale) {
     const template: any[] = [
         ...(isMac
             ? [{
@@ -22,10 +21,10 @@ function getTemplate(local = 'zh-cn') {
             }]
             : []),
         {
-            label: isEn ? 'File' : '文件',
+            label: munu?.File ?? '文件',
             submenu: [
                 {
-                    label: isEn ? 'settings' : '设置',
+                    label: munu?.settings ?? '设置',
                     click: (MenuItem: any, win: BrowserWindow) => {
                         const url = new URL(win.webContents.getURL());
                         if (url.hash !== '#/about/settings') {
@@ -34,18 +33,18 @@ function getTemplate(local = 'zh-cn') {
                         }
                     }
                 },
-                { role: isMac ? 'close' : 'quit', label: isEn ? 'quit' : '退出' }
+                { role: isMac ? 'close' : 'quit', label: munu?.quit ?? '退出' }
             ]
         },
         {
-            label: isEn ? 'Edit' : '编辑',
+            label: munu?.Edit ?? '编辑',
             submenu: [
-                { role: 'undo', label: isEn ? 'undo' : '撤销' },
-                { role: 'redo', label: isEn ? 'redo' : '重做' },
+                { role: 'undo', label: munu?.undo ?? '撤销' },
+                { role: 'redo', label: munu?.redo ?? '重做' },
                 { type: 'separator' },
-                { role: 'cut', label: isEn ? 'cut' : '剪切' },
-                { role: 'copy', label: isEn ? 'copy' : '复制' },
-                { role: 'paste', label: isEn ? 'paste' : '粘贴' },
+                { role: 'cut', label: munu?.cut ?? '剪切' },
+                { role: 'copy', label: munu?.copy ?? '复制' },
+                { role: 'paste', label: munu?.paste ?? '粘贴' },
                 ...(isMac
                     ? [
                         { role: 'pasteAndMatchStyle' },
@@ -61,36 +60,36 @@ function getTemplate(local = 'zh-cn') {
                         }
                     ]
                     : [
-                        { role: 'delete', label: isEn ? 'undo' : '删除' },
+                        { role: 'delete', label: munu?.delete ?? '删除' },
                         { type: 'separator' },
-                        { role: 'selectAll', label: isEn ? 'undo' : '全选' }
+                        { role: 'selectAll', label: munu?.selectAll ?? '全选' }
                     ])
             ]
         },
         {
-            label: isEn ? 'View' : '视图',
+            label: munu?.View ?? '视图',
             submenu: [
-                { role: 'reload', label: isEn ? 'reload' : '重新加载' },
-                { role: 'forceReload', label: isEn ? 'forceReload' : '强制重新加载' },
-                { role: 'toggleDevTools', label: isEn ? 'toggleDevTools' : '开发者工具', accelerator: 'F12' },
+                { role: 'reload', label: munu?.reload ?? '重新加载' },
+                { role: 'forceReload', label: munu?.forceReload ?? '强制重新加载' },
+                { role: 'toggleDevTools', label: munu?.toggleDevTools ?? '开发者工具', accelerator: 'F12' },
                 { type: 'separator' },
-                { role: 'resetZoom', label: isEn ? 'resetZoom' : '重置缩放' },
-                { role: 'zoomIn', label: isEn ? 'zoomIn' : '放大' },
-                { role: 'zoomOut', label: isEn ? 'zoomOut' : '缩小' },
+                { role: 'resetZoom', label: munu?.resetZoom ?? '重置缩放' },
+                { role: 'zoomIn', label: munu?.zoomIn ?? '放大' },
+                { role: 'zoomOut', label: munu?.zoomOut ?? '缩小' },
                 { type: 'separator' },
-                { role: 'togglefullscreen', label: isEn ? 'togglefullscreen' : '进入/退出全屏' }
+                { role: 'togglefullscreen', label: munu?.togglefullscreen ?? '进入/退出全屏' }
             ]
         },
         {
-            label: isEn ? 'Window' : '窗口',
+            label: munu?.Window ?? '窗口',
             submenu: [
                 {
                     role: 'minimize',
-                    label: isEn ? 'minimize' : '最小化',
+                    label: munu?.minimize ?? '最小化',
                     accelerator: 'Ctrl+Shift+M',
                 },
                 {
-                    label: isEn ? 'maxmize' : '最大化',
+                    label: munu?.maxmize ?? '最大化',
                     accelerator: 'Ctrl+Shift+Z',
                     click: (item: any, win: BrowserWindow) => {
                         if (win) {
@@ -99,7 +98,7 @@ function getTemplate(local = 'zh-cn') {
                     }
                 },
                 {
-                    label: isEn ? 'restore' : '恢复',
+                    label: munu?.restore ?? '恢复',
                     accelerator: 'CmdOrCtrl+Shift+N',
                     click: (item: any, win: BrowserWindow) => {
                         if (win) {
@@ -115,16 +114,16 @@ function getTemplate(local = 'zh-cn') {
                         { role: 'window' }
                     ]
                     : [
-                        { role: 'close', label: isEn ? 'close' : '退出' }
+                        { role: 'close', label: munu?.close ?? '退出' }
                     ])
             ]
         },
         ...(process.env.NODE_ENV === 'development' ? [{
             role: 'help',
-            label: isEn ? 'Help' : '帮助',
+            label: munu?.Help ?? '帮助',
             submenu: [
                 {
-                    label: isEn ? 'Learn more' : '学习更多',
+                    label: munu?.LearnMore ?? '学习更多',
                     click: async () => {
                         await shell.openExternal('https://electronjs.org');
                     }
@@ -137,9 +136,38 @@ function getTemplate(local = 'zh-cn') {
 }
 
 let lang: string | undefined = 'zh-ch';
-export function setApplicationMenu(local?: string) {
+
+export type MenuLocale = {
+    File: string,
+    settings: string,
+    quit: string,
+    Edit: string,
+    undo: string,
+    redo: string,
+    cut: string,
+    copy: string,
+    paste: string,
+    delete: string,
+    selectAll: string,
+    View: string,
+    reload: string,
+    forceReload: string,
+    toggleDevTools: string,
+    resetZoom: string,
+    zoomIn: string,
+    togglefullscreen: string,
+    zoomOut: string,
+    Window: string,
+    minimize: string,
+    maxmize: string,
+    restore: string,
+    close: string,
+    LearnMore: string,
+    Help: string,
+}
+export function setApplicationMenu(local?: string, option?: { menu: MenuLocale }) {
     if (local === lang) return;
-    const menu = Menu.buildFromTemplate(getTemplate(local));
+    const menu = Menu.buildFromTemplate(getTemplate(option?.menu));
     Menu.setApplicationMenu(menu);
     lang = local;
 }

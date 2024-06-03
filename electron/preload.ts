@@ -3,13 +3,14 @@ import getClient from './ssh2';
 import type { InfoEvent, InfoTyoe } from './preload2Render';
 import './preload2Render';
 import type { OptionsType } from './cmd';
+import { MenuLocale } from './menu';
 const electronAPI = {
     getClient,
     open: (url: string) => ipcRenderer.send('open-url', url),
     /** 通知主线程任务数量 */
     setTaskNum: (num: number) => ipcRenderer.send('task-num', num),
     setCloseWhenTask0: (status: boolean) => ipcRenderer.send('close-windows-when-task-0', status),
-    switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
+    switchLocale: (locale: string, option: { menu: MenuLocale }) => ipcRenderer.send('switch-locale', locale, option),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
     /** 本地命令行执行代码 */

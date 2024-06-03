@@ -182,7 +182,7 @@ function onExport() {
     const text = JSON.stringify({
         serverList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
-    exportData(text, { defaultPath: 'serverList' }, t);
+    exportData(text, { defaultPath: 'serverList' });
 }
 
 async function delItem(id: number | number[]) {

@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Desk from '@/layouts/desk.vue';
 import { ElMessage } from 'element-plus';
+import { t } from '@/i18n';
 
 /** meta类型说明 */
 export interface MetaType {
@@ -209,7 +210,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     if (!to.matched?.length) {
         if (from.name) {
-            ElMessage.error(localStorage.locale === 'en' ? 'The page you want to go to does not exist' : '您要前往的页面不存在');
+            ElMessage.error(t('page-404'));
             next(from);
         } else {
             next('/404');

@@ -4,6 +4,7 @@ import duration from 'dayjs/plugin/duration';
 import { ElMessage } from "element-plus";
 import type { SaveDialogOptions } from "electron";
 import { useEnum } from "./hooks";
+import { t } from '@/i18n';
 
 dayjs.extend(duration);
 
@@ -39,7 +40,7 @@ export function useShellTypeEnum() {
     }))
 }
 
-export function formatScriptStr(config: Record<string, any> | undefined | null, shells: ShellsType<'edit'> | ShellsType<'record'>, t: (...args: any) => string) {
+export function formatScriptStr(config: Record<string, any> | undefined | null, shells: ShellsType<'edit'> | ShellsType<'record'>) {
     config = config || {};
     let str = t('excute-script-list') + '\n';
     const shellTypeEnum = {
@@ -119,7 +120,7 @@ export function noRepeat<T extends Record<string, any>>(list: T[], key = 'value'
 }
 
 export function computedTime(startTime: string | dayjs.Dayjs, endTime?: string | dayjs.Dayjs, format?: string) {
-    format = format ?? (localStorage.locale === 'en' ? 'H:mm:ss' : 'H时mm分ss秒');
+    format = format ?? (t('format-time1'));
     const start = dayjs(startTime);
     const end = dayjs(endTime);
     // 计算时间差
@@ -130,7 +131,7 @@ export function computedTime(startTime: string | dayjs.Dayjs, endTime?: string |
 
 /** 计算一天之内的时间差 */
 export function utilTime(startTime: string, format?: string) {
-    format = format ?? (localStorage.locale === 'en' ? 'H:mm:ss' : 'H时mm分ss秒');
+    format = format ?? (t('format-time1'));
     const start = dayjs(startTime);
     const end = dayjs();
     // 计算时间差
@@ -139,7 +140,7 @@ export function utilTime(startTime: string, format?: string) {
         return startTime;
     }
     // 将时间差格式化为 "x时x分x秒" 的形式
-    return dayjs.duration(diff).format(format) + (localStorage.locale === 'en' ? ' ago' : '前');
+    return dayjs.duration(diff).format(format) + (t('ago'));
 }
 
 /**
@@ -147,13 +148,13 @@ export function utilTime(startTime: string, format?: string) {
  * @param text 要导出的数据
  * @param option 保存文件夹的选项
  */
-export async function exportData(text: any, option?: SaveDialogOptions, t?: ReturnType<typeof import('vue-i18n').useI18n>['t']) {
+export async function exportData(text: any, option?: SaveDialogOptions) {
     if (text == null) {
-        ElMessage.warning(t ? t('no-data-export') : 'No data found to export!');
+        ElMessage.warning(t('no-data-export'));
         return;
     }
     const res = await electronAPI.showSaveDialog({
-        title: t ? t('select-save') : 'Select save location',
+        title: t('select-save'),
         defaultPath: 'config',
         filters: [{ extensions: ['json'], name: '' }],
         ...option,
@@ -161,9 +162,9 @@ export async function exportData(text: any, option?: SaveDialogOptions, t?: Retu
     if (!res.canceled && res.filePath) {
         const status = await electronAPI.writeFile(res.filePath, text);
         if (status === true) {
-            ElMessage.success(t ? t('file-save-success', { filePath: res.filePath }) : `File saved to ${res.filePath}`);
+            ElMessage.success(t('file-save-success', { filePath: res.filePath }));
         } else {
-            ElMessage.error(t ? t('file-save-error', { err: status + '' }) : `File save failed, reson: ${status}`);
+            ElMessage.error(t('file-save-error', { err: status + '' }));
         }
         return status;
     }

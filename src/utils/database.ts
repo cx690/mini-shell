@@ -2,6 +2,7 @@ import type { SaveDialogOptions } from "electron";
 import { ElMessage } from "element-plus";
 import { exportData } from ".";
 import { v4 } from "uuid";
+import { t } from '@/i18n';
 export const AllStore = ['serverList', 'shellList', 'excuteList'] as const;
 export type AllStoreType = typeof AllStore[number];
 export function getDatabase() {
@@ -48,7 +49,7 @@ export async function clearStore(store: AllStoreType) {
         const table = db.transaction([store], 'readwrite').objectStore(store);
         const request = table.clear();
         request.onsuccess = () => {
-            ElMessage.success(localStorage.locale === 'en' ? 'Deleted success!' : '已成功删除数据！');
+            ElMessage.success(t('del-success-data'));
             resolve();
         }
         request.onerror = function (err: any) {
@@ -112,7 +113,7 @@ export async function exportTables(t?: ReturnType<typeof import('vue-i18n').useI
             reject(err);
         }
     });
-    return await exportData(text, option, t);
+    return await exportData(text, option);
 }
 
 function createStore(db: IDBDatabase, storeName: string, index: string[]) {
@@ -130,7 +131,7 @@ function createIndex(store: IDBObjectStore, index: string[]) {
 /** 删除多条数据 */
 export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | IDBKeyRange) {
     if (!query) {
-        ElMessage.error(localStorage.locale === 'en' ? 'No data found' : '没有找到要删除的数据');
+        ElMessage.error(t('del-data-404'));
         return;
     }
 
@@ -138,7 +139,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
         return new Promise<Event>((resolve, reject) => {
             const request = store.delete(query);
             request.onsuccess = e => {
-                ElMessage.success(localStorage.locale === 'en' ? 'Successful operation' : '操作成功');
+                ElMessage.success(t('action-success'));
                 resolve(e);
             };
             request.onerror = err => {
@@ -151,7 +152,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
             query = [query];
         }
         if (!query.length) {
-            ElMessage.error(localStorage.locale === 'en' ? 'No data found' : '没有找到要删除的数据');
+            ElMessage.error(t('del-data-404'));
             return;
         }
         return Promise.all(query.map(item => {
@@ -166,7 +167,7 @@ export async function deleteItems(store: IDBObjectStore, query: IDBValidKey | ID
                 }
             })
         })).then(res => {
-            ElMessage.success(localStorage.locale === 'en' ? 'Successful operation' : '操作成功');
+            ElMessage.success(t('action-success'));
             return res;
         }).catch(err => {
             ElMessage.error(err + '');

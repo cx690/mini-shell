@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow, dialog, nativeTheme } from "electron";
 import { exec } from 'child_process';
 import createWindow from "./createwin";
 import type { InfoTyoe } from "./preload2Render";
-import { setApplicationMenu } from "./menu";
+import { MenuLocale, setApplicationMenu } from "./menu";
 
 let close = false;
 
@@ -32,8 +32,8 @@ function events() {
         checkTask();
     })
 
-    ipcMain.on('switch-locale', function (e, locale?: string) {
-        setApplicationMenu(locale);
+    ipcMain.on('switch-locale', function (e, locale?: string, option?: { menu: MenuLocale }) {
+        setApplicationMenu(locale, option);
     })
 
     ipcMain.on('change-theme-source', function (e, theme: 'dark' | 'light' | 'system') {

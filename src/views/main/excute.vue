@@ -86,7 +86,7 @@
                                             <span>{{ (index + 1) + '、' + shellTypeEnum[item.type] }}</span>
                                             <template #content>
                                                 <div class="select-shell-str">
-                                                    <pre>{{ formatScriptStr(formData.selectShell.envVar, [item], t) }}</pre>
+                                                    <pre>{{ formatScriptStr(formData.selectShell.envVar, [item]) }}</pre>
                                                 </div>
                                             </template>
                                         </el-tooltip>
@@ -783,7 +783,7 @@ function showShell() {
         return;
     }
     state.shellShow = true;
-    state.shellStr = formatScriptStr(formData.selectShell.envVar, formData.selectShell.baseScripts, t);
+    state.shellStr = formatScriptStr(formData.selectShell.envVar, formData.selectShell.baseScripts);
 }
 
 async function openPowershell(command: 'powershell' | 'cmd') {
@@ -901,7 +901,7 @@ function onExport() {
     const text = JSON.stringify({
         excuteList: state.selects.map(({ id, ...rest }) => id ? rest : null).filter(Boolean),
     }, null, 5)
-    exportData(text, { defaultPath: 'logs' }, t);
+    exportData(text, { defaultPath: 'logs' });
 }
 
 async function delItem(id: number | number[]) {

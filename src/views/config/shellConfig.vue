@@ -508,7 +508,7 @@ function onExport() {
     const text = JSON.stringify({
         shellList: state.selects.map(({ id, ...rest }) => rest),
     }, null, 5)
-    exportData(text, { defaultPath: 'shellList' }, t);
+    exportData(text, { defaultPath: 'shellList' });
 }
 
 async function delItem(id: number | number[]) {
@@ -599,7 +599,7 @@ function showShell(row: ShellListRecoed | ShellListRecoed<'edit'>) {
     };
     state.shellShow = true;
     state.scriptName = row.scriptName;
-    state.shellStr = formatScriptStr(env, row.baseScripts, t);
+    state.shellStr = formatScriptStr(env, row.baseScripts);
 }
 
 function onSelect(rows: ShellListRecoed[]) {
