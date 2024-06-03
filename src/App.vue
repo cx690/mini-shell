@@ -11,8 +11,8 @@ import { reactive, h, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import { onBeforeUnmount } from 'vue';
-const allLocales = import.meta.glob('/node_modules/element-plus/es/locale/lang/*.mjs');
-const allDayjsLocales = import.meta.glob('/node_modules/dayjs/locale/*.js');
+const allLocales = import.meta.glob(['/node_modules/element-plus/es/locale/lang/*.mjs', '!/node_modules/element-plus/es/locale/lang/zh-cn.mjs']);
+const allDayjsLocales = import.meta.glob(['/node_modules/dayjs/locale/*.js', '!/node_modules/dayjs/locale/zh-cn.js']);
 const { locale } = useI18n();
 const ElLocale = ref(zhCn);
 
