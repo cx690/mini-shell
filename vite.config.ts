@@ -73,9 +73,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1024,//超过1mb警告
     rollupOptions: {
       output: {
-        entryFileNames: 'js/[name]-[hash].js',
-        chunkFileNames: 'js/[name]-chunk-[hash].js',
-        assetFileNames: (chunkInfo) => /\.css$/.test(chunkInfo.name || '') ? 'css/[name]-[hash].[ext]' : 'assets/[name]-[hash].[ext]',
+        entryFileNames: 'js/[name].js',
+        chunkFileNames: 'js/[name]-chunk.js',
+        assetFileNames: (chunkInfo) => /\.css$/.test(chunkInfo.name || '') ? 'css/[name].[ext]' : 'assets/[name].[ext]',
         manualChunks: function (id) {//防止文件因为异步块问题碎片化
           if (/node_modules\/.*\.css$/.test(id)) {
             return;

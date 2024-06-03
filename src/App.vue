@@ -69,31 +69,32 @@ function storage(e: WindowEventMap['storage']) {
     const { key } = e;
     if (key === 'locale') {
         locale.value = localStorage.locale;
-        setElLocale()
+        loadLocale();
     }
 }
 
-function setElLocale() {
-    if (locale.value === 'zh-cn' || !locale.value) {
+function loadLocale() {
+    const file = locale.value ?? 'zh-cn';
+    if (file === 'zh-cn') {
         ElLocale.value = zhCn;
+        return;
+    };
+    const key = `/node_modules/element-plus/es/locale/lang/${file}.mjs`;
+    if (key in allLocales) {
+        allLocales[key]().then((res: any) => {//加载对应i18n设置
+            ElLocale.value = res.default;
+        })
     } else {
-        const key = `/node_modules/element-plus/es/locale/lang/${locale.value}.mjs`
-        if (key in allLocales) {
-            allLocales[key]().then((res: any) => {
-                ElLocale.value = res.default;
-            })
-        } else {
-            ElMessageBox.alert(`Can't find lang '${locale.value}' in element-plus, please make the file name in supported. See https://element-plus.org/en-US/guide/i18n.html#cdn-usage `);
-        }
+        ElMessageBox.alert(`Can't find lang '${file}' in element-plus, please make the file name the same to be supported. See https://element-plus.org/en-US/guide/i18n.html#cdn-usage `);
+    }
 
-        const dayjsKey = `/node_modules/dayjs/locale/${locale.value}.js`;
-        if (dayjsKey in allDayjsLocales) {
-            allDayjsLocales[dayjsKey]();//加载dayjs时间设置
-        }
+    const dayjsKey = `/node_modules/dayjs/locale/${file}.js`;
+    if (dayjsKey in allDayjsLocales) {
+        allDayjsLocales[dayjsKey]();//加载dayjs时间设置
     }
 }
 
-setElLocale();
+loadLocale();
 
 window.addEventListener('storage', storage)
 
