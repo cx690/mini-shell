@@ -12,7 +12,7 @@ import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import { onBeforeUnmount } from 'vue';
 const allLocales = import.meta.glob('/node_modules/element-plus/es/locale/lang/*.mjs');
-
+const allDayjsLocales = import.meta.glob('/node_modules/dayjs/locale/*.js');
 const { locale } = useI18n();
 const ElLocale = ref(zhCn);
 
@@ -84,6 +84,11 @@ function setElLocale() {
             })
         } else {
             ElMessageBox.alert(`Can't find lang '${locale.value}' in element-plus, please make the file name in supported. See https://element-plus.org/en-US/guide/i18n.html#cdn-usage `);
+        }
+
+        const dayjsKey = `/node_modules/dayjs/locale/${locale.value}.js`;
+        if (dayjsKey in allDayjsLocales) {
+            allDayjsLocales[dayjsKey]();//加载dayjs时间设置
         }
     }
 }

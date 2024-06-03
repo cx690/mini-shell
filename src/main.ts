@@ -7,7 +7,6 @@ import '@/assets/styles/index.less';
 import '@xterm/xterm/css/xterm.css';
 import App from './App.vue';
 import 'dayjs/locale/zh-cn';
-import 'dayjs/locale/en';
 import i18n, { loadLocales } from './i18n';
 import router from './router';
 import BasePage from '@/components/basePage.vue';
