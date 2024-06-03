@@ -1,5 +1,5 @@
 {
-  "__locale_name": "中文",
+  "locale_name": "中文",
   "title": "迷你Shell",
   "cancel_close_windows": "取消任务执行完毕关机设定",
   "new_window": "新开窗口",

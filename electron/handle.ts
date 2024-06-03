@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, dialog, ipcMain, shell } from "electron";
 import { openExe, execCmd } from './cmd';
+import getLocales from './locales';
 export function handles() {
     ipcMain.handle('exec-cmd', async function (e, command: string, type?: 'powershell' | 'bat' | 'native', env?: Record<string, any>) {
         return await execCmd(command, type, env);
@@ -24,11 +25,14 @@ export function handles() {
             console.log(error);
         })
     })
-    ipcMain.handle('show-save-dialog', function (e, option: SaveDialogOptions) {
+    ipcMain.handle('show-save-dialog', async function (e, option: SaveDialogOptions) {
         return dialog.showSaveDialog({
             ...option,
         }).catch((error) => {
             console.log(error);
         })
+    })
+    ipcMain.handle('get-locales', async function (e, locale?: string) {
+        return getLocales(locale);
     })
 }

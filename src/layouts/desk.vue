@@ -157,36 +157,7 @@ const { t, locale } = useI18n();
 function onChangeLocal(command?: string) {
     locale.value = command ?? 'zh-cn';
     localStorage.locale = locale.value;
-    electronAPI.switchLocale(locale.value,{
-        menu:{
-            File: t('menu.File'),
-            settings: t('menu.settings'),
-            quit: t('menu.quit'),
-            Edit: t('menu.Edit'),
-            undo: t('menu.undo'),
-            redo: t('menu.redo'),
-            cut: t('menu.cut'),
-            copy: t('menu.copy'),
-            paste: t('menu.paste'),
-            delete: t('menu.delete'),
-            selectAll: t('menu.selectAll'),
-            View: t('menu.View'),
-            reload: t('menu.reload'),
-            forceReload: t('menu.forceReload'),
-            toggleDevTools: t('menu.toggleDevTools'),
-            resetZoom: t('menu.resetZoom'),
-            zoomIn: t('menu.zoomIn'),
-            togglefullscreen: t('menu.togglefullscreen'),
-            zoomOut: t('menu.zoomOut'),
-            Window: t('menu.Window'),
-            minimize: t('menu.minimize'),
-            maxmize: t('menu.maxmize'),
-            restore: t('menu.restore'),
-            close: t('menu.close'),
-            LearnMore: t('menu.LearnMore'),
-            Help: t('menu.Help'),
-        }
-    });
+    electronAPI.switchLocale(locale.value);
 }
 onChangeLocal(localStorage.locale);
 
