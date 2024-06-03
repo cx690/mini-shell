@@ -24,7 +24,7 @@
     "build": "vite build",
     "build:p": "vite build && yarn package",
     "preview": "vite preview --host 0.0.0.0",
-    "lint": "eslint --ext .js,.ts,.tsx,.vue ./src",
+    "lint": "eslint --ext .js,.ts,.tsx,.vue ./src ./electron",
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx,.vue ./src ./electron",
     "type": "vue-tsc --noEmit",
     "package": "electron-forge package",
