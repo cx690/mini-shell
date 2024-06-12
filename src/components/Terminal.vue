@@ -1,7 +1,7 @@
 <template>
     <div class="terminal dark" ref="div" @click="onClick"></div>
 </template>
-<script setup lang="ts" name="Terminal">
+<script setup lang="ts">
 import useClient from '@/store/useClient';
 import { useResize } from '@/utils/hooks';
 import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';

@@ -3,7 +3,7 @@
         <div v-html="content"></div>
     </div>
 </template>
-<script setup lang="ts" name="Terminal">
+<script setup lang="ts">
 import { nextTick, ref } from 'vue';
 const output = ref<HTMLDivElement>()
 const content = ref('');
