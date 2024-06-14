@@ -43,7 +43,7 @@
     "@xterm/xterm": "^5.5.0",
     "dayjs": "^1.11.10",
     "electron": "^30.0.0",
-    "element-plus": "^2.7.3",
+    "element-plus": "^2.7.5",
     "eslint": "^8.57.0",
     "less": "^4.2.0",
     "normalize.css": "^8.0.1",
