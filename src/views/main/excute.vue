@@ -99,7 +99,8 @@
                                     </el-button>
                                 </div>
                             </el-popover>
-                            <el-button @click="showShell" class="mgL10" :disabled="!formData.selectShell" :icon="View">
+                            <el-button @click="showShell(formData.selectShell)" class="mgL10"
+                                :disabled="!formData.selectShell" :icon="View">
                                 {{ t('view-script') }}
                             </el-button>
                             <el-dropdown @command="openPowershell" v-if="isWin32">
@@ -177,6 +178,10 @@
                         <el-table-column :label="t('Action')">
                             <template #default="{ row }">
                                 <el-link type="primary" :underline="false" @click="onShowLogs(row)">
+                                    {{ t('Logs') }}
+                                </el-link>
+                                <el-link type="primary" :underline="false" v-if="row.status === 0"
+                                    @click="showTargetShell(row)">
                                     {{ t('View') }}
                                 </el-link>
                                 <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0 && !row.pid"
@@ -218,7 +223,8 @@
                 <Terminal ref="terminalsRef" init />
             </el-tab-pane>
         </el-tabs>
-        <el-dialog v-model="state.shellShow" :title="t('format-script-detail')" width="1000px" draggable>
+        <el-dialog v-model="state.shellShow" :title="`${t('format-script-detail')} - ${state.scriptName ?? ''}`"
+            width="1000px" draggable>
             <el-input readonly :model-value="state.shellStr" type="textarea" :rows="20" resize="none" />
         </el-dialog>
         <el-dialog v-model="state.showUpload" :title="t('uploadfile')" width="800px" :close-on-click-modal="false">
@@ -371,6 +377,7 @@ const state = reactive({
     activeName: 'Exce' as 'Exce' | 'Terminal' | number,
     shellNum: 1,
     shellShow: false,
+    scriptName: '',
     shellStr: '',
     /** 全部shell数据 */
     shellList: [] as ShellListRecoed[],
@@ -777,13 +784,24 @@ function onSelectShell(id: number) {
     formData.uploadDir = formData.selectShell?.mainPath ? (formData.selectShell?.envVar?.[formData.selectShell.mainPath] ?? '/root') : '/root';
     formData.checkList = [];
 }
-function showShell() {
-    if (!formData.selectShell?.baseScripts?.length) {
+function showShell(shell?: ShellListRecoed | null) {
+    if (!shell?.baseScripts?.length) {
         ElMessage.error(t('pls-config-script-view'));
         return;
     }
     state.shellShow = true;
-    state.shellStr = formatScriptStr(formData.selectShell.envVar, formData.selectShell.baseScripts);
+    state.shellStr = formatScriptStr(shell.envVar, shell.baseScripts);
+    state.scriptName = shell.scriptName;
+}
+
+function showTargetShell(row: ExcuteListRecoed) {
+    const { excuteId } = row;
+    const find = state.shellList?.find(item => item.uuid === excuteId);
+    if (!find) {
+        ElMessage.error(t('shell-404'));
+        return;
+    }
+    showShell(find);
 }
 
 async function openPowershell(command: 'powershell' | 'cmd') {

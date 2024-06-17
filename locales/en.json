@@ -290,5 +290,7 @@
   "menu.restore": "restore",
   "menu.close": "close",
   "menu.LearnMore": "Learn more",
-  "menu.Help": "Help"
+  "menu.Help": "Help",
+  "shell-404": "Can't find the shell to show!",
+  "Logs": "Logs"
 }
