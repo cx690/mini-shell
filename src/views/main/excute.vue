@@ -178,7 +178,7 @@
                         <el-table-column :label="t('Action')">
                             <template #default="{ row }">
                                 <el-link type="primary" :underline="false" @click="onShowLogs(row)">
-                                    {{ t('Logs') }}
+                                    {{ t('Log') }}
                                 </el-link>
                                 <el-link type="primary" :underline="false" v-if="row.status === 0"
                                     @click="showTargetShell(row)">
