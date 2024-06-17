@@ -71,7 +71,8 @@ export function formatScriptStr(config: Record<string, any> | undefined | null, 
         } else if (type === 3) {
             str += `${t('upload-file-path')}：${formatterShell(config, item.localFile ?? '')}\n${t('remote-path-dir')}：${formatterShell(config, item.remoteDir ?? '')}\n`;
         } else if (type === 4) {
-            str += item.combine?.map(item => `${t('script-name')}:${item.name} ${t('Sign')}:${item.value} `)?.join(';\n') || '';
+            str += item.combine?.map(item => `${t('script-name')}:${item.name} ${t('Sign')}:${item.value} `)?.join('\n') || '';
+            str += '\n';
         }
     }
     return str;
