@@ -185,7 +185,7 @@
   "start-excute-script": "开始执行{num}、{type}：",
   "excute-script-cmd": "执行脚本：",
   "excute-script-error": "{type}运行失败",
-  "tip-excute-script-error": "\"{shellName}\"中远端脚本运行错误",
+  "tip-excute-script-error": "\"{shellName}\"中脚本运行错误",
   "excute-script-type": "执行脚本({type})：",
   "env-var-detail": "环境变量：{env}",
   "no-upload-found": "未找到上传设置",
