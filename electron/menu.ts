@@ -71,7 +71,8 @@ async function getTemplate() {
             label: t('menu.View') ?? '视图',
             submenu: [
                 {
-                    // role: 'reload', 
+                    // role: 'reload',
+                    accelerator: 'Ctrl+R',
                     label: t('menu.reload') ?? '重新加载',
                     click: async (item: any, win: BrowserWindow) => {
                         //任务判断
