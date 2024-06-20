@@ -1,5 +1,6 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, dialog } from "electron";
 import path from "path";
+import { t } from './locales';
 
 function createWindow(url?: string) {
     const win = new BrowserWindow({
@@ -31,6 +32,35 @@ function createWindow(url?: string) {
     }
 
     win.maximize();
+    //任务判断
+    let confirmd = false;
+    let confirming = false;
+    win.on('close', async (e) => {
+        if (confirmd) return;
+        e.preventDefault();
+        if (confirming) return;
+        const taskNum = await win.webContents.executeJavaScript('window.Excute.getTaskNum();');
+        if (taskNum === 0) {
+            confirmd = true;
+            win.close();
+        } else {
+            confirming = true;
+            const { response } = await dialog.showMessageBox({
+                type: 'warning',
+                message: t('has-task-close-window'),
+                buttons: [t('Cancel'), t('Confirm')],
+                defaultId: 0,
+                cancelId: 0,
+            })
+            confirming = false;
+            if (response === 1) {
+                confirmd = true;
+                win.close();
+            } else {
+                confirmd = false;
+            }
+        }
+    })
     return win;
 }
 export default createWindow;

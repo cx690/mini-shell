@@ -3,6 +3,19 @@ import { dialog } from "electron";
 import path from 'path';
 import { getAllFiles } from './utils';
 const locales: { locale: string, message: any }[] = [];
+export let lang: string | undefined = 'zh-cn';
+export function setLang(next?: string) {
+    lang = next || 'zh-cn';
+}
+
+export function t(key: string) {
+    let find = locales.find(item => item.locale === lang);
+    if (!find) {
+        find = locales.find(item => item.locale === 'zh-cn');
+    }
+    return find ? find.message[key] : key;
+}
+
 export default async function getLocales(locale?: string) {
     if (!locales.length) {
         const files = await getAllFiles(path.resolve(__dirname, '../locales'));

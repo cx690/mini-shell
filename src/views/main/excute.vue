@@ -949,25 +949,6 @@ function selectable(row: ExcuteListRecoed) {
     return !!row.id;
 }
 
-if (process.env.NODE_ENV !== 'development') {
-    let confirmd = false;
-    let confirming = false;
-    window.addEventListener('beforeunload', async (e) => {
-        if (confirmd || !state.excuteData.length) return;
-        e.preventDefault();
-        if (confirming) return;
-        confirming = true;
-        const action = await ElMessageBox.confirm(t('has-task-close-window'), t('Hint'), {
-            type: 'warning',
-        }).catch(action => action);
-        confirming = false;
-        if (action === 'confirm') {
-            confirmd = true;
-            window.close();
-        }
-    });
-}
-
 const win = useWin();
 watchEffect(() => {
     window.Excute.setTaskNum(state.excuteData.length);

@@ -203,7 +203,7 @@
   "only-group": "Only associate group",
   "fail-script": "Non-associative",
   "only-host": "Only associate host",
-  "has-task-close-window": "There is currently a running task, and the data cannot be saved when closing the window. Are you sure want to close the window?",
+  "has-task-close-window": "There is currently a running task, and the data cannot be saved when closing or refreshing the window. Are you sure want to close the window?",
   "switch-already-connected": "Currently connected to host {host}, are you sure want to switch connection? \n(If you want to maintain and establish a new connection, you can open a new window)",
   "connect-status": "Status",
   "offline": "Offline",
