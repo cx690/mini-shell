@@ -292,5 +292,9 @@
   "menu.LearnMore": "Learn more",
   "menu.Help": "Help",
   "shell-404": "Can't find the shell to show!",
-  "Log": "Log"
+  "Log": "Log",
+  "Queuing": "Queuing",
+  "Uploading": "Uploading",
+  "Finished": "Finished",
+  "UploadError": "Upload Error"
 }

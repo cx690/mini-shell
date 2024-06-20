@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import type { UploadInfoType } from 'electron/preload2Render';
 import { ElMessage, ElMessageBox, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
-import { reactive, h, ref } from 'vue';
+import { reactive, h, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import { onBeforeUnmount } from 'vue';
@@ -46,18 +46,29 @@ electronAPI.onInfo('upload', (info) => {
                 title: '文件上传',
                 showClose: false,
                 message: h(Content, null, {
-                    default: () => h(ElProgress, {
-                        status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
-                        percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
-                        style: "width:250px;"
-                    }, {
-                        default: () => h('span', null, `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
-                    },
-                    )
+                    default: () => [
+                        h('div', `${uploadInfo[uuid].data.name ? (uploadInfo[uuid].data.name + '-') : ''}${statusMap.value[uploadInfo[uuid].data.status]}`),
+                        h(ElProgress, {
+                            status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
+                            percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
+                            style: "width:250px;"
+                        }, {
+                            default: () => h('span', null, `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
+                        })
+                    ]
                 }),
                 position: 'bottom-right',
                 duration: 0,
             })
+    }
+})
+const { t } = useI18n();
+const statusMap = computed(() => {
+    return {
+        0: t('Queuing'),
+        1: t('Uploading'),
+        2: t('Finished'),
+        3: t('UploadError')
     }
 })
 

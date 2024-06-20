@@ -292,5 +292,9 @@
   "menu.LearnMore": "学习更多",
   "menu.Help": "帮助",
   "shell-404": "找不到要查看的脚本！",
-  "Log": "日志"
+  "Log": "日志",
+  "Queuing": "队列中",
+  "Uploading": "上传中",
+  "Finished": "已完成",
+  "UploadError": "上传失败"
 }

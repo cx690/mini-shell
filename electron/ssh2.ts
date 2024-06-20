@@ -89,7 +89,8 @@ function getClient() {
             client.destroy();
             return clientProxy;
         },
-        uploadFile: async (localPath: string, remoteDir: string, quiet = false) => {
+        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string } = {}) => {
+            const { quiet = false, name } = option;
             const stat = await fs.stat(localPath);
             let uploadPathList: typeFileItem[] = [];
             let localDir = '';
@@ -111,7 +112,8 @@ function getClient() {
                 successNum,
                 errorNum,
                 total,
-                status: 0
+                status: 0,
+                name,
             })
             const status = await new Promise<boolean | Error>((resolve) => {
                 client.sftp(async function (err, sftp) {
@@ -122,13 +124,6 @@ function getClient() {
                         return;
                     };
                     const mkRemotedir = getMkRemoteDir(client);
-                    emit({
-                        successNum,
-                        errorNum,
-                        total,
-                        status: 1,
-                    })
-
                     await mkRemotedir(remoteDir).catch(err => {
                         sftp.end();
                         emit({
@@ -137,33 +132,52 @@ function getClient() {
                             total,
                             status: 3,
                             message: err + '',
+                            name,
                         })
                         throw err;
                     });//创建远程文件上传根目录
+                    let start = false;
+                    let errored = false;
                     const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
+                        if (!start) {
+                            emit({
+                                successNum,
+                                errorNum,
+                                total,
+                                status: 1,
+                                name,
+                            })
+                            start = true;
+                        }
                         const gapDir = path.relative(localDir, dir);
                         const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
                         if (mkstatus !== true) {
-                            emit({
+                            !errored && emit({
                                 successNum,
                                 errorNum,
                                 total,
                                 status: 3,
                                 message: mkstatus + '',
-                            })
+                                name,
+                            });
+                            errored = true;
+                            resolve(mkstatus);
                             throw mkstatus;
                         } else {
                             const remotePath = path.join(remoteDir, gapDir, base);
                             const status = await fastPut(sftp, id, remotePath);
                             if (status !== true) {
                                 errorNum++;
-                                emit({
+                                !errored && emit({
                                     successNum,
                                     errorNum,
                                     total,
                                     status: 3,
                                     message: status + '',
-                                })
+                                    name,
+                                });
+                                errored = true;
+                                resolve(status);
                                 throw status;
                             } else {
                                 successNum++;
@@ -174,6 +188,7 @@ function getClient() {
                                 total,
                                 status: (successNum + errorNum) === total ? 2 : 1,
                                 message: status + '',
+                                name,
                             })
                             return status;
                         }
