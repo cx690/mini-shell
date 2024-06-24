@@ -83,7 +83,6 @@ const useSettings = defineStore('settings', () => {
         const file = config.locale
         locale.value = config.locale;
         electronAPI.switchLocale(locale.value);
-        console.log('开始', ElLocale.value);
         if (file === 'zh-cn') {
             ElLocale.value = zhCn;
             return;
@@ -92,7 +91,6 @@ const useSettings = defineStore('settings', () => {
         if (key in allLocales) {
             allLocales[key]().then((res: any) => {//加载对应i18n设置
                 ElLocale.value = res.default;
-                console.log('完毕', ElLocale.value)
             })
         } else {
             ElMessageBox.alert(`Can't find lang '${file}' in element-plus, please make the file name the same to be supported. See https://element-plus.org/en-US/guide/i18n.html#cdn-usage `);
