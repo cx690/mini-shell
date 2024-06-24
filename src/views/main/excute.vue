@@ -101,7 +101,7 @@
                             </el-popover>
                             <el-button @click="showShell(formData.selectShell)" class="mgL10"
                                 :disabled="!formData.selectShell" :icon="View">
-                                {{ t('View') }}
+                                {{ t('View-script') }}
                             </el-button>
                             <el-dropdown @command="openPowershell" v-if="isWin32">
                                 <el-button class="mgL10">{{ t('open-local-term') }}</el-button>
@@ -182,7 +182,7 @@
                                 </el-link>
                                 <el-link type="primary" :underline="false" v-if="row.status === 0"
                                     @click="showTargetShell(row)">
-                                    {{ t('View-script') }}
+                                    {{ t('View') }}
                                 </el-link>
                                 <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0 && !row.pid"
                                     @confirm="cancelExecute(row)">
