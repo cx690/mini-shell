@@ -25,7 +25,8 @@ export async function getAllFiles(dir: string, exclud?: RegExp) {
 }
 
 const queue: (() => Promise<any>)[] = [];//上传文件队列
-let running = false;
+let running = 0;
+const maxRunning = 3;
 /**
  * 并行执行指定数量的任务
  * @param tasks 生成任务的函数
@@ -62,7 +63,7 @@ export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCoun
 
 /** 执行队列任务 */
 async function startTask() {
-    if (running) {
+    if (running >= maxRunning) {
         return;
     };
     const taskFn = queue.shift();
@@ -70,9 +71,9 @@ async function startTask() {
         return;
     }
     if (taskFn) {
-        running = true;
+        running++;
         await taskFn().catch(err => console.error(err));
-        running = false;
+        running--;
         return await startTask();
     }
 }
