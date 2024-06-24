@@ -22,10 +22,10 @@ async function getTemplate() {
             }]
             : []),
         {
-            label: t('menu.File') ?? '文件',
+            label: t('menu.File'),
             submenu: [
                 {
-                    label: t('menu.settings') ?? '设置',
+                    label: t('menu.settings'),
                     click: (MenuItem: any, win: BrowserWindow) => {
                         const url = new URL(win.webContents.getURL());
                         if (url.hash !== '#/about/settings') {
@@ -34,18 +34,18 @@ async function getTemplate() {
                         }
                     }
                 },
-                { role: isMac ? 'close' : 'quit', label: t('menu.quit') ?? '退出' }
+                { role: isMac ? 'close' : 'quit', label: t('menu.quit') }
             ]
         },
         {
-            label: t('menu.Edit') ?? '编辑',
+            label: t('menu.Edit'),
             submenu: [
-                { role: 'undo', label: t('menu.undo') ?? '撤销' },
-                { role: 'redo', label: t('menu.redo') ?? '重做' },
+                { role: 'undo', label: t('menu.undo') },
+                { role: 'redo', label: t('menu.redo') },
                 { type: 'separator' },
-                { role: 'cut', label: t('menu.cut') ?? '剪切' },
-                { role: 'copy', label: t('menu.copy') ?? '复制' },
-                { role: 'paste', label: t('menu.paste') ?? '粘贴' },
+                { role: 'cut', label: t('menu.cut') },
+                { role: 'copy', label: t('menu.copy') },
+                { role: 'paste', label: t('menu.paste') },
                 ...(isMac
                     ? [
                         { role: 'pasteAndMatchStyle' },
@@ -61,19 +61,19 @@ async function getTemplate() {
                         }
                     ]
                     : [
-                        { role: 'delete', label: t('menu.delete') ?? '删除' },
+                        { role: 'delete', label: t('menu.delete') },
                         { type: 'separator' },
-                        { role: 'selectAll', label: t('menu.selectAll') ?? '全选' }
+                        { role: 'selectAll', label: t('menu.selectAll') }
                     ])
             ]
         },
         {
-            label: t('menu.View') ?? '视图',
+            label: t('menu.View'),
             submenu: [
                 {
                     // role: 'reload',
                     accelerator: 'Ctrl+R',
-                    label: t('menu.reload') ?? '重新加载',
+                    label: t('menu.reload'),
                     click: async (item: any, win: BrowserWindow) => {
                         //任务判断
                         const taskNum = await win.webContents.executeJavaScript('window.Excute.getTaskNum();');
@@ -93,26 +93,26 @@ async function getTemplate() {
                         }
                     }
                 },
-                { role: 'forceReload', label: t('menu.forceReload') ?? '强制重新加载' },
-                { role: 'toggleDevTools', label: t('menu.toggleDevTools') ?? '开发者工具', accelerator: 'F12' },
+                { role: 'forceReload', label: t('menu.forceReload') },
+                { role: 'toggleDevTools', label: t('menu.toggleDevTools'), accelerator: 'F12' },
                 { type: 'separator' },
-                { role: 'resetZoom', label: t('menu.resetZoom') ?? '重置缩放' },
-                { role: 'zoomIn', label: t('menu.zoomIn') ?? '放大' },
-                { role: 'zoomOut', label: t('menu.zoomOut') ?? '缩小' },
+                { role: 'resetZoom', label: t('menu.resetZoom') },
+                { role: 'zoomIn', label: t('menu.zoomIn') },
+                { role: 'zoomOut', label: t('menu.zoomOut') },
                 { type: 'separator' },
-                { role: 'togglefullscreen', label: t('menu.togglefullscreen') ?? '进入/退出全屏' }
+                { role: 'togglefullscreen', label: t('menu.togglefullscreen') }
             ]
         },
         {
-            label: t('menu.Window') ?? '窗口',
+            label: t('menu.Window'),
             submenu: [
                 {
                     role: 'minimize',
-                    label: t('menu.minimize') ?? '最小化',
+                    label: t('menu.minimize'),
                     accelerator: 'Ctrl+Shift+M',
                 },
                 {
-                    label: t('menu.maxmize') ?? '最大化',
+                    label: t('menu.maxmize'),
                     accelerator: 'Ctrl+Shift+Z',
                     click: (item: any, win: BrowserWindow) => {
                         if (win) {
@@ -121,7 +121,7 @@ async function getTemplate() {
                     }
                 },
                 {
-                    label: t('menu.restore') ?? '恢复',
+                    label: t('menu.restore'),
                     accelerator: 'CmdOrCtrl+Shift+N',
                     click: (item: any, win: BrowserWindow) => {
                         if (win) {
@@ -137,16 +137,16 @@ async function getTemplate() {
                         { role: 'window' }
                     ]
                     : [
-                        { role: 'close', label: t('menu.close') ?? '退出' }
+                        { role: 'close', label: t('menu.close') }
                     ])
             ]
         },
         ...(process.env.NODE_ENV === 'development' ? [{
             role: 'help',
-            label: t('menu.Help') ?? '帮助',
+            label: t('menu.Help'),
             submenu: [
                 {
-                    label: t('menu.LearnMore') ?? '学习更多',
+                    label: t('menu.LearnMore'),
                     click: async () => {
                         await shell.openExternal('https://electronjs.org');
                     }
