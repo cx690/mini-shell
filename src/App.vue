@@ -1,21 +1,17 @@
 <template>
-    <el-config-provider :locale="ElLocale">
+    <el-config-provider :locale="settings.ElLocale">
         <router-view></router-view>
     </el-config-provider>
 </template>
 
 <script setup lang="ts">
 import type { UploadInfoType } from 'electron/preload2Render';
-import { ElMessage, ElMessageBox, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
-import { reactive, h, ref, computed } from 'vue';
+import { ElMessage, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
+import { reactive, h, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import zhCn from 'element-plus/es/locale/lang/zh-cn';
-import { onBeforeUnmount } from 'vue';
-const allLocales = import.meta.glob(['/node_modules/element-plus/es/locale/lang/*.mjs', '!/node_modules/element-plus/es/locale/lang/zh-cn.mjs']);
-const allDayjsLocales = import.meta.glob(['/node_modules/dayjs/locale/*.js', '!/node_modules/dayjs/locale/zh-cn.js']);
-const { locale } = useI18n();
-const ElLocale = ref(zhCn);
+import useSettings from './store/useSetting';
 
+const settings = useSettings();//不能直接解构ref解包结果
 const uploadInfo = reactive<Record<string, {
     data: UploadInfoType,
     notificationHandle?: NotificationHandle
@@ -75,42 +71,5 @@ const statusMap = computed(() => {
 function Content(props: any, ctx: any) {//ElNotification.message不是可以添加未依赖的函数，所以添加一个default插槽函数，这样可以跟踪数据变化，自动刷新
     return ctx.slots?.default?.();
 }
-
-function storage(e: WindowEventMap['storage']) {
-    const { key } = e;
-    if (key === 'locale') {
-        locale.value = localStorage.locale;
-        loadLocale();
-    }
-}
-
-function loadLocale() {
-    const file = locale.value ?? 'zh-cn';
-    if (file === 'zh-cn') {
-        ElLocale.value = zhCn;
-        return;
-    };
-    const key = `/node_modules/element-plus/es/locale/lang/${file}.mjs`;
-    if (key in allLocales) {
-        allLocales[key]().then((res: any) => {//加载对应i18n设置
-            ElLocale.value = res.default;
-        })
-    } else {
-        ElMessageBox.alert(`Can't find lang '${file}' in element-plus, please make the file name the same to be supported. See https://element-plus.org/en-US/guide/i18n.html#cdn-usage `);
-    }
-
-    const dayjsKey = `/node_modules/dayjs/locale/${file}.js`;
-    if (dayjsKey in allDayjsLocales) {
-        allDayjsLocales[dayjsKey]();//加载dayjs时间设置
-    }
-}
-
-loadLocale();
-
-window.addEventListener('storage', storage)
-
-onBeforeUnmount(() => {
-    window.removeEventListener('storage', storage)
-})
 
 </script>

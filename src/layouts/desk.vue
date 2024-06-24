@@ -152,14 +152,13 @@ function onCancelColose() {
     electronAPI.setCloseWhenTask0(false);
 }
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+
+const { config } = useSettings();
 
 function onChangeLocal(command?: string) {
-    locale.value = command ?? 'zh-cn';
-    localStorage.locale = locale.value;
-    electronAPI.switchLocale(locale.value);
+    config.locale = command || 'zh-cn';
 }
-onChangeLocal(localStorage.locale);
 
 function openGithub() {
     electronAPI.openExternal('https://github.com/cx690/mini-shell');
