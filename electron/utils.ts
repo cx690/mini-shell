@@ -34,7 +34,7 @@ const maxRunning = 3;
  */
 export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCount = 10) {
     const source = Object.entries(tasks);
-    const PInfo = withResolvers<T[]>();
+    const PInfo = Promise.withResolvers<T[]>();
     const taskFn = async () => {
         const list: T[] = [];
         async function excuteTask() {
@@ -76,13 +76,4 @@ async function startTask() {
         running--;
         return await startTask();
     }
-}
-
-export function withResolvers<T = any>() {
-    let resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void;
-    const promise = new Promise<T>((rl, rj) => {
-        resolve = rl;
-        reject = rj;
-    })
-    return { promise, resolve: resolve!, reject: reject! };
 }
