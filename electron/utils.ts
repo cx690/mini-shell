@@ -32,19 +32,19 @@ let running = false;
  * @param maxCount 最多并行任务
  */
 export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCount = 10) {
-    const source = [...tasks];
+    const source = Object.entries(tasks);
     const PInfo = withResolvers<T[]>();
     const taskFn = async () => {
         const list: T[] = [];
         async function excuteTask() {
-            const task = tasks.shift();
-            if (task) {
-                const i = source.indexOf(task);
+            const item = source.shift();
+            if (item) {
+                const [i, task] = item;
                 const res = await task().catch(err => {
                     PInfo.reject(err);
                     throw err;//终止当前上传
                 });
-                list[i] = res;
+                list[+i] = res;
                 if (tasks.length) {
                     await excuteTask();
                 }
