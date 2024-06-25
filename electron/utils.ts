@@ -50,7 +50,6 @@ export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCoun
                     await excuteTask();
                 }
             }
-            return true;
         }
         await Promise.all(tasks.slice(0, maxCount).map(() => excuteTask()));
         PInfo.resolve(list);
