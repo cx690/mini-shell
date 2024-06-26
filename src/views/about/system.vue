@@ -31,7 +31,7 @@ const developer = [
     }
 ]
 const version = process.env.version;
-const buildTime = process.env.buildTime;
+const buildTime = new Date(process.env.buildTime).toLocaleString();
 </script>
 <style lang="less" scoped>
 .content {

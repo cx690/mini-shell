@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import checker from 'vite-plugin-checker';
-import dayjs from 'dayjs';
 import electron from 'vite-plugin-electron'
 // import legacy from '@vitejs/plugin-legacy';
 import Components from 'unplugin-vue-components/vite';
@@ -64,7 +63,7 @@ export default defineConfig({
     ]
   },
   define: {
-    'process.env.buildTime': JSON.stringify(dayjs().format('YYYY-MM-DD HH:mm:ss')),
+    'process.env.buildTime': JSON.stringify(Date.now()),
     'process.env.version': JSON.stringify(version),
   },
   build: {
