@@ -420,7 +420,7 @@ async function onUpload() {
         return;
     }
     state.showUpload = false;
-    await (clientStore.client!.uploadFile(formData.file, formData.uploadDir));
+    await (clientStore.client!.uploadFile(formData.file, formData.uploadDir, { uuid: v4() }));
 }
 
 async function onDownLoad() {
@@ -591,17 +591,20 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
                 logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
+                const uploadId = v4();
                 const start = dayjs();
-                const result = await (clientStore.client!.uploadFile(local, remote, { quiet: !settings.config.showUploadProcess, name: exceteRecord.shellName }));
+                const result = await (clientStore.client!.uploadFile(local, remote, { quiet: !settings.config.showUploadProcess, name: exceteRecord.shellName, uuid: uploadId }));
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {
+                        clientStore.client!.abortUploadFile(uploadId);
                         return abortRecord();
                     }
                 } else {
                     logInfo(`<p class="error">${t('upload-err', { err: result + '' })}</p>`);
                     if (abort) {
+                        clientStore.client!.abortUploadFile(uploadId);
                         return abortRecord();
                     }
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));

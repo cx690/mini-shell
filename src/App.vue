@@ -6,17 +6,18 @@
 
 <script setup lang="ts">
 import type { UploadInfoType } from 'electron/preload2Render';
-import { ElMessage, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
+import { ElLink, ElMessage, ElMessageBox, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
 import { reactive, h, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useSettings from './store/useSetting';
-
+import useClient from './store/useClient';
+const { t } = useI18n();
 const settings = useSettings();//不能直接解构ref解包结果
 const uploadInfo = reactive<Record<string, {
     data: UploadInfoType,
     notificationHandle?: NotificationHandle
 }>>({});
-
+const clientStore = useClient();
 electronAPI.onInfo('upload', (info) => {
     const { uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } } = info;
     if (uploadInfo[uuid]) {
@@ -43,7 +44,22 @@ electronAPI.onInfo('upload', (info) => {
                 showClose: false,
                 message: h(Content, null, {
                     default: () => [
-                        h('div', `${uploadInfo[uuid].data.name ? (uploadInfo[uuid].data.name + '-') : ''}${statusMap.value[uploadInfo[uuid].data.status]}`),
+                        h('div', {},
+                            [
+                                h('span', `${uploadInfo[uuid].data.name ? (uploadInfo[uuid].data.name + '-') : ''}${statusMap.value[uploadInfo[uuid].data.status]}`),
+                                (!uploadInfo[uuid].data.name && (uploadInfo[uuid].data.status === 0 || uploadInfo[uuid].data.status === 1)) ? h(ElLink, {//脚本中的上传不做此设置
+                                    type: 'danger',
+                                    underline: false,
+                                    style: { marginLeft: '16px' },
+                                    onclick: async () => {
+                                        const action = await ElMessageBox.confirm(t('confirm-cancel-task'), {}).catch(action => action);
+                                        if (action === 'confirm') {
+                                            clientStore.client?.abortUploadFile(uuid);
+                                        }
+                                    }
+                                }, { default: () => t('Cancel') }) : null
+                            ]
+                        ),
                         h(ElProgress, {
                             status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
                             percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
@@ -58,7 +74,7 @@ electronAPI.onInfo('upload', (info) => {
             })
     }
 })
-const { t } = useI18n();
+
 const statusMap = computed(() => {
     return {
         0: t('Queuing'),

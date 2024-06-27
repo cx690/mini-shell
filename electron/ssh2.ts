@@ -1,13 +1,13 @@
 import { Client, SFTPWrapper } from 'ssh2';
 import path from 'path';
 import { stat } from 'fs/promises';
-import { v4 } from 'uuid';
 import preload2Render, { UploadInfoType } from './preload2Render';
 import fs from 'fs/promises';
 import { getAllFiles, parallelTask, typeFileItem } from './utils';
 
 function getClient() {
     const client = new Client();
+    const uploadAbort: Record<string, AbortController> = {};
     const clientProxy = {
         on: (...args: any[]) => {
             client.on(...args as Parameters<Client['on']>);
@@ -89,8 +89,8 @@ function getClient() {
             client.destroy();
             return clientProxy;
         },
-        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string } = {}) => {
-            const { quiet = false, name } = option;
+        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string }) => {
+            const { quiet = false, name, uuid } = option;
             const stat = await fs.stat(localPath);
             let uploadPathList: typeFileItem[] = [];
             let localDir = '';
@@ -104,18 +104,33 @@ function getClient() {
             } else {
                 return new Error('上传文件出错，请检查本地路径是否存在并且有权限访问！');
             }
-            const emit = emitUpload(quiet);
+            const emit = emitUpload(quiet, uuid);
             let successNum = 0;
             let errorNum = 0;
             const total = uploadPathList.length;
-            emit({
-                successNum,
-                errorNum,
-                total,
-                status: 0,
-                name,
-            })
             const status = await new Promise<boolean | Error>((resolve) => {
+                uploadAbort[uuid] = new AbortController();
+                emit({
+                    successNum,
+                    errorNum,
+                    total,
+                    status: 0,
+                    name,
+                })
+                const message = `${name ? (name + ' u') : 'U'}pload canceled!`;
+                let abort = false;
+                uploadAbort[uuid].signal.addEventListener('abort', () => {
+                    emit({
+                        successNum,
+                        errorNum,
+                        total,
+                        status: 3,
+                        message,
+                        name,
+                    })
+                    abort = true;
+                    resolve(new Error(message));
+                })
                 client.sftp(async function (err, sftp) {
                     if (err) {
                         console.error(err);
@@ -123,6 +138,11 @@ function getClient() {
                         sftp.end();
                         return;
                     };
+                    if (abort) {
+                        resolve(new Error(message));
+                        sftp.end();
+                        return;
+                    }
                     const mkRemotedir = getMkRemoteDir(client);
                     await mkRemotedir(remoteDir).catch(err => {
                         sftp.end();
@@ -136,9 +156,17 @@ function getClient() {
                         })
                         throw err;
                     });//创建远程文件上传根目录
+                    if (abort) {
+                        resolve(new Error(message));
+                        sftp.end();
+                        return;
+                    }
                     let start = false;
                     let errored = false;
                     const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
+                        if (abort) {
+                            throw new Error(message);
+                        }
                         if (!start) {
                             emit({
                                 successNum,
@@ -199,7 +227,13 @@ function getClient() {
                     resolve(true);
                 });
             }).catch((err: Error) => err);
+            delete uploadAbort[uuid];
             return status;
+        },
+        abortUploadFile(uuid: string) {
+            if (uuid && uploadAbort[uuid]) {
+                uploadAbort[uuid].abort();
+            };
         },
         downloadFile: async (localDir: string, remotePath: string) => {
             return new Promise<boolean | Error | string>(async (resolve) => {
@@ -276,8 +310,7 @@ async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string)
     })
 }
 
-function emitUpload(quiet: boolean) {
-    const uuid = quiet ? '' : v4();
+function emitUpload(quiet: boolean, uuid: string) {
     return function emit(data: UploadInfoType) {
         if (quiet) return;
         preload2Render({
