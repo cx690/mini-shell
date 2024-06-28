@@ -593,18 +593,19 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
                 const uploadId = v4();
                 const start = dayjs();
+                excuteAbort[uuid].signal.addEventListener('abort', () => {
+                    clientStore.client!.abortUploadFile(uploadId);
+                })
                 const result = await (clientStore.client!.uploadFile(local, remote, { quiet: !settings.config.showUploadProcess, name: exceteRecord.shellName, uuid: uploadId }));
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
                     if (abort) {
-                        clientStore.client!.abortUploadFile(uploadId);
                         return abortRecord();
                     }
                 } else {
                     logInfo(`<p class="error">${t('upload-err', { err: result + '' })}</p>`);
                     if (abort) {
-                        clientStore.client!.abortUploadFile(uploadId);
                         return abortRecord();
                     }
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
