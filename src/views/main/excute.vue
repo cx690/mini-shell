@@ -632,7 +632,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 if (notFound.length) {
                     return 2;
                 }
-                exceteRecord.children = shells.map(selectShell => {
+                const children = shells.map(selectShell => {
                     const uuid = v4();
                     return {
                         shellName: selectShell.scriptName ?? t('unnamed'),
@@ -647,14 +647,19 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                         logs: '',
                         uuid,
                         pid: exceteRecord.uuid,
-                    }
+                    } as const;
                 })
+                if (exceteRecord.children) {
+                    exceteRecord.children.push(...children);
+                } else {
+                    exceteRecord.children = children;
+                }
                 async function executeItem(exceteRecord: ExcuteListRecoed, shell: ShellListRecoed) {
                     const status = await executeShell(exceteRecord, shell);
                     return await excuteResult(status, exceteRecord);
                 }
                 const start = dayjs();
-                const res = await Promise.all(exceteRecord.children.map((exceteRecord, index) => executeItem(exceteRecord, shells[index])));
+                const res = await Promise.all(children.map((exceteRecord, index) => executeItem(exceteRecord, shells[index])));
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (abort) {
                     return abortRecord();
