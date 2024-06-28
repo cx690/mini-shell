@@ -221,7 +221,7 @@ function getClient() {
                             return status;
                         }
                     });
-                    await parallelTask(tasks).finally(() => {
+                    await parallelTask(tasks).catch(err => resolve(err)).finally(() => {
                         sftp.end();
                     })
                     resolve(true);
