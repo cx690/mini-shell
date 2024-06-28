@@ -27,6 +27,10 @@
                     <el-button type="primary" @click="onAdd" :icon="Plus">{{ t('New') }}</el-button>
                     <el-button @click="onExport" :icon="Download">{{ t('Export') }}</el-button>
                     <el-button type="danger" @click="onDelete" :icon="Delete">{{ t('Delete') }}</el-button>
+                    <el-button v-if="state.formData.viewType !== 'all'" type="warning" @click="onSwitch"
+                        :icon="state.formData.viewType === 'default' ? Hide : View">
+                        {{ state.formData.viewType === 'default' ? t('Hide') : t('Show') }}
+                    </el-button>
                 </el-form-item>
             </el-form>
         </template>
@@ -48,12 +52,12 @@
                             <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
-                    <el-popconfirm :title="t('confirm-hidden-item')" @confirm="hideItem(row, true)" v-if="!row.hidden">
+                    <el-popconfirm :title="t('confirm-hidden-item')" @confirm="switchItems(row)" v-if="!row.hidden">
                         <template #reference>
                             <el-link type="warning" :underline="false">{{ t('Hide') }}</el-link>
                         </template>
                     </el-popconfirm>
-                    <el-link v-else type="warning" :underline="false" @click="hideItem(row, false)">
+                    <el-link v-else type="warning" :underline="false" @click="switchItems(row)">
                         {{ t('Show') }}
                     </el-link>
                 </template>
@@ -293,7 +297,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { addOrPut, deleteItemsById, findAll } from '@/utils/database';
-import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View } from '@element-plus/icons-vue';
+import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View, Hide } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
 import { exportData, formatScriptStr, noRepeat, useShellTypeEnum } from '@/utils';
@@ -516,10 +520,28 @@ async function delItem(id: number | number[]) {
     getTableData();
 }
 
-async function hideItem(row: ShellListRecoed, hidden: boolean) {
-    await addOrPut({ storeName: 'shellList', type: 'put', record: { ...JSON.parse(JSON.stringify(row)), hidden } }).catch((err) => {
-        ElMessage.error(err + '');
-    });
+async function onSwitch() {
+    if (!state.selects.length) {
+        ElMessage.error(t('pls-select-record'));
+        return;
+    }
+    const action = await ElMessageBox.confirm(t('confirm-switch-hidden-item', { num: state.selects.length }), t('Change-confirm'), {
+        type: 'warning'
+    }).catch(action => action);
+    if (action === 'confirm') {
+        switchItems(state.selects);
+    }
+}
+
+async function switchItems(row: ShellListRecoed | ShellListRecoed[]) {
+    if (!Array.isArray(row)) {
+        row = [row];
+    }
+    for (const item of row) {
+        await addOrPut({ storeName: 'shellList', type: 'put', record: { ...JSON.parse(JSON.stringify(item)), hidden: !item.hidden } }).catch((err) => {
+            ElMessage.error(err + '');
+        });
+    }
     getTableData();
 }
 
@@ -528,7 +550,7 @@ async function onDelete() {
         ElMessage.error(t('pls-select-record'));
         return;
     }
-    const action = await ElMessageBox.confirm(t('delete-confirm-content'), t('delete-confirm'), {
+    const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: state.selects.length }), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {

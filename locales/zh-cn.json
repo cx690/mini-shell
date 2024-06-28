@@ -296,5 +296,7 @@
   "Queuing": "队列中",
   "Uploading": "上传中",
   "Finished": "已完成",
-  "UploadError": "上传失败"
+  "UploadError": "上传失败",
+  "confirm-switch-hidden-item": "确定要变更选中的{num}条数据的显示/隐藏吗？",
+  "Change-confirm": "变更确认"
 }

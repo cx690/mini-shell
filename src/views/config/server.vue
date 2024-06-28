@@ -195,7 +195,7 @@ async function onDelete() {
         ElMessage.error(t('pls-select-record'));
         return;
     }
-    const action = await ElMessageBox.confirm(t('delete-confirm-content'), t('delete-confirm'), {
+    const action = await ElMessageBox.confirm(t('delete-confirm-content', { num: state.selects.length }), t('delete-confirm'), {
         type: 'warning'
     }).catch(action => action);
     if (action === 'confirm') {

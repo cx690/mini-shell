@@ -296,5 +296,7 @@
   "Queuing": "Queuing",
   "Uploading": "Uploading",
   "Finished": "Finished",
-  "UploadError": "Upload Error"
+  "UploadError": "Upload Error",
+  "confirm-switch-hidden-item": "Are you sure want to switch show/hide the selected record {num}?",
+  "Change-confirm": "Change Confirm"
 }
