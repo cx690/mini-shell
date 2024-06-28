@@ -66,9 +66,6 @@ async function startTask() {
         return;
     };
     const taskFn = queue.shift();
-    if (!taskFn) {
-        return;
-    }
     if (taskFn) {
         running++;
         await taskFn().catch(err => console.error(err));
