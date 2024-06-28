@@ -179,6 +179,9 @@ function getClient() {
                         }
                         const gapDir = path.relative(localDir, dir);
                         const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
+                        if (abort) {
+                            throw new Error(message);
+                        }
                         if (mkstatus !== true) {
                             !errored && emit({
                                 successNum,
@@ -194,6 +197,9 @@ function getClient() {
                         } else {
                             const remotePath = path.join(remoteDir, gapDir, base);
                             const status = await fastPut(sftp, id, remotePath);
+                            if (abort) {
+                                throw new Error(message);
+                            }
                             if (status !== true) {
                                 errorNum++;
                                 !errored && emit({
