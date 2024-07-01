@@ -521,7 +521,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
     const { envVar, baseScripts } = selectShell;
     const logInfo = logInfoFn(exceteRecord);
     excuteAbort[uuid] = new AbortController();
-    let abort = false;
+    const { signal } = excuteAbort[uuid];
     function abortRecord(): 4 {
         logInfo(`<p class="cancel">${t('canceled-excute')}</p>`);
         ElMessage.warning(t('canceled-excute-item', { shellName: exceteRecord.shellName }));
@@ -530,7 +530,6 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
     excuteAbort[uuid].signal.addEventListener('abort', () => {
         !exceteRecord.pid && ElMessage.warning(t('set-canceled', { shellName: exceteRecord.shellName }));
         exceteRecord.status = 3;
-        abort = true;
     })
     if (!baseScripts?.length) {
         logInfo(`<p class="warning">${t('no-script-found')}</p>`);
@@ -551,7 +550,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 const code = await clientStore.client!.exec(cmd, (data: string) => {
                     logInfo(data);
                 });
-                if (abort) {
+                if (signal.aborted) {
                     return abortRecord();
                 }
                 if (code !== 0) {
@@ -572,7 +571,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 }
                 const { code, data } = await electronAPI.execCmd(cmd, type, { env, mergeEnv });
                 logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
-                if (abort) {
+                if (signal.aborted) {
                     return abortRecord();
                 }
                 if (code !== 0) {
@@ -600,12 +599,12 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
-                    if (abort) {
+                    if (signal.aborted) {
                         return abortRecord();
                     }
                 } else {
                     logInfo(`<p class="error">${t('upload-err', { err: result + '' })}</p>`);
-                    if (abort) {
+                    if (signal.aborted) {
                         return abortRecord();
                     }
                     ElMessage.error(t('tip-excute-script-error', { shellName: exceteRecord.shellName }));
@@ -661,7 +660,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 const start = dayjs();
                 const res = await Promise.all(children.map((exceteRecord, index) => executeItem(exceteRecord, shells[index])));
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
-                if (abort) {
+                if (signal.aborted) {
                     return abortRecord();
                 }
                 if (!res.every(item => item === 1)) {
