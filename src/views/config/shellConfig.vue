@@ -380,7 +380,7 @@ const configPleaseHold = computed(() => `${t('enter-json')}：
     "mainPath": "/root/apps"
 }`);
 
-const envPlacehold = computed(() => `${t('enter-json')}：{"NODE_ENV": "production","JAVA_HOME": "C:\\Java\\jdk1.8.0_351"}`);
+const envPlacehold = computed(() => `${t('enter-json')}：{"NODE_ENV": "production","JAVA_HOME": "C:/Java/jdk1.8.0_351"}`);
 
 onMounted(onSearch);
 
