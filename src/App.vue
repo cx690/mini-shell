@@ -28,7 +28,7 @@ electronAPI.onInfo('upload', (info) => {
                 if (data.status === 3) {
                     ElMessage.error(t('upload-err', { err: data.message || 'unkonw' }));
                 } else {
-                    ElMessage.success(data.message ?? t('upload-success'));
+                    ElMessage.success(t('upload-success'));
                 }
             }, 1000)
         }
