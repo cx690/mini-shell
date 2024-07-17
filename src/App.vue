@@ -26,13 +26,9 @@ electronAPI.onInfo('upload', (info) => {
             setTimeout(() => {
                 uploadInfo[uuid].notificationHandle!.close();
                 if (data.status === 3) {
-                    ElMessage.error(data.message ?? `文件上传失败！失败数量：${data.errorNum}个`);
+                    ElMessage.error(t('upload-err', { err: data.message || 'unkonw' }));
                 } else {
-                    if (data.errorNum === 0) {
-                        ElMessage.success('文件上传成功！');
-                    } else {
-                        ElMessage.error(`文件上传成功：${data.successNum}个；  文件上传失败：${data.errorNum}个`);
-                    }
+                    ElMessage.success(data.message ?? t('upload-success'));
                 }
             }, 1000)
         }
@@ -40,7 +36,7 @@ electronAPI.onInfo('upload', (info) => {
         uploadInfo[uuid] = { data };//转换响应式
         uploadInfo[uuid].notificationHandle =
             ElNotification({
-                title: '文件上传',
+                title: t('uploadfile'),
                 showClose: false,
                 message: h(Content, null, {
                     default: () => [
