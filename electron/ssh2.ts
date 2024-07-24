@@ -155,6 +155,7 @@ function getClient() {
                             name,
                         })
                         resolve(status);
+                        return;
                     }
                     if (signal.aborted) {
                         resolve(new Error(message));
