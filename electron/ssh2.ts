@@ -145,7 +145,6 @@ function getClient() {
                     const mkRemotedir = getMkRemoteDir(client);
                     const status = await mkRemotedir(remoteDir);//创建远程文件上传根目录
                     if (status !== true) {
-                        sftp.end();
                         emit({
                             successNum,
                             errorNum,
@@ -155,6 +154,7 @@ function getClient() {
                             name,
                         })
                         resolve(status);
+                        sftp.end();
                         return;
                     }
                     if (signal.aborted) {
