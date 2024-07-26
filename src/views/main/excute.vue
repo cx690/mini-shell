@@ -921,7 +921,7 @@ onActivated(() => {
 
 function onExport() {
     if (!state.selects.length) {
-        ElMessage.error(t('pls-select-item'));
+        ElMessage.error(t('pls-select-record'));
         return;
     }
     const text = JSON.stringify({
