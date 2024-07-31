@@ -108,7 +108,8 @@ function getClient() {
             let successNum = 0;
             let errorNum = 0;
             const total = uploadPathList.length;
-            const status = await new Promise<boolean | Error>((resolve) => {
+            let _sftp: SFTPWrapper | null = null;
+            const status = await new Promise<boolean | Error>((resolve, reject) => {
                 uploadAbort[uuid] = new AbortController();
                 const { signal } = uploadAbort[uuid];
                 emit({
@@ -120,58 +121,30 @@ function getClient() {
                 })
                 const message = `${name ? (name + ' u') : 'U'}pload canceled!`;
                 uploadAbort[uuid].signal.addEventListener('abort', () => {
-                    emit({
-                        successNum,
-                        errorNum,
-                        total,
-                        status: 3,
-                        message,
-                        name,
-                    })
-                    resolve(new Error(message));
+                    reject(new Error(message));
                 })
                 client.sftp(async function (err, sftp) {
+                    _sftp = sftp;
                     if (err) {
                         console.error(err);
-                        emit({
-                            successNum,
-                            errorNum,
-                            total,
-                            status: 3,
-                            message: err + '',
-                            name,
-                        })
-                        resolve(err);
-                        sftp?.end();
+                        reject(err);
                         return;
                     };
                     if (signal.aborted) {
-                        resolve(new Error(message));
-                        sftp.end();
+                        reject(new Error(message));
                         return;
                     }
                     const mkRemotedir = getMkRemoteDir(client);
                     const status = await mkRemotedir(remoteDir);//创建远程文件上传根目录
                     if (status !== true) {
-                        emit({
-                            successNum,
-                            errorNum,
-                            total,
-                            status: 3,
-                            message: err + '',
-                            name,
-                        })
-                        resolve(status);
-                        sftp.end();
+                        reject(status);
                         return;
                     }
                     if (signal.aborted) {
-                        resolve(new Error(message));
-                        sftp.end();
+                        reject(new Error(message));
                         return;
                     }
                     let start = false;
-                    let errored = false;
                     const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
                         if (signal.aborted) {
                             throw new Error(message);
@@ -192,16 +165,6 @@ function getClient() {
                             throw new Error(message);
                         }
                         if (mkstatus !== true) {
-                            !errored && emit({
-                                successNum,
-                                errorNum,
-                                total,
-                                status: 3,
-                                message: mkstatus + '',
-                                name,
-                            });
-                            errored = true;
-                            resolve(mkstatus);
                             throw mkstatus;
                         } else {
                             const remotePath = path.join(remoteDir, gapDir, base);
@@ -211,16 +174,6 @@ function getClient() {
                             }
                             if (status !== true) {
                                 errorNum++;
-                                !errored && emit({
-                                    successNum,
-                                    errorNum,
-                                    total,
-                                    status: 3,
-                                    message: status + '',
-                                    name,
-                                });
-                                errored = true;
-                                resolve(status);
                                 throw status;
                             } else {
                                 successNum++;
@@ -236,12 +189,21 @@ function getClient() {
                             return status;
                         }
                     });
-                    await parallelTask(tasks).catch(err => resolve(err)).finally(() => {
-                        sftp.end();
-                    })
+                    await parallelTask(tasks).catch(err => reject(err));
                     resolve(true);
                 });
-            }).catch((err: Error) => err);
+            }).catch((err: Error) => {
+                emit({
+                    successNum,
+                    errorNum,
+                    total,
+                    status: 3,
+                    message: err + '',
+                    name,
+                })
+                _sftp?.end();
+                return err;
+            });
             delete uploadAbort[uuid];
             return status;
         },
