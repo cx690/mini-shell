@@ -133,8 +133,16 @@ function getClient() {
                 client.sftp(async function (err, sftp) {
                     if (err) {
                         console.error(err);
+                        emit({
+                            successNum,
+                            errorNum,
+                            total,
+                            status: 3,
+                            message: err + '',
+                            name,
+                        })
                         resolve(err);
-                        sftp.end();
+                        sftp?.end();
                         return;
                     };
                     if (signal.aborted) {
