@@ -144,6 +144,18 @@ function getClient() {
                         reject(new Error(message));
                         return;
                     }
+                    if (uploadPathList.length === 0) {
+                        emit({
+                            successNum,
+                            errorNum,
+                            total,
+                            status: 2,
+                            name,
+                        })
+                        resolve(true);
+                        sftp.end();
+                        return;
+                    }
                     let start = false;
                     const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
                         if (signal.aborted) {
