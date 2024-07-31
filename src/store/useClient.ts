@@ -23,13 +23,16 @@ const useClient = defineStore('counter', () => {
     function connect(opt: ServerListRecord, success?: (client: ClientType) => any) {
         return new Promise<ClientType>(async (resolve, reject) => {
             status.value = 1;
-            // 创建SSH客户端实例
+            // 创建SSH客户端实例    
             client.value = electronAPI.getClient();
+            const holdClient = client.value;
             config.value = opt;
             // 连接到远程服务器
             client.value.on('ready', () => {
-                ElMessage.success(t('connect-success'));
-                status.value = 2;
+                if (holdClient === client.value) {//防止重复链接的时候前者状态覆盖后者
+                    ElMessage.success(t('connect-success'));
+                    status.value = 2;
+                }
                 success?.(client.value!);
                 resolve(client.value!);
             }).connect({
@@ -39,9 +42,11 @@ const useClient = defineStore('counter', () => {
                 password: opt.password,
             });
             client.value.on('error', (err: any) => {
-                ElMessage.error(t('connect-err', { err: err + '' }));
-                client.value!.destroy();
-                status.value = 0;
+                if (holdClient === client.value) {//防止重复链接的时候前者状态覆盖后者
+                    ElMessage.error(t('connect-err', { err: err + '' }));
+                    client.value!.destroy();
+                    status.value = 0;
+                }
                 reject(err);
             });
         })
