@@ -149,7 +149,7 @@
                     <Table :data="history" :row-key="rowKey" @selection-change="onSelect" ref="table">
                         <el-table-column type="selection" width="55" :selectable="selectable" />
                         <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
-                        <el-table-column prop="host" :label="t('de-host')" width="120px;" />
+                        <el-table-column prop="host" :label="t('de-host')" width="140px;" />
                         <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
                         <el-table-column prop="excuteType" :label="t('excuted-script')" width="140px"
                             show-overflow-tooltip>
