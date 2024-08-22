@@ -186,8 +186,8 @@
                                         :prop="`baseScripts.${num}.baseScripts.${index}.mergeEnv`">
                                         <el-radio-group :model-value="!!item.mergeEnv"
                                             @update:model-value="(value) => item.mergeEnv = !!value">
-                                            <el-radio :label="false">{{ t('env-only') }}</el-radio>
-                                            <el-radio :label="true">{{ t('env-merge') }}</el-radio>
+                                            <el-radio :value="false">{{ t('env-only') }}</el-radio>
+                                            <el-radio :value="true">{{ t('env-merge') }}</el-radio>
                                         </el-radio-group>
                                     </el-form-item>
                                     <el-form-item label=" " :prop="`baseScripts.${num}.baseScripts.${index}.env`"
