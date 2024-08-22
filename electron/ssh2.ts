@@ -91,18 +91,22 @@ function getClient() {
         },
         uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string }) => {
             const { quiet = false, name, uuid } = option;
-            const stat = await fs.stat(localPath);
             let uploadPathList: typeFileItem[] = [];
             let localDir = '';
-            if (stat.isFile()) {
-                const item = { id: localPath, ...path.parse(localPath) };
-                uploadPathList.push(item);
-                localDir = item.dir;
-            } else if (stat.isDirectory()) {
-                localDir = path.parse(localPath).dir;
-                uploadPathList = await getAllFiles(localPath);
-            } else {
-                return new Error('上传文件出错，请检查本地路径是否存在并且有权限访问！');
+            try {
+                const stat = await fs.stat(localPath);
+                if (stat.isFile()) {
+                    const item = { id: localPath, ...path.parse(localPath) };
+                    uploadPathList.push(item);
+                    localDir = item.dir;
+                } else if (stat.isDirectory()) {
+                    localDir = path.parse(localPath).dir;
+                    uploadPathList = await getAllFiles(localPath);
+                } else {
+                    return new Error('上传文件出错，请检查本地路径是否存在并且有权限访问！');
+                }
+            } catch (err) {
+                return err;
             }
             const emit = emitUpload(quiet, uuid);
             let successNum = 0;
