@@ -137,33 +137,6 @@ export const routes: RouteRecordRaw[] = [
             },
         ]
     },
-    ...(process.env.NODE_ENV === 'development' ? [{
-        path: '/external',
-        name: 'external',
-        redirect: '/external/vueorg',
-        component: Desk,
-        meta: {
-            title: '开发文档',
-        },
-        children: [
-            {
-                path: 'vueorg',
-                name: 'vueorg',
-                component: () => import('@/views/external/vueorg.vue'),
-                meta: {
-                    title: 'Vue3文档'
-                },
-            },
-            {
-                path: 'viteorg',
-                name: 'viteorg',
-                component: () => import('@/views/external/viteorg.vue'),
-                meta: {
-                    title: 'Vite文档'
-                },
-            },
-        ]
-    }] : []),
     {
         path: '/404',
         name: '404',
