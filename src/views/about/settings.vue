@@ -6,7 +6,7 @@
                     {{ t('View-Settings') }}
                 </template>
                 <el-form-item :label="t('Default-pageSize')" prop="pageSize">
-                    <el-select v-model="settings.config.pageSize" :placeholder="t('pls-select')" clearable>
+                    <el-select v-model="settings.config.pageSize" :placeholder="t('pls-select')">
                         <el-option v-for="item of pageSizes" :label="item" :value="item" :key="item" />
                     </el-select>
                 </el-form-item>
