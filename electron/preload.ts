@@ -3,6 +3,8 @@ import getClient from './ssh2';
 import type { InfoEvent, InfoTyoe } from './preload2Render';
 import './preload2Render';
 import type { OptionsType } from './cmd';
+import type { ConfigType } from '@/store/useSetting';
+import { changeConfig } from './tasks.pre';
 
 const electronAPI = {
     getClient,
@@ -31,6 +33,8 @@ const electronAPI = {
     openExternal: (url: string, options?: OpenExternalOptions) => ipcRenderer.invoke('open-external', url, options) as Promise<void>,
     /** 修改主题样式 */
     changeThemeSource: (theme: 'dark' | 'light' | 'system') => ipcRenderer.send('change-theme-source', theme),
+    /** 修改了配置文件 */
+    changeSystemConfig: (config: ConfigType) => changeConfig(config),
     getLocales: (locale?: string) => ipcRenderer.invoke('get-locales', locale) as Promise<{ locale: string, message: Record<string, any> }[]>
 }
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

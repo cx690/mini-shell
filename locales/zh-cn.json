@@ -298,5 +298,9 @@
   "Finished": "已完成",
   "UploadError": "上传失败",
   "confirm-switch-hidden-item": "确定要变更选中的{num}条数据的显示/隐藏吗？",
-  "Change-confirm": "变更确认"
+  "Change-confirm": "变更确认",
+  "Upload-Settings": "上传设置",
+  "max-upload-tasks": "最大并发任务数量",
+  "Max-files-tasks": "文件最大并发上传数量",
+  "max-warn-tip": "并发数量过大的情况下，可能出现错误：‘(SSH) Channel open failure: open failed’"
 }

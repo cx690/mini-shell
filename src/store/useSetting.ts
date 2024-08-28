@@ -9,6 +9,10 @@ const allDayjsLocales = import.meta.glob(['/node_modules/dayjs/locale/*.js', '!/
 export const pageSizes = [10, 20, 30, 40, 50, 100] as const;
 
 export type ConfigType = {
+    /** 最大上传任务并发量 */
+    maxTasks: number,
+    /** 最大文件上传并发量 */
+    maxFiles: number,
     /** 默认分页大小 */
     pageSize: (typeof pageSizes)[number],
     /** 上传脚本显示进度 */
@@ -20,6 +24,8 @@ export type ConfigType = {
 
 const useSettings = defineStore('settings', () => {
     const config = reactive<ConfigType>({
+        maxTasks: 3,
+        maxFiles: 10,
         pageSize: 10,
         showUploadProcess: false,
         dark: false,
@@ -45,6 +51,14 @@ const useSettings = defineStore('settings', () => {
                     loadLocale();
                 }
 
+                if (typeof data.maxTasks === 'number') {
+                    config.maxTasks = data.maxTasks || 3;
+                }
+
+                if (typeof data.maxFiles === 'number') {
+                    config.maxFiles = data.maxFiles || 10;
+                }
+                electronAPI.changeSystemConfig({ ...config });
             } catch (error) {
                 localStorage.removeItem('config');
             }
@@ -67,6 +81,7 @@ const useSettings = defineStore('settings', () => {
     });
 
     watch(config, () => {
+        electronAPI.changeSystemConfig({ ...config });
         localStorage.setItem('config', JSON.stringify(config));
     });
 

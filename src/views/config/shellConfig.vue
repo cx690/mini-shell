@@ -158,8 +158,9 @@
                     <el-card class="shells" v-for="(base, num) of state.currentRow.baseScripts" :key="base.key">
                         <template #header>
                             <div class="card-header">
-                                <span>{{ shellTypeEnum[base.type] }} <span v-if="base.type === 4">{{ t('parallel-tasks')
-                                        }}</span></span>
+                                <span>{{ shellTypeEnum[base.type] }} <span v-if="base.type === 4">
+                                        {{ t('parallel-tasks') }}
+                                    </span></span>
                                 <div>
                                     <el-button :icon="RemoveFilled" type="danger" circle
                                         @click="removeShellType(num)"></el-button>

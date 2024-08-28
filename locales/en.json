@@ -298,5 +298,9 @@
   "Finished": "Finished",
   "UploadError": "Upload Error",
   "confirm-switch-hidden-item": "Are you sure want to switch show/hide the selected record {num}?",
-  "Change-confirm": "Change Confirm"
+  "Change-confirm": "Change Confirm",
+  "Upload-Settings": "Upload Settings",
+  "max-upload-tasks": "Maximum concurrent tasks",
+  "Max-files-tasks": "Maximum files uploaded concurrently",
+  "max-warn-tip": "When the number of concurrent requests is too large, an error may occur: '(SSH) Channel open failure: open failed'"
 }
