@@ -208,6 +208,7 @@ function getClient() {
                     });
                     await parallelTask(tasks).catch(err => reject(err));
                     resolve(true);
+                    sftp.end();
                 });
             }).catch((err: Error) => {
                 emit({
