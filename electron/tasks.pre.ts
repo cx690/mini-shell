@@ -39,7 +39,6 @@ export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCoun
 
 /** 执行队列任务 */
 async function startTask() {
-    console.log(running)
     if (running >= maxRunning) {
         return;
     };
