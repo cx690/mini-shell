@@ -14,7 +14,7 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
             if (!fs.existsSync(temp)) {
                 fs.mkdirSync(temp);
             }
-            filePath = path.resolve(temp, `${Date.now()}${Math.random()}.sh`);
+            filePath = path.resolve(temp, `${Date.now()}-${Math.random()}.sh`);
             await writeFile(filePath, command);
         }
     } else {
