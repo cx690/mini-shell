@@ -6,26 +6,29 @@ import { writeFile, unlink } from 'fs/promises';
 
 const temp = path.resolve(process.cwd(), 'temp');
 export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
-export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'bat' | 'native' | 'sh', options?: OptionsType) {
+export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'ps1' | 'bat' | 'native' | 'sh', options?: OptionsType) {
     let cmd = command;
-    let base = '';
+    let filePath = '';
     if (process.platform === 'darwin') {
         if (type === 'bat' || type === 'sh') {
             if (!fs.existsSync(temp)) {
                 fs.mkdirSync(temp);
             }
-            base = `${Date.now()}${Math.random()}.sh`;
-            cmd = path.resolve(temp, base);
-            await writeFile(cmd, command);
+            filePath = path.resolve(temp, `${Date.now()}${Math.random()}.sh`);
+            await writeFile(filePath, command);
         }
     } else {
-        if (type === 'bat' || type === 'sh') {
+        if (type === 'bat' || type === 'sh' || 'ps1') {
             if (!fs.existsSync(temp)) {
                 fs.mkdirSync(temp);
             }
-            base = `${Date.now()}${Math.random()}.bat`;
-            cmd = path.resolve(temp, base);
-            await writeFile(cmd, command);
+            filePath = path.resolve(temp, `${Date.now()}-${Math.random()}.${type === 'ps1' ? 'ps1' : 'bat'}`);
+            if (type === 'ps1') {
+                cmd = `powershell -File "${filePath}"`;
+            } else {
+                cmd = filePath;
+            }
+            await writeFile(filePath, command);
         } else if (type === 'native') {
             cmd = command;
         } else {
@@ -42,8 +45,8 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
     const targetEnv = options.mergeEnv ? { ...process.env, ...env } : env;
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
         exec(cmd, { encoding: 'buffer', env: targetEnv }, (err, stdout, stderr) => {
-            if (base) {
-                unlink(cmd).catch((err) => console.error(err));
+            if (filePath) {
+                unlink(filePath).catch((err) => console.error(err));
             }
             if (err) {
                 resolve({ code: err.code ?? 1, data: decode(stderr, 'cp936') });

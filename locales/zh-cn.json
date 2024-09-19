@@ -96,7 +96,7 @@
   "format-script-detail": "格式化脚本详情",
   "Cancel": "取消",
   "enter-remote-script": "请输入远端脚本",
-  "enter-remote-script-powershell": "请输入本地脚本,如果是powershell脚本，多行脚本使用英文分号 ; 分隔",
+  "enter-remote-script-powershell": "请输入本地脚本,如果是powershell(Command)脚本，多行脚本使用英文分号 ; 分隔",
   "excuting": "执行中",
   "excute-success": "执行完毕",
   "excute-error": "执行错误",

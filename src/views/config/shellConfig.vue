@@ -177,7 +177,10 @@
                                         <el-select v-model="item.type" :placeholder="t('default-cmd')"
                                             style="width: 200px;">
                                             <el-option label="powershell" v-if="!isMac"
-                                                value="powershell">powershell</el-option>
+                                                value="powershell">powershell(Command)</el-option>
+                                            <el-option label="ps1" v-if="!isMac" value="ps1">
+                                                powershell(ps1 File)
+                                            </el-option>
                                             <el-option label="bat" v-if="!isMac" value="bat">bat</el-option>
                                             <el-option label="sh" v-if="isMac" value="sh">sh</el-option>
                                             <el-option label="native" value="native">native</el-option>

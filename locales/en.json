@@ -96,7 +96,7 @@
   "format-script-detail": "Format script details",
   "Cancel": "Cancel",
   "enter-remote-script": "Please enter the remote script",
-  "enter-remote-script-powershell": "Please enter a local script. If it is a powershell script, use ';' to separate multi-line scripts;",
+  "enter-remote-script-powershell": "Please enter a local script. If it is a powershell(Command) script, use ';' to separate multi-line scripts;",
   "excuting": "Excuting",
   "excute-success": "Finished",
   "excute-error": "execution error",
