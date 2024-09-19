@@ -44,7 +44,6 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
     const env = (typeof options.env === 'object' && options.env) ? options.env : {};
     const targetEnv = options.mergeEnv ? { ...process.env, ...env } : env;
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
-        console.log(cmd)
         exec(cmd, { encoding: 'buffer', env: targetEnv }, (err, stdout, stderr) => {
             if (filePath) {
                 unlink(filePath).catch((err) => console.error(err));
