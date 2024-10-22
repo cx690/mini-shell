@@ -21,6 +21,7 @@ const useUpdate = defineStore('update', () => {
         }
         if (shouldUpdate.value === null || force) {
             checking.value = true;
+            const errSymblo = Symbol();
             const info = await window.electronAPI.checkForUpdates().catch(err => {
                 if (notice) {
                     console.error(err);
@@ -35,9 +36,14 @@ const useUpdate = defineStore('update', () => {
                         ])
                         , t('update-err-title'))
                 }
-                return null;
+                return errSymblo;
             });
             checking.value = false;
+            shouldUpdate.value = '0';
+            if (info === errSymblo || typeof info === 'symbol') {
+                sessionStorage.setItem('shouldUpdate', '0');
+                return;
+            }
             if (info) {
                 updateInfo.value = info;
                 if (compareVersions(info.updateInfo.version, process.env.version) >= 1) {
@@ -52,14 +58,11 @@ const useUpdate = defineStore('update', () => {
                     }
                 }
             }
-        }
-        if (shouldUpdate.value !== '1') {
-            shouldUpdate.value = '0';
+            if (shouldUpdate.value === '0' && notice) {
+                ElMessage.success(t('no-new-found'));
+            }
         }
         sessionStorage.setItem('shouldUpdate', shouldUpdate.value ?? '0');
-        if (shouldUpdate.value === '0' && notice) {
-            ElMessage.success(t('no-new-found'));
-        }
         return shouldUpdate.value;
     }
 
