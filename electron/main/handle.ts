@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, dialog, ipcMain, shell } from "electron";
 import { openExe, execCmd } from './cmd';
 import getLocales from './locales';
+import { checkForUpdatesAndNotify, downloadUpdate } from './updater';
 export function handles() {
     ipcMain.handle('exec-cmd', async function (e, command: string, type?: 'powershell' | 'bat' | 'native', env?: Record<string, any>) {
         return await execCmd(command, type, env);
@@ -34,5 +35,15 @@ export function handles() {
     })
     ipcMain.handle('get-locales', async function (e, locale?: string) {
         return getLocales(locale);
+    })
+
+
+    /** 检查更新 */
+    ipcMain.handle('check-for-updates', () => {
+        return checkForUpdatesAndNotify();
+    })
+    /** 检查更新 */
+    ipcMain.handle('download-update', () => {
+        return downloadUpdate();
     })
 }

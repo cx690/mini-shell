@@ -5,12 +5,13 @@
 </template>
 
 <script setup lang="ts">
-import type { UploadInfoType } from 'electron/preload2Render';
+import type { UploadInfoType } from 'electron/preload/preload2Render';
 import { ElLink, ElMessage, ElMessageBox, ElNotification, ElProgress, NotificationHandle } from 'element-plus';
 import { reactive, h, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useSettings from './store/useSetting';
 import useClient from './store/useClient';
+import { Content } from './utils';
 const { t } = useI18n();
 const settings = useSettings();//不能直接解构ref解包结果
 const uploadInfo = reactive<Record<string, {
@@ -18,7 +19,7 @@ const uploadInfo = reactive<Record<string, {
     notificationHandle?: NotificationHandle
 }>>({});
 const clientStore = useClient();
-electronAPI.onInfo('upload', (info) => {
+electronAPI.onInfo('upload', (info) => {//上传回执处理
     const { uuid, data = { status: 3, successNum: 0, errorNum: 0, total: 1 } } = info;
     if (uploadInfo[uuid]) {
         Object.assign(uploadInfo[uuid].data, data);
@@ -79,9 +80,4 @@ const statusMap = computed(() => {
         3: t('UploadError')
     }
 })
-
-function Content(props: any, ctx: any) {//ElNotification.message不是可以添加未依赖的函数，所以添加一个default插槽函数，这样可以跟踪数据变化，自动刷新
-    return ctx.slots?.default?.();
-}
-
 </script>

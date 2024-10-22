@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { dialog } from "electron";
 import path from 'path';
-import { getAllFiles } from './utils';
+import { getAllFiles } from '../common/utils';
 const locales: { locale: string, message: any }[] = [];
 export let lang: string | undefined = 'zh-cn';
 export function setLang(next?: string) {

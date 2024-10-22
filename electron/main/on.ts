@@ -1,8 +1,9 @@
 import { ipcMain, BrowserWindow, dialog, nativeTheme } from "electron";
 import { exec } from 'child_process';
 import createWindow from "./createwin";
-import type { InfoTyoe } from "./preload2Render";
+import type { InfoTyoe } from "../preload/preload2Render";
 import { setApplicationMenu } from "./menu";
+import { quitAndInstall } from "./updater";
 
 let close = false;
 
@@ -38,6 +39,12 @@ function events() {
 
     ipcMain.on('change-theme-source', function (e, theme: 'dark' | 'light' | 'system') {
         nativeTheme.themeSource = theme;
+    })
+
+    ipcMain.on('quit-and-install-app', function () {
+        if (process.env.NODE_ENV !== 'development') {
+            quitAndInstall();
+        }
     })
 }
 export default events;

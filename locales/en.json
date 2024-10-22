@@ -198,7 +198,7 @@
   "record-log-error": "{shellName} logging failed",
   "pls-config-script-view": "Can't find script config",
   "unuse-term": "The connection is not established and the terminal is unavailable",
-  "open-term-error": "Failed to open the terminal. The starting position is: {pwd}; the reason for failure: {err}. Please check the script config.",
+  "open-term-error": "Failed to open the target. The starting position is: {pwd}; the reason for failure: {err}. Please check the script config.",
   "prefect-script": "Fully associated",
   "only-group": "Only associate group",
   "fail-script": "Non-associative",
@@ -302,5 +302,9 @@
   "Upload-Settings": "Upload Settings",
   "max-upload-tasks": "Maximum concurrent tasks",
   "Max-files-tasks": "Maximum files uploaded concurrently",
-  "max-warn-tip": "When the number of concurrent requests is too large, an error may occur: '(SSH) Channel open failure: open failed'"
+  "max-warn-tip": "When the number of concurrent requests is too large, an error may occur: '(SSH) Channel open failure: open failed'",
+  "is-setup-now": "Found a new version {version}, install it now?",
+  "no-new-found": "The current version is the latest version!",
+  "isDownload": "Downloading update files",
+  "restart-update": "Restart to update apps"
 }

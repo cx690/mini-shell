@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from "@xterm/xterm";
 import { debounce } from ".";
-import type { ChannelType } from 'electron/ssh2';
+import type { ChannelType } from 'electron/preload/ssh2';
 
 // import type { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "xterm-addon-fit";

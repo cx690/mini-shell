@@ -32,7 +32,7 @@
 
         <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
             @tab-change="onActiveChange">
-            <el-tab-pane label="Exce" name="Exce">
+            <el-tab-pane label="Execute" name="Execute">
                 <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
                     {{ t('Back') }}
                 </el-button>
@@ -111,6 +111,9 @@
                                         <el-dropdown-item command="powershell">
                                             {{ t('Open ') }}Powershell
                                         </el-dropdown-item>
+                                        <el-dropdown-item command="code" v-if="formData.selectShell?.localDir">
+                                            {{ t('Open ') }}VSCode
+                                        </el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -151,7 +154,7 @@
                         <el-table-column prop="shellName" :label="t('script-name')" show-overflow-tooltip />
                         <el-table-column prop="host" :label="t('de-host')" width="140px;" />
                         <el-table-column prop="excuteGroup" :label="t('group-by')" show-overflow-tooltip />
-                        <el-table-column prop="excuteType" :label="t('excuted-script')" width="140px"
+                        <el-table-column prop="excuteType" :label="t('excuted-script')" width="80px"
                             show-overflow-tooltip>
                             <template #default="{ row }">
                                 {{ !row.excuteType ? t('All') : row.excuteType === 1 ? t('part') : row.excuteType }}
@@ -374,7 +377,7 @@ const state = reactive({
     showUpload: false,
     showDownload: false,
     uploadLoading: false,
-    activeName: 'Exce' as 'Exce' | 'Terminal' | number,
+    activeName: 'Execute' as 'Execute' | 'Terminal' | number,
     shellNum: 1,
     shellShow: false,
     scriptName: '',
@@ -509,6 +512,7 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
         logs: '',
         uuid,
     });
+    table.value?.resetPage();
     const exceteRecord = state.excuteData[0];
     const status = await executeShell(exceteRecord, selectShell, checkList);
     if (status === 1) {
@@ -812,7 +816,7 @@ function showTargetShell(row: ExcuteListRecoed) {
     showShell(find);
 }
 
-async function openPowershell(command: 'powershell' | 'cmd') {
+async function openPowershell(command: 'powershell' | 'cmd' | 'code') {
     const pwd = formData.selectShell?.localDir ? (formData.selectShell?.envVar?.[formData.selectShell.localDir] ?? '') : '';
     let open: {
         code: number;
@@ -822,6 +826,8 @@ async function openPowershell(command: 'powershell' | 'cmd') {
     if (pwd) {
         if (command === 'cmd') {
             open = await electronAPI.openExe(`/d "${pwd}" cmd.exe`);
+        } else if (command === 'code') {
+            open = await electronAPI.execCmd(`code "${pwd}"`, 'native');
         } else {
             open = await electronAPI.openExe(`/d "${pwd}" powershell.exe`);
         }

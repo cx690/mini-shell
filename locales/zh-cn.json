@@ -198,7 +198,7 @@
   "record-log-error": "{shellName}日志记录失败",
   "pls-config-script-view": "请设置脚本后查看",
   "unuse-term": "连接未建立，终端不可用",
-  "open-term-error": "终端打开失败，起始位置为：{pwd}；失败原因：{err}  请检查脚本配置",
+  "open-term-error": "目标打开失败，起始位置为：{pwd}；失败原因：{err}  请检查脚本配置",
   "prefect-script": "完全关联脚本",
   "only-group": "仅关联群组脚本",
   "only-host": "仅关联host脚本",
@@ -302,5 +302,9 @@
   "Upload-Settings": "上传设置",
   "max-upload-tasks": "最大并发任务数量",
   "Max-files-tasks": "文件最大并发上传数量",
-  "max-warn-tip": "并发数量过大的情况下，可能出现错误：‘(SSH) Channel open failure: open failed’"
+  "max-warn-tip": "并发数量过大的情况下，可能出现错误：‘(SSH) Channel open failure: open failed’",
+  "is-setup-now": "发现新版本（{version}），现在安装吗？",
+  "no-new-found": "当前版本已是最新版本！",
+  "isDownload": "正在下载更新文件",
+  "restart-update": "重启以更新应用"
 }

@@ -172,3 +172,6 @@ export async function exportData(text: any, option?: SaveDialogOptions) {
     return false;
 }
 
+export function Content(props: any, ctx: any) {//ElNotification.message不是可以添加未依赖的函数，所以添加一个default插槽函数，这样可以跟踪数据变化，自动刷新
+    return ctx.slots?.default?.();
+}

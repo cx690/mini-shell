@@ -1,6 +1,6 @@
 {
   "name": "mini-shell",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "license": "Apache-2.0",
   "main": "dist-electron/main.js",
   "author": {
@@ -28,40 +28,45 @@
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx,.vue ./src ./electron",
     "type": "vue-tsc --noEmit",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "build-win": "electron-builder -w",
+    "release": "vite build && electron-builder build --win -p always"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.14.8",
     "@types/ssh2": "^1.15.0",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-vue": "^5.0.5",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "dayjs": "^1.11.11",
-    "electron": "^31.2.1",
-    "element-plus": "^2.7.8",
+    "compare-versions": "^6.1.1",
+    "dayjs": "^1.11.13",
+    "electron": "^33.0.1",
+    "electron-builder": "^25.1.8",
+    "electron-updater": "^6.3.9",
+    "element-plus": "^2.8.6",
     "eslint": "^8.57.0",
     "less": "^4.2.0",
     "normalize.css": "^8.0.1",
-    "pinia": "^2.1.7",
+    "pinia": "^2.2.4",
     "terser": "^5.31.2",
     "tree-kill": "^1.2.2",
-    "typescript": "^5.5.3",
-    "unplugin-vue-components": "^0.27.2",
+    "typescript": "~5.5.3",
+    "unplugin-vue-components": "^0.27.4",
     "uuid": "^10.0.0",
-    "vite": "^5.3.3",
-    "vite-plugin-checker": "^0.7.2",
-    "vite-plugin-electron": "^0.28.7",
-    "vue": "^3.4.31",
-    "vue-draggable-plus": "^0.5.2",
+    "vite": "^5.4.9",
+    "vite-plugin-checker": "^0.8.0",
+    "vite-plugin-electron": "^0.28.8",
+    "vue": "^3.5.12",
+    "vue-draggable-plus": "^0.5.4",
     "vue-eslint-parser": "^9.4.3",
-    "vue-i18n": "^9.13.1",
-    "vue-router": "^4.4.0",
-    "vue-tsc": "^2.0.26"
+    "vue-i18n": "^10.0.4",
+    "vue-router": "^4.4.5",
+    "vue-tsc": "^2.1.6"
   },
   "dependencies": {
     "iconv-lite": "^0.6.3",
@@ -69,5 +74,40 @@
   },
   "volta": {
     "node": "20.16.0"
+  },
+  "build": {
+    "files": [
+      "dist",
+      "dist-electron",
+      "locales"
+    ],
+    "directories": {
+      "output": "./out/installation_package"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "cx690",
+      "private": false,
+      "repo": "mini-shell",
+      "releaseType": "release"
+    }
   }
 }

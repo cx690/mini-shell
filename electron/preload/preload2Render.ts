@@ -1,8 +1,11 @@
 import { ipcRenderer } from "electron";
+import { ProgressInfo, UpdateDownloadedEvent } from "electron-updater";
 
 export interface InfoEvent {
     'upload': UploadInfoType,
-    'close-windows': boolean
+    'close-windows': boolean,
+    'download-progress': ProgressInfo,
+    'update-downloaded': UpdateDownloadedEvent,
 }
 
 // enum statusInfo {

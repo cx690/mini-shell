@@ -24,7 +24,7 @@ const state = reactive({
 const attrs = useAttrs();
 const props = defineProps<TableProps<any>>();
 const table = ref<any>();
-defineExpose({ table });
+defineExpose({ table, resetPage() { state.currentPage = 1; } });
 
 const tableProps = computed(() => {
     let data: any[];

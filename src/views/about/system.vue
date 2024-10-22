@@ -1,13 +1,32 @@
 <template>
     <base-page>
         <div class="content">
-            <div>{{ $t('version') }}: {{ version }}</div>
-            <div>{{ $t('buildTime') }}: {{ buildTime }}</div>
-            <div>Chrome: {{ versions.chrome }}</div>
-            <div>Node: {{ versions.node }}</div>
-            <div>Electron: {{ versions.electron }}</div>
+            <div>{{ $t('version') }}:&nbsp;
+                <el-badge v-if="update.shouldUpdate === '1'"
+                    :value="update.updateInfo?.updateInfo?.version ? `New v${update.updateInfo.updateInfo.version}` : 'New'"
+                    :offset="[0, -10]">
+                    <el-text type="primary" class="version" @click="check">v{{ version }}</el-text>
+                </el-badge>
+                <el-text type="primary" v-else class="version" @click="check">v{{ version }}</el-text>
+                <el-button type="primary" size="small" style="margin-left: 10px" v-if="update.checking" loading
+                    circle />
+            </div>
+            <div class="download" v-if="update.download">
+                <el-text type="primary" v-if="update.download === 1">
+                    {{ t('isDownload') }}：
+                </el-text>
+                <el-button v-if="update.download === 2" type="primary" @click="restart">
+                    {{ t('restart-update') }}
+                </el-button>
+                <el-progress v-if="update.download === 1" style="width: 300px;"
+                    :percentage="update.progressInfo?.percent || 0" :format="format" />
+            </div>
+            <div>{{ $t('buildTime') }}:&nbsp;{{ buildTime }}</div>
+            <div>Chrome:&nbsp;{{ versions.chrome }}</div>
+            <div>Node:&nbsp;{{ versions.node }}</div>
+            <div>Electron:&nbsp;{{ versions.electron }}</div>
             <div class="developer">
-                <div>{{ $t('developer') }}：</div>
+                <div>{{ $t('developer') }}:&nbsp;</div>
                 <div class="item" @click="openExternal(item.href)" v-for="(item, index) of developer" :key="index">
                     <img :src="item.img" />
                     <el-link>{{ item.name }}</el-link>
@@ -17,6 +36,9 @@
     </base-page>
 </template>
 <script setup lang="ts">
+import useUpdate from '@/store/useUpdate';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 const { versions, openExternal } = electronAPI;
 const developer = [
     {
@@ -32,6 +54,24 @@ const developer = [
 ]
 const version = process.env.version;
 const buildTime = new Date(process.env.buildTime).toLocaleString();
+const update = useUpdate();
+
+async function check() {
+    await update.checkForUpdates(true, true);
+}
+
+function format() {
+    const { progressInfo } = update;
+    if (progressInfo) {
+        const { percent, bytesPerSecond } = progressInfo;
+        return `${percent.toFixed(1)}%  ${bytesPerSecond > 1024 ? (Math.floor(bytesPerSecond / 1024) + 'KB/S') : (bytesPerSecond + 'B/S')}`;
+    }
+    return '';
+}
+
+function restart() {
+    window.electronAPI.quitAndInstall();
+}
 </script>
 <style lang="less" scoped>
 .content {
@@ -59,5 +99,14 @@ const buildTime = new Date(process.env.buildTime).toLocaleString();
             border-radius: 50%;
         }
     }
+}
+
+.version {
+    cursor: pointer;
+}
+
+.download {
+    display: flex;
+    justify-content: flex-start;
 }
 </style>

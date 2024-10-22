@@ -1,7 +1,7 @@
 import { hideLoading, setLoading } from '@/utils/fetch';
 import { useEnum } from '@/utils/hooks';
 import { ServerListRecord } from '@/utils/tables';
-import type { ClientType } from 'electron/ssh2';
+import type { ClientType } from 'electron/preload/ssh2';
 import { ElMessage } from 'element-plus';
 import { defineStore } from 'pinia'
 import { ref } from 'vue';

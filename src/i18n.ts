@@ -13,7 +13,7 @@ export async function loadLocales() {
         locale: string;
         message: Record<string, any>;
     }[] = [];
-    if (process.env.NODE_ENV !== 'production') {//开发模式下 直接加载能够正常热更新
+    if (process.env.NODE_ENV === 'development') {//开发模式下 直接加载能够正常热更新
         const source = import.meta.glob('../locales/*.json');
         for (const key in source) {
             const res: any = await source[key]();

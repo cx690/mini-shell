@@ -3,8 +3,9 @@ import { decode } from 'iconv-lite';
 import path from 'path';
 import fs from 'fs';
 import { writeFile, unlink } from 'fs/promises';
+import { app } from 'electron';
 
-const temp = path.resolve(process.cwd(), 'temp');
+const temp = process.env.NODE_ENV === 'development' ? path.resolve(process.cwd(), './temp') : path.resolve(app.getPath('temp'), './mini-shell-temp');
 export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
 export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'ps1' | 'bat' | 'native' | 'sh', options?: OptionsType) {
     let cmd = command;
@@ -14,7 +15,7 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
             if (!fs.existsSync(temp)) {
                 fs.mkdirSync(temp);
             }
-            filePath = path.resolve(temp, `${Date.now()}${Math.random()}.sh`);
+            filePath = path.resolve(temp, `${Date.now()}-${Math.random()}.sh`);
             await writeFile(filePath, command);
         }
     } else {

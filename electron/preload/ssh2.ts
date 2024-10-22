@@ -3,8 +3,8 @@ import path from 'path';
 import { stat } from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
 import fs from 'fs/promises';
-import { getAllFiles, typeFileItem } from './utils';
-import { parallelTask } from './tasks.pre';
+import { getAllFiles, typeFileItem } from '../common/utils';
+import { parallelTask } from './tasks';
 
 function getClient() {
     const client = new Client();

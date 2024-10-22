@@ -5,6 +5,12 @@
                 <div class="header">
                     <div>{{ t('title') }}</div>
                     <div class="extra">
+                        <el-badge v-if="update.shouldUpdate === '1'" style="margin-right: 32px;" value="New"
+                            :offset="[0, -10]">
+                            <el-text type="primary" class="version" @click="check" style="cursor: pointer;">
+                                v{{ version }}
+                            </el-text>
+                        </el-badge>
                         <el-button v-if="win.close" @click="onCancelColose" :icon="Remove">
                             {{ t('cancel_close_windows') }}
                         </el-button>
@@ -107,6 +113,7 @@ import useWin from '@/store/useWin';
 import { useI18n } from 'vue-i18n';
 import useSettings from '@/store/useSetting';
 import { localeOptions } from '@/i18n';
+import useUpdate from '@/store/useUpdate';
 
 const route = useRoute();
 const router = useRouter();
@@ -145,7 +152,7 @@ function openWin() {
 }
 const win = useWin();
 electronAPI.onInfo('close-windows', ({ data }) => {
-    win.close = data;
+    win.setClose(data);
 })
 
 function onCancelColose() {
@@ -165,6 +172,15 @@ function openGithub() {
 }
 
 const settings = useSettings();
+
+const update = useUpdate();
+async function check() {
+    const res = await update.checkForUpdates(true, true);
+    if (res === '1') {
+        router.push({ name: 'system' });
+    }
+}
+const version = process.env.version;
 </script>
 
 <style scoped lang="less">

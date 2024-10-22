@@ -6,7 +6,7 @@ import useClient from '@/store/useClient';
 import { useResize } from '@/utils/hooks';
 import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
 import { Terminal } from '@xterm/xterm';
-import type { ChannelType } from 'electron/ssh2';
+import type { ChannelType } from 'electron/preload/ssh2';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 const props = defineProps<{ init?: boolean }>()
