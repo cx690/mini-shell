@@ -306,5 +306,7 @@
   "is-setup-now": "Found a new version {version}, install it now?",
   "no-new-found": "The current version is the latest version!",
   "isDownload": "Downloading update files",
-  "restart-update": "Restart to update apps"
+  "restart-update": "Restart to update apps",
+  "update-err-title": "Failed to fetch update information",
+  "update-info-err": "Failed to fetch updated information, you can go to the link below to obtain updated information!"
 }

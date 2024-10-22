@@ -1,7 +1,7 @@
 import type { ProgressInfo, UpdateCheckResult } from 'electron-updater';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElText } from 'element-plus';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { h, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { compareVersions } from 'compare-versions';
 
@@ -22,7 +22,19 @@ const useUpdate = defineStore('update', () => {
         if (shouldUpdate.value === null || force) {
             checking.value = true;
             const info = await window.electronAPI.checkForUpdates().catch(err => {
-                notice && console.error(err);
+                if (notice) {
+                    console.error(err);
+                    ElMessageBox.alert(
+                        h('div', null, [
+                            h('p', null, t('update-info-err')),
+                            h(ElText, {
+                                style: 'cursor: pointer;', type: 'primary', onClick: () => {
+                                    electronAPI.openExe('https://github.com/cx690/mini-shell/releases');
+                                }
+                            }, 'https://github.com/cx690/mini-shell/releases')
+                        ])
+                        , t('update-err-title'))
+                }
                 return null;
             });
             checking.value = false;
