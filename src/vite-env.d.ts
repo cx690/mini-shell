@@ -1,7 +1,7 @@
 declare namespace NodeJS {
     interface Process {
         env: {
-            /** 注意生产模式下node端为undefined，不要使用production作为比较 */
+            /** 注意生产模式下node端一般为undefined，想字符串替换的话请使用import.meta.env.DEV */
             readonly NODE_ENV?: 'development' | 'production';
             readonly buildTime: number;
             readonly version: string;

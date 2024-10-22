@@ -42,7 +42,7 @@ function events() {
     })
 
     ipcMain.on('quit-and-install-app', function () {
-        if (process.env.NODE_ENV !== 'development') {
+        if (!import.meta.env.DEV) {
             quitAndInstall();
         }
     })

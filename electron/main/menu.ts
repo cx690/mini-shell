@@ -141,7 +141,7 @@ async function getTemplate() {
                     ])
             ]
         },
-        ...(process.env.NODE_ENV === 'development' ? [{
+        ...(import.meta.env.DEV ? [{
             role: 'help',
             label: t('menu.Help'),
             submenu: [

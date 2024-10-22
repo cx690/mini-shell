@@ -15,7 +15,7 @@ const useUpdate = defineStore('update', () => {
     checkForUpdates();
     async function checkForUpdates(notice = false, force = false) {
         if (checking.value || download.value) return;
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             notice && ElMessage.success(t('no-new-found'));
             return '0';
         }

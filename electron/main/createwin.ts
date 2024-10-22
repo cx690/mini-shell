@@ -27,7 +27,7 @@ function createWindow(url?: string) {
         }
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
         win.webContents.openDevTools();
     }
 
