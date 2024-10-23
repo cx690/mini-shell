@@ -5,7 +5,12 @@ export type typeFileItem = { id: string } & ReturnType<typeof path.parse>
 
 /** 获取目录下的所有文件 */
 export async function getAllFiles(dir: string, exclud?: RegExp) {
-    const dirs: string[] = await fs.readdir(dir);
+    let dirs: string[] = []
+    try {
+        dirs = await fs.readdir(dir);
+    } catch (error) {
+        import.meta.env.DEV && console.error(error);
+    }
     const allFiles: typeFileItem[] = [];
     for (const item of dirs) {
         const id = path.resolve(dir, item);

@@ -40,3 +40,10 @@ The generated logs is displayed in the image below.
 - It lacks the robust ecosystem that Jenkins possesses.
 
 - Scripts execute will be end if quit the application.
+
+# Language Settings
+The mini-shell comes with built-in support for Chinese and English, with Chinese being the default. If you want to support additional languages, you can follow these steps:
+
+- Translate the language files located in the locales directory within the source code. If translating into Japanese, rename the translated file to ja.json. The naming convention can be found [here](https://element-plus.org/en-US/guide/i18n.html).
+
+- Create a new folder named `lang` in the root directory of your application installation. Place the translated files into this folder, and then restart the application.
