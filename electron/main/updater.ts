@@ -1,6 +1,8 @@
 import { BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import type { InfoTyoe } from "../preload/preload2Render";
+import { copy } from './utils';
+import { backupDirectory, langDir } from './config';
 
 export async function checkForUpdatesAndNotify() {
     autoUpdater.autoDownload = false;
@@ -26,7 +28,10 @@ autoUpdater.on('download-progress', (ProgressInfo) => {
     })
 })
 
-autoUpdater.on('update-downloaded', (UpdateDownloadedEvent) => {
+autoUpdater.on('update-downloaded', async (UpdateDownloadedEvent) => {
+    if (!import.meta.env.DEV) {
+        await copy(langDir, backupDirectory, { createRootDir: true, force: true });//尝试备份用户可能存在的自定义语言
+    }
     sendStatusToWindow({
         type: 'update-downloaded',
         uuid: 'update-downloaded',

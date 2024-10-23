@@ -3,9 +3,8 @@ import { decode } from 'iconv-lite';
 import path from 'path';
 import fs from 'fs';
 import { writeFile, unlink } from 'fs/promises';
-import { app } from 'electron';
+import { temp } from './config';
 
-const temp = import.meta.env.DEV ? path.resolve(process.cwd(), './temp') : path.resolve(app.getPath('temp'), './mini-shell-temp');
 export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
 export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'ps1' | 'bat' | 'native' | 'sh', options?: OptionsType) {
     let cmd = command;
