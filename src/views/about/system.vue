@@ -16,7 +16,7 @@
                     {{ t('isDownload') }}：
                 </el-text>
                 <el-button v-if="update.download === 2" type="primary" @click="restart">
-                    {{ t('restart-update') }}
+                    {{ t('quit-and-install') }}
                 </el-button>
                 <el-progress v-if="update.download === 1" style="width: 300px;"
                     :percentage="update.progressInfo?.percent || 0" :format="format" />
