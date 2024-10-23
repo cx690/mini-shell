@@ -1,6 +1,6 @@
 {
   "name": "mini-shell",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "license": "Apache-2.0",
   "main": "dist-electron/main.js",
   "author": {
