@@ -303,7 +303,7 @@
   "max-upload-tasks": "最大并发任务数量",
   "Max-files-tasks": "文件最大并发上传数量",
   "max-warn-tip": "并发数量过大的情况下，可能出现错误：‘(SSH) Channel open failure: open failed’",
-  "is-setup-now": "发现新版本（{version}），现在安装吗？",
+  "is-setup-now": "发现新版本 {version}，现在下载吗？",
   "no-new-found": "当前版本已是最新版本！",
   "isDownload": "正在下载更新文件",
   "quit-and-install": "退出并安装应用",

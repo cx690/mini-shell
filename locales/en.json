@@ -303,7 +303,7 @@
   "max-upload-tasks": "Maximum concurrent tasks",
   "Max-files-tasks": "Maximum files uploaded concurrently",
   "max-warn-tip": "When the number of concurrent requests is too large, an error may occur: '(SSH) Channel open failure: open failed'",
-  "is-setup-now": "Found a new version {version}, install it now?",
+  "is-setup-now": "Found a new version {version}, download it now?",
   "no-new-found": "The current version is the latest version!",
   "isDownload": "Downloading update files",
   "quit-and-install": "Exit and install the app",

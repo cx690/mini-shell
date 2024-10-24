@@ -3,11 +3,11 @@
         <div class="content">
             <div>{{ $t('version') }}:&nbsp;
                 <el-badge v-if="update.shouldUpdate === '1'"
-                    :value="update.updateInfo?.updateInfo?.version ? `New v${update.updateInfo.updateInfo.version}` : 'New'"
+                    :value="update.updateInfo?.updateInfo?.version ? `New ${update.updateInfo.updateInfo.version}` : 'New'"
                     :offset="[0, -10]">
-                    <el-text type="primary" class="version" @click="check">v{{ version }}</el-text>
+                    <el-text type="primary" class="version" @click="check">{{ version }}</el-text>
                 </el-badge>
-                <el-text type="primary" v-else class="version" @click="check">v{{ version }}</el-text>
+                <el-text type="primary" v-else class="version" @click="check">{{ version }}</el-text>
                 <el-button type="primary" size="small" style="margin-left: 10px" v-if="update.checking" loading
                     circle />
             </div>
