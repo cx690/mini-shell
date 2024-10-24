@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { writeFile, unlink } from 'fs/promises';
 import { temp } from './config';
+import { isUtf8 } from 'node:buffer';
 
 export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
 export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'ps1' | 'bat' | 'native' | 'sh', options?: OptionsType) {
@@ -49,11 +50,21 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
                 unlink(filePath).catch((err) => import.meta.env.DEV && console.error(err));
             }
             if (err) {
-                resolve({ code: err.code ?? 1, data: decode(stderr, 'cp936') });
+                if (isUtf8(stderr)) {
+                    resolve({ code: err.code ?? 1, data: decode(stderr, 'utf8') });
+
+                } else {
+                    resolve({ code: err.code ?? 1, data: decode(stderr, 'cp936') });
+
+                }
                 return;
             }
             if (stdout) {
-                resolve({ code: 0, data: decode(stdout, 'cp936') });
+                if (isUtf8(stdout)) {
+                    resolve({ code: 0, data: decode(stdout, 'utf8') });
+                } else {
+                    resolve({ code: 0, data: decode(stdout, 'cp936') });
+                }
                 return;
             }
             resolve({ code: 0, data: '' });
