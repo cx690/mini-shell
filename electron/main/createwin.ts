@@ -4,7 +4,7 @@ import { t } from './locales';
 
 function createWindow(url?: string) {
     const win = new BrowserWindow({
-        title: '迷你Shell',
+        title: 'Mini Shell',
         width: 1520,
         height: 800,
         fullscreenable: true,
