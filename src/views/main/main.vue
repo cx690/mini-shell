@@ -49,8 +49,8 @@
                         readonly />
                 </el-form-item>
                 <el-form-item :label="t('user-name')" prop="username">
-                    <el-input v-model.trim="state.currentRow.username" :placeholder="t('enter-username')"
-                        clearablereadonly />
+                    <el-input v-model.trim="state.currentRow.username" :placeholder="t('enter-username')" clearable
+                        readonly />
                 </el-form-item>
                 <el-form-item :label="t('Password')" prop="password">
                     <el-input type="password" v-model="state.currentRow.password" :placeholder="t('enter-password')"
