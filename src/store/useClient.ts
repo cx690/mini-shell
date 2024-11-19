@@ -70,7 +70,6 @@ const useClient = defineStore('counter', () => {
             client.on('error', (err: any) => {
                 ElMessage.error(t('connect-err', { err: err + '' }));
                 client!.destroy();
-                status.value = 0;
                 hideLoading();
                 resolve(false);
             });
