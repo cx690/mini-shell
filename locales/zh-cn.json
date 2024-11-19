@@ -308,5 +308,6 @@
   "isDownload": "正在下载更新文件",
   "quit-and-install": "退出并安装应用",
   "update-info-err": "获取更新信息失败，您可以前往下方链接获取更新信息！",
-  "update-err-title": "获取更新信息失败"
+  "update-err-title": "获取更新信息失败",
+  "update-detail": "更新信息："
 }

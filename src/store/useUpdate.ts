@@ -49,7 +49,13 @@ const useUpdate = defineStore('update', () => {
                 if (compareVersions(info.updateInfo.version, process.env.version) >= 1) {
                     shouldUpdate.value = '1';
                     if (notice) {
-                        const action = await ElMessageBox.confirm(t('is-setup-now', { version: `v${info.updateInfo.version}` })).catch(action => action);
+                        const action = await ElMessageBox.confirm(`<p>
+                            ${t('is-setup-now', { version: `v${info.updateInfo.version}` })}
+                            </p>
+                            <p>${t('update-detail')}</p>
+                            <div style="margin-left:30px;">${info.updateInfo?.releaseNotes}</div>
+                            `,
+                            { dangerouslyUseHTMLString: true }).catch(action => action);
                         if (action === 'confirm') {
                             electronAPI.downloadUpdate().catch(err => {
                                 ElMessage.error(err);

@@ -308,5 +308,6 @@
   "isDownload": "Downloading update files",
   "quit-and-install": "Exit and install the app",
   "update-err-title": "Failed to fetch update information",
-  "update-info-err": "Failed to fetch updated information, you can go to the link below to obtain updated information!"
+  "update-info-err": "Failed to fetch updated information, you can go to the link below to obtain updated information!",
+  "update-detail": "Update information:"
 }
