@@ -69,11 +69,9 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="state.showAdd = false">{{ t('cancel') }}</el-button>
-                    <el-button type="primary" @click="onTest">{{ t('connection-test') }}</el-button>
-                    <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
-                </span>
+                <el-button @click="state.showAdd = false">{{ t('cancel') }}</el-button>
+                <el-button type="primary" @click="onTest">{{ t('connection-test') }}</el-button>
+                <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
             </template>
         </el-dialog>
     </base-page>

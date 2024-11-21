@@ -281,10 +281,8 @@
                 </VueDraggable>
             </el-form>
             <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="state.showAdd = false">{{ t('Cancel') }}</el-button>
-                    <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
-                </span>
+                <el-button @click="state.showAdd = false">{{ t('Cancel') }}</el-button>
+                <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
             </template>
         </el-dialog>
         <el-dialog v-model="state.shellShow" :title="`${t('format-script-detail')} - ${state.scriptName ?? ''}`"
