@@ -94,8 +94,8 @@ html.dark {
 }
 
 .el-table__cell {
-    .el-link+.el-link {
-        margin-left: @gap*2;
+    .el-link:not(:last-child) {
+        margin-right: @gap*2;
     }
 }
 
