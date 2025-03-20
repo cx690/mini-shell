@@ -571,7 +571,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 logInfo(`<p class="subtitle">${t('excute-script-type', { type: isMac ? (type ? (type === 'bat' ? 'sh' : type) : 'native') : (type ? type : 'powershell') })}</p><pre class="cmd">${cmd}</pre>`);
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
-                    logInfo(`<p class="env">(${mergeEnv ? 'only' : 'merge'})${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
+                    logInfo(`<p class="env">(${mergeEnv ? 'merge' : 'only' })${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
                 }
                 const { code, data } = await electronAPI.execCmd(cmd, type, { env, mergeEnv });
                 logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
