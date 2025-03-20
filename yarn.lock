@@ -5088,10 +5088,10 @@ vite-plugin-checker@^0.8.0:
     vscode-languageserver-textdocument "^1.0.1"
     vscode-uri "^3.0.2"
 
-vite-plugin-electron@^0.28.8:
-  version "0.28.8"
-  resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.28.8.tgz#abc7d52d01582926e50300148ad04326149a02d0"
-  integrity sha512-ir+B21oSGK9j23OEvt4EXyco9xDCaF6OGFe0V/8Zc0yL2+HMyQ6mmNQEIhXsEsZCSfIowBpwQBeHH4wVsfraeg==
+vite-plugin-electron@^0.29.0:
+  version "0.29.0"
+  resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.29.0.tgz#a30e0288c46f55848d23ed49582fb574e8573fc6"
+  integrity sha512-HP0DI9Shg41hzt55IKYVnbrChWXHX95QtsEQfM+szQBpWjVhVGMlqRjVco6ebfQjWNr+Ga+PeoBjMIl8zMaufw==
 
 vite@^5.4.9:
   version "5.4.9"
