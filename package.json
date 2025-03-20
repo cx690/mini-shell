@@ -30,6 +30,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "build-win": "electron-builder -w",
+    "build-mac": "electron-builder",
     "release": "vite build && electron-builder build --win -p always"
   },
   "devDependencies": {
@@ -77,6 +78,7 @@
     "node": "20.16.0"
   },
   "build": {
+    "productName": "mini-shell",
     "files": [
       "dist",
       "dist-electron",
@@ -102,6 +104,10 @@
           ]
         }
       ]
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.utilities"
     },
     "publish": {
       "provider": "github",
