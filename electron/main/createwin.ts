@@ -39,7 +39,7 @@ function createWindow(url?: string) {
         if (confirmd) return;
         e.preventDefault();
         if (confirming) return;
-        const taskNum = await win.webContents.executeJavaScript('window.Excute.getTaskNum();');
+        const taskNum = await win.webContents.executeJavaScript('window.Excute.getTaskNum();').catch(() => 0);
         if (taskNum === 0) {
             confirmd = true;
             win.close();

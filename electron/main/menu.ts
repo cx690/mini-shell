@@ -9,15 +9,22 @@ async function getTemplate() {
             ? [{
                 label: app.name,
                 submenu: [
-                    { role: 'about' },
+                    { label: t('route-about'), click:  (MenuItem: any, win: BrowserWindow) => {
+                        const url = new URL(win.webContents.getURL());
+                        if (url.hash !== '#/about/system') {
+                                url.hash = '#/about/system';
+                                win.loadURL(url.href);
+                            }
+                        }      
+                    },
                     { type: 'separator' },
-                    { role: 'services' },
+                    { role: 'services', label: t('menu.services') },
                     { type: 'separator' },
-                    { role: 'hide' },
-                    { role: 'hideOthers' },
-                    { role: 'unhide' },
+                    { role: 'hide', label: t('menu.hide') },
+                    { role: 'hideOthers', label: t('menu.hideOthers') },
+                    { role: 'unhide', label: t('menu.unhide') },
                     { type: 'separator' },
-                    { role: 'quit' }
+                    { role: 'quit', label: t('menu.quit') }
                 ]
             }]
             : []),
@@ -49,14 +56,14 @@ async function getTemplate() {
                 ...(isMac
                     ? [
                         { role: 'pasteAndMatchStyle' },
-                        { role: 'delete' },
-                        { role: 'selectAll' },
+                        { role: 'delete', label: t('Delete') },
+                        { role: 'selectAll', label: t('menu.selectAll') },
                         { type: 'separator' },
                         {
-                            label: 'Speech',
+                            label: t('menu.speech'),
                             submenu: [
-                                { role: 'startSpeaking' },
-                                { role: 'stopSpeaking' }
+                                { role: 'startSpeaking', label: t('menu.startSpeaking') },
+                                { role: 'stopSpeaking', label: t('menu.stopSpeaking') }
                             ]
                         }
                     ]
@@ -132,9 +139,9 @@ async function getTemplate() {
                 ...(isMac
                     ? [
                         { type: 'separator' },
-                        { role: 'front' },
+                        { role: 'front', label: t('menu.front') },
                         { type: 'separator' },
-                        { role: 'window' }
+                        { role: 'window', label: t('menu.window') }
                     ]
                     : [
                         { role: 'close', label: t('menu.close') }

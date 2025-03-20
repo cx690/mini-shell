@@ -52,7 +52,7 @@ export default events;
 async function checkTask() {
     if (close) {
         const wins = BrowserWindow.getAllWindows();
-        const arr = await Promise.all(wins.map(({ webContents }) => webContents.executeJavaScript('window.Excute.getTaskNum();')))
+        const arr = await Promise.all(wins.map(({ webContents }) => webContents.executeJavaScript('window.Excute.getTaskNum();').catch(() => 0)));
         const taskNum: number = arr.reduce((a, b) => a + b);
         if (taskNum === 0) {
             for (const win of wins) {

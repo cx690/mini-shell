@@ -309,5 +309,14 @@
   "quit-and-install": "退出并安装应用",
   "update-info-err": "获取更新信息失败，您可以前往下方链接获取更新信息！",
   "update-err-title": "获取更新信息失败",
-  "update-detail": "更新信息："
+  "update-detail": "更新信息：",
+  "menu.services": "服务",
+  "menu.hide": "隐藏Mini-Shell",
+  "menu.hideOthers": "隐藏其他",
+  "menu.unhide": "全部显示",
+  "menu.window": "窗口",
+  "menu.front": "全部在前",
+  "menu.speech": "阅读",
+  "menu.startSpeaking": "开始阅读",
+  "menu.stopSpeaking": "停止阅读"
 }

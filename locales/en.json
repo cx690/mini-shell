@@ -275,7 +275,7 @@
   "menu.copy": "copy",
   "menu.paste": "paste",
   "menu.delete": "delete",
-  "menu.selectAll": "selectAll",
+  "menu.selectAll": "Select All",
   "menu.View": "View",
   "menu.reload": "reload",
   "menu.forceReload": "forceReload",
@@ -309,5 +309,14 @@
   "quit-and-install": "Exit and install the app",
   "update-err-title": "Failed to fetch update information",
   "update-info-err": "Failed to fetch updated information, you can go to the link below to obtain updated information!",
-  "update-detail": "Update information:"
+  "update-detail": "Update information:",
+  "menu.services": "Services",
+  "menu.hide": "Hide Mini-Shell",
+  "menu.hideOthers": "Hide Others",
+  "menu.unhide": "Show All",
+  "menu.window": "Window",
+  "menu.front": "Bring All to front",
+  "menu.speech": "Speech",
+  "menu.startSpeaking": "Start Speaking",
+  "menu.stopSpeaking": "Stop Speaking"
 }
