@@ -118,7 +118,7 @@
                                 </template>
                             </el-dropdown>
                             <el-popconfirm :title="t('confirm-close-windows')"
-                                v-if="state.excuteData.length && win.close === false" @confirm="closeWin">
+                                v-if="state.excuteData.length && win.close === false && isWin32" @confirm="closeWin">
                                 <template #reference>
                                     <el-button type="danger" class="mgL10" :icon="SwitchButton">
                                         {{ t('close-windows-btn') }}
