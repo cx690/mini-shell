@@ -6,7 +6,7 @@ import { writeFile, unlink } from 'fs/promises';
 import { temp } from './config';
 import { isUtf8 } from 'node:buffer';
 
-export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean };
+export type OptionsType = { env?: Record<string, any>, mergeEnv?: boolean, shell?: string | undefined };
 export async function execCmd(command: string, type = 'powershell' as 'powershell' | 'ps1' | 'bat' | 'native' | 'sh', options?: OptionsType) {
     let cmd = command;
     let filePath = '';
@@ -40,12 +40,13 @@ export async function execCmd(command: string, type = 'powershell' as 'powershel
         options = {
             env: {},
             mergeEnv: false,
+            shell: process.platform === 'darwin' ? '/bin/zsh' : undefined
         };
     }
     const env = (typeof options.env === 'object' && options.env) ? options.env : {};
     const targetEnv = options.mergeEnv ? { ...process.env, ...env } : env;
     return await new Promise<{ code: number, data: string }>(async (resolve) => {
-        exec(cmd, { encoding: 'buffer', env: targetEnv }, (err, stdout, stderr) => {
+        exec(cmd, { encoding: 'buffer', env: targetEnv ,shell: options.shell ?? (process.platform === 'darwin' ? '/bin/zsh' : undefined) }, (err, stdout, stderr) => {
             if (filePath) {
                 unlink(filePath).catch((err) => import.meta.env.DEV && console.error(err));
             }
