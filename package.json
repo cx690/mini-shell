@@ -31,7 +31,8 @@
     "make": "electron-forge make",
     "build-win": "electron-builder -w",
     "build-mac": "electron-builder",
-    "release": "vite build && electron-builder build --win -p always"
+    "release": "vite build && electron-builder build --win -p always",
+    "release-mac": "vite build && electron-builder build --mac -p always"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
