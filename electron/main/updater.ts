@@ -29,7 +29,7 @@ autoUpdater.on('download-progress', (ProgressInfo) => {
 })
 
 autoUpdater.on('update-downloaded', async (UpdateDownloadedEvent) => {
-    if (!import.meta.env.DEV) {
+    if (!import.meta.env.DEV && process.platform === 'win32') {
         await copy(langDir, backupDirectory, { createRootDir: true, force: true });//尝试备份用户可能存在的自定义语言
     }
     sendStatusToWindow({
