@@ -58,7 +58,7 @@ const useUpdate = defineStore('update', () => {
                             { dangerouslyUseHTMLString: true }).catch(action => action);
                         if (action === 'confirm') {
                             electronAPI.downloadUpdate().catch(err => {
-                                ElMessage.error(err);
+                                ElMessage.error(err || 'unknown error');
                             });
                         }
                     }
