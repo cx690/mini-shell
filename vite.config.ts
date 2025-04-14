@@ -6,6 +6,7 @@ import electron from 'vite-plugin-electron'
 // import legacy from '@vitejs/plugin-legacy';
 import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { version } from './package.json';
 
 // https://vitejs.dev/config/
@@ -45,7 +46,13 @@ export default defineConfig({
       resolvers: ElementPlusResolver({
         importStyle: false,
       }),
-    })
+    }),
+    {
+      ...codeInspectorPlugin({
+        bundler: 'vite',
+      }),
+      apply: 'serve'
+    }
   ],
   css: {
     preprocessorOptions: {

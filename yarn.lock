@@ -1150,6 +1150,17 @@
     estree-walker "^2.0.2"
     source-map-js "^1.2.0"
 
+"@vue/compiler-core@3.5.13":
+  version "3.5.13"
+  resolved "https://registry.npmmirror.com/@vue/compiler-core/-/compiler-core-3.5.13.tgz#b0ae6c4347f60c03e849a05d34e5bf747c9bda05"
+  integrity sha512-oOdAkwqUfW1WqpwSYJce06wvt6HljgY3fGeM9NcVA1HaYOij3mZG9Rkysn0OHuyUAGMbEbARIpsG+LPVlBJ5/Q==
+  dependencies:
+    "@babel/parser" "^7.25.3"
+    "@vue/shared" "3.5.13"
+    entities "^4.5.0"
+    estree-walker "^2.0.2"
+    source-map-js "^1.2.0"
+
 "@vue/compiler-dom@3.5.12":
   version "3.5.12"
   resolved "https://registry.npmmirror.com/@vue/compiler-dom/-/compiler-dom-3.5.12.tgz#456d631d11102535b7ee6fd954cf2c93158d0354"
@@ -1165,6 +1176,14 @@
   dependencies:
     "@vue/compiler-core" "3.4.31"
     "@vue/shared" "3.4.31"
+
+"@vue/compiler-dom@^3.5.13":
+  version "3.5.13"
+  resolved "https://registry.npmmirror.com/@vue/compiler-dom/-/compiler-dom-3.5.13.tgz#bb1b8758dbc542b3658dda973b98a1c9311a8a58"
+  integrity sha512-ZOJ46sMOKUjO3e94wPdCzQ6P1Lx/vhp2RSvfaab88Ajexs0AHeV0uasYhi99WPaogmBlRHNRuly8xV75cNTMDA==
+  dependencies:
+    "@vue/compiler-core" "3.5.13"
+    "@vue/shared" "3.5.13"
 
 "@vue/compiler-sfc@3.5.12":
   version "3.5.12"
@@ -1263,6 +1282,11 @@
   version "3.5.12"
   resolved "https://registry.npmmirror.com/@vue/shared/-/shared-3.5.12.tgz#f9e45b7f63f2c3f40d84237b1194b7f67de192e3"
   integrity sha512-L2RPSAwUFbgZH20etwrXyVyCBu9OxRSi8T/38QsvnkJyvq2LufW2lDCOzm7t/U9C1mkhJGWYfCuFBCmIuNivrg==
+
+"@vue/shared@3.5.13":
+  version "3.5.13"
+  resolved "https://registry.npmmirror.com/@vue/shared/-/shared-3.5.13.tgz#87b309a6379c22b926e696893237826f64339b6f"
+  integrity sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==
 
 "@vueuse/core@^9.1.0":
   version "9.13.0"
@@ -1519,7 +1543,7 @@ async-validator@^4.2.5:
   resolved "https://registry.npmmirror.com/async-validator/-/async-validator-4.2.5.tgz#c96ea3332a521699d0afaaceed510a54656c6339"
   integrity sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==
 
-async@^3.2.3:
+async@^3.2.3, async@^3.2.6:
   version "3.2.6"
   resolved "https://registry.npmmirror.com/async/-/async-3.2.6.tgz#1b0728e14929d51b85b449b7f06e27c1145e38ce"
   integrity sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==
@@ -1709,6 +1733,14 @@ callsites@^3.0.0:
   resolved "https://registry.npmmirror.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
 
+chalk@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.npmmirror.com/chalk/-/chalk-4.1.1.tgz#c80b3fab28bf6371e6863325eee67e618b77e6ad"
+  integrity sha512-diHzdDKxcU+bAsUboHLPEDQiw0qEe0qd7SYUn3HgcFlWgbDcfLGswOHYeGrHKzG9z6UYf01d9VFMfZxPM1xZSg==
+  dependencies:
+    ansi-styles "^4.1.0"
+    supports-color "^7.1.0"
+
 chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.npmmirror.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -1836,6 +1868,29 @@ clone@^1.0.2:
   version "1.0.4"
   resolved "https://registry.npmmirror.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
   integrity sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==
+
+code-inspector-core@0.20.9:
+  version "0.20.9"
+  resolved "https://registry.npmmirror.com/code-inspector-core/-/code-inspector-core-0.20.9.tgz#82f72f70f523c9bc8569be60a1a0390da51f96aa"
+  integrity sha512-oX6rJqcE/L62vnBdhE+UMTeZrE6R7LPX7wqE0BMSanut8qtcxFixeh4Da87JsdjsCvUGGbJ++QcfRqQbny6ZKA==
+  dependencies:
+    "@vue/compiler-dom" "^3.5.13"
+    chalk "^4.1.1"
+    dotenv "^16.1.4"
+    launch-ide "1.0.6"
+    portfinder "^1.0.28"
+
+code-inspector-plugin@^0.20.9:
+  version "0.20.9"
+  resolved "https://registry.npmmirror.com/code-inspector-plugin/-/code-inspector-plugin-0.20.9.tgz#f081830a58b8423521efc828309e38fccd83707a"
+  integrity sha512-q+U8khSQDo/t/GHACnJIl6UMRca+nbyxBRZfJIW1sSdHVuyiWpA12orelRZkuiOq+IGWPByvzabbO8TsgoLyWg==
+  dependencies:
+    chalk "4.1.1"
+    code-inspector-core "0.20.9"
+    dotenv "^16.3.1"
+    esbuild-code-inspector-plugin "0.20.9"
+    vite-code-inspector-plugin "0.20.9"
+    webpack-code-inspector-plugin "0.20.9"
 
 color-convert@^1.9.0:
   version "1.9.3"
@@ -2148,6 +2203,11 @@ dotenv-expand@^11.0.6:
   dependencies:
     dotenv "^16.4.4"
 
+dotenv@^16.1.4, dotenv@^16.3.1:
+  version "16.5.0"
+  resolved "https://registry.npmmirror.com/dotenv/-/dotenv-16.5.0.tgz#092b49f25f808f020050051d1ff258e404c78692"
+  integrity sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==
+
 dotenv@^16.4.4, dotenv@^16.4.5:
   version "16.4.5"
   resolved "https://registry.npmmirror.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
@@ -2308,6 +2368,13 @@ es6-error@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmmirror.com/es6-error/-/es6-error-4.1.1.tgz#9e3af407459deed47e9a91f9b885a84eb05c561d"
   integrity sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==
+
+esbuild-code-inspector-plugin@0.20.9:
+  version "0.20.9"
+  resolved "https://registry.npmmirror.com/esbuild-code-inspector-plugin/-/esbuild-code-inspector-plugin-0.20.9.tgz#f896e861264ded806390ad446ecdcfa65bb25bf1"
+  integrity sha512-O9bgUWGocA4MJyJ9d/EfFvtfLuuHQ+cVYb1GRwUTvtW2504ML/Vy6glulrYyJjRTptcnbAOzr6JR+i4dj7snGA==
+  dependencies:
+    code-inspector-core "0.20.9"
 
 esbuild@^0.21.3:
   version "0.21.5"
@@ -3303,6 +3370,14 @@ keyv@^4.0.0, keyv@^4.5.3:
   dependencies:
     json-buffer "3.0.1"
 
+launch-ide@1.0.6:
+  version "1.0.6"
+  resolved "https://registry.npmmirror.com/launch-ide/-/launch-ide-1.0.6.tgz#df86fcea6304e11857190a90c4722c498762d420"
+  integrity sha512-qIH8dQRWyc/CtSdTvakFnMohAcIb8xxyZVDz7LK718opC36sqmULWcyWBKeiH+Hv+dlc1dNPKN2CekYd6Uqsmg==
+  dependencies:
+    chalk "^4.1.1"
+    dotenv "^16.1.4"
+
 lazy-val@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmmirror.com/lazy-val/-/lazy-val-1.0.5.tgz#6cf3b9f5bc31cee7ee3e369c0832b7583dcd923d"
@@ -4181,6 +4256,14 @@ plist@^3.0.0, plist@^3.0.4, plist@^3.0.5, plist@^3.1.0:
     "@xmldom/xmldom" "^0.8.8"
     base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
+
+portfinder@^1.0.28:
+  version "1.0.35"
+  resolved "https://registry.npmmirror.com/portfinder/-/portfinder-1.0.35.tgz#6ebaf945da4d14c55d996e907b217f73e1dc06c9"
+  integrity sha512-73JaFg4NwYNAufDtS5FsFu/PdM49ahJrO1i44aCRsDWju1z5wuGDaqyFUQWR6aJoK2JPDWlaYYAGFNIGTSUHSw==
+  dependencies:
+    async "^3.2.6"
+    debug "^4.3.6"
 
 postcss@^8.4.43, postcss@^8.4.47:
   version "8.4.47"
@@ -5068,6 +5151,13 @@ verror@^1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
+vite-code-inspector-plugin@0.20.9:
+  version "0.20.9"
+  resolved "https://registry.npmmirror.com/vite-code-inspector-plugin/-/vite-code-inspector-plugin-0.20.9.tgz#c976f0c61b5a4951c9c977ec98ecb11500e69b33"
+  integrity sha512-1YjjhJMezQSL0PQG4jxUz6AfQQR9vu5ZOxzvYMvwETz/E9YNnUsuvmfcVdfWfDlUAbMlyjHJJvEoUHYGq1e4Cg==
+  dependencies:
+    code-inspector-core "0.20.9"
+
 vite-plugin-checker@^0.8.0:
   version "0.8.0"
   resolved "https://registry.npmmirror.com/vite-plugin-checker/-/vite-plugin-checker-0.8.0.tgz#33419857a623b35c9483e4f603d4ca8b6984acde"
@@ -5220,6 +5310,13 @@ webidl-conversions@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
   integrity sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==
+
+webpack-code-inspector-plugin@0.20.9:
+  version "0.20.9"
+  resolved "https://registry.npmmirror.com/webpack-code-inspector-plugin/-/webpack-code-inspector-plugin-0.20.9.tgz#b77a03b0465ca9f07107cace56dab350b1784bb3"
+  integrity sha512-JjbrlHmA2fl7DSAIelayq+UVtMQwGc9a6NiVEKWbho9IM1Hdt2/Hg27y0+eWAzkNfM5xFta+KnxLvDRkC9VTew==
+  dependencies:
+    code-inspector-core "0.20.9"
 
 webpack-virtual-modules@^0.6.2:
   version "0.6.2"
