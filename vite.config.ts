@@ -47,12 +47,9 @@ export default defineConfig({
         importStyle: false,
       }),
     }),
-    {
-      ...codeInspectorPlugin({
-        bundler: 'vite',
-      }),
-      apply: 'serve'
-    }
+    codeInspectorPlugin({
+      bundler: 'vite',
+    }),
   ],
   css: {
     preprocessorOptions: {
