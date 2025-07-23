@@ -1,0 +1,31 @@
+{
+    "i18n-ally.localesPaths": [
+        "locales"
+    ],
+    "i18n-ally.keystyle": "flat",
+    "i18n-ally.sourceLanguage": "zh-cn",
+    "[less]": {
+        "editor.defaultFormatter": "michelemelluso.code-beautifier"
+    },
+    "[scss]": {
+        "editor.defaultFormatter": "michelemelluso.code-beautifier"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "michelemelluso.code-beautifier"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "Vue.volar"
+    },
+}
