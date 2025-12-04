@@ -115,7 +115,7 @@
   "enter-json": "请输入配置json如",
   "Back": "返回",
   "excute-status": "执行状态",
-  "current-connect": "当前链接的服务器",
+  "current-connect": "当前连接的服务器",
   "reconnect": "重新连接",
   "switch-connect": "切换连接",
   "select-connect": "选择连接",
@@ -318,5 +318,6 @@
   "menu.front": "全部在前",
   "menu.speech": "阅读",
   "menu.startSpeaking": "开始阅读",
-  "menu.stopSpeaking": "停止阅读"
+  "menu.stopSpeaking": "停止阅读",
+  "currentConnect": "当前连接"
 }

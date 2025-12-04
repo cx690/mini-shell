@@ -136,10 +136,15 @@
                             <el-radio-button label="currentShell" value="currentShell">
                                 {{ t('current-shell') }}
                             </el-radio-button>
-                            <el-radio-button label="currentGroup" value="currentGroup">{{ t('current-group')
-                                }}</el-radio-button>
-                            <el-radio-button label="currentHost" value="currentHost">{{ t('current-host')
-                                }}</el-radio-button>
+                            <el-radio-button label="currentGroup" value="currentGroup">
+                                {{ t('current-group') }}
+                            </el-radio-button>
+                            <el-radio-button label="currentHost" value="currentHost">
+                                {{ t('current-host') }}
+                            </el-radio-button>
+                            <el-radio-button label="currentConnect" value="currentConnect">
+                                {{ t('currentConnect') }}
+                            </el-radio-button>
                             <el-radio-button label="all" value="all">{{ t('all-logs') }}</el-radio-button>
                         </el-radio-group>
                         <span class="mgL10">
@@ -384,7 +389,7 @@ const state = reactive({
     shellStr: '',
     /** 全部shell数据 */
     shellList: [] as ShellListRecoed[],
-    hostType: 'currentShell' as 'currentHost' | 'all' | 'currentShell' | 'currentGroup',
+    hostType: 'currentShell' as 'currentHost' | 'all' | 'currentShell' | 'currentGroup' | 'currentConnect',
     currentRecord: null as ExcuteListRecoed | null,
     excuteLogs: [] as ExcuteListRecoed[],
     excuteData: [] as ExcuteListRecoed[],
@@ -499,9 +504,10 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
     }
 
     const uuid = v4();
+    const host = (hasType(selectShell, 1) || hasType(selectShell, 3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0'
     state.excuteData.unshift({
         shellName: selectShell.scriptName ?? t('unnamed'),
-        host: (hasType(selectShell, 1) || hasType(selectShell, 3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0',
+        host,
         startTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         endTime: '',
         time: '',
@@ -511,6 +517,7 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
         status: 0,
         logs: '',
         uuid,
+        connectId: host === '0.0.0.0' ? null : clientStore.config?.uuid
     });
     table.value?.resetPage();
     const exceteRecord = state.excuteData[0];
@@ -571,7 +578,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 logInfo(`<p class="subtitle">${t('excute-script-type', { type: isMac ? (type ? (type === 'bat' ? 'sh' : type) : 'native') : (type ? type : 'powershell') })}</p><pre class="cmd">${cmd}</pre>`);
                 const env = formatEnv(envVar, excuteItem.env);
                 if (env) {
-                    logInfo(`<p class="env">(${mergeEnv ? 'merge' : 'only' })${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
+                    logInfo(`<p class="env">(${mergeEnv ? 'merge' : 'only'})${t('env-var-detail', { env: JSON.stringify(env) })}</p>`);
                 }
                 const { code, data } = await electronAPI.execCmd(cmd, type, { env, mergeEnv });
                 logInfo(`<pre class="${code === 0 ? 'success' : 'error'}">${data}</pre>`);
@@ -650,6 +657,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                         logs: '',
                         uuid,
                         pid: exceteRecord.uuid,
+                        connectId: exceteRecord.connectId,
                     } as const;
                 })
                 if (exceteRecord.children) {
@@ -903,6 +911,10 @@ const history = computed(() => {
     }
     if (hostType === 'currentHost') {
         return history.filter(item => item.host === (clientStore.config?.host ?? '0.0.0.0'));
+    }
+    if (hostType === 'currentConnect') {
+        return history.filter(item => (clientStore.config?.host && clientStore.config.host !== '0.0.0.0') ?
+            (clientStore.config?.uuid === item.connectId) : (item.host === '0.0.0.0'));
     }
     if (hostType === 'all') {
         return history;

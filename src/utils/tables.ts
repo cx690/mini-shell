@@ -75,6 +75,8 @@ export interface ExcuteListRecoed extends BaseItem {
     endTime?: string,
     /** 执行的脚本uuid */
     excuteId?: string,
+    /** 执行脚本时的连接uuid */
+    connectId?: string | null,
     /** 执行脚本的群组 */
     excuteGroup?: string,
     /** 执行的脚本分类 */

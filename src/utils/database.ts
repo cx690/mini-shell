@@ -15,7 +15,7 @@ export function getDatabase() {
             //脚本表
             createStore(db, 'shellList', ['scriptName', 'host', 'envVar', 'localDir', 'mainPath', 'baseScripts', 'group', 'uuid', 'hidden']);
             //执行记录表
-            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children']);
+            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children', 'excuteId']);
         }
         request.onsuccess = function () {
             resolve(request.result);

@@ -318,5 +318,6 @@
   "menu.front": "Bring All to front",
   "menu.speech": "Speech",
   "menu.startSpeaking": "Start Speaking",
-  "menu.stopSpeaking": "Stop Speaking"
+  "menu.stopSpeaking": "Stop Speaking",
+  "currentConnect": "Current connect"
 }
