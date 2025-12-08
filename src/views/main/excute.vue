@@ -504,7 +504,7 @@ async function checkAndExcute(checkList?: ShellListRecoed['baseScripts']) {
     }
 
     const uuid = v4();
-    const host = (hasType(selectShell, 1) || hasType(selectShell, 3)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0'
+    const host = (hasType(selectShell, 1) || hasType(selectShell, 3) || hasType(selectShell, 4)) ? (clientStore.config?.host ?? '0.0.0.0') : '0.0.0.0'
     state.excuteData.unshift({
         shellName: selectShell.scriptName ?? t('unnamed'),
         host,
