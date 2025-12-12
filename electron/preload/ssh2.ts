@@ -37,7 +37,7 @@ function getClient() {
                 })
             })
         },
-        shell: async (callbackInfo?: (data: string | { code: number, message: string, action: string, signal?: number | null }) => any) => {
+        shell: async (callbackInfo?: (data: Uint8Array | { code: number, message: string, action: string, signal?: number | null }) => any) => {
             return new Promise<ChannelType>((resolve) => {
                 client.shell((err, channel) => {
                     if (err) {
@@ -51,22 +51,13 @@ function getClient() {
                             action: 'close'
                         });
                     }).on('data', (data: any) => {
-                        const str = `${data}`;
-                        if (/^rz waiting to receive\./.test(str)) {
-                            callbackInfo?.({
-                                code: 0,
-                                message: '',
-                                action: 'upload'
-                            })
-                            return;
-                        }
-                        callbackInfo?.(str);
+                        callbackInfo?.(data);
                     }).stderr.on('data', (data) => {
-                        callbackInfo?.(`${data}`);
+                        callbackInfo?.(data);
                     });
                     resolve({
-                        write: function (command: string) {
-                            channel.write(command, undefined, (err) => {
+                        write: function (chunk: any) {
+                            channel.write(chunk, undefined, (err) => {
                                 if (err) {
                                     console.error(err);
                                 }
@@ -318,7 +309,7 @@ function emitUpload(quiet: boolean, uuid: string) {
 
 export type ClientType = ReturnType<typeof getClient>;
 export type ChannelType = {
-    write(command: string): void,
+    write(chunk: any): void,
     end(...args: any[]): void,
     setWindow(opt: { cols: number, rows: number, height: number, width: number }): void,
 }

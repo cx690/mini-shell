@@ -10,3 +10,5 @@ declare namespace NodeJS {
         }
     }
 }
+
+declare module 'zmodem.js/src/zmodem_browser.js'

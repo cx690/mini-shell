@@ -2016,6 +2016,11 @@ cpu-features@~0.0.9:
     buildcheck "~0.0.6"
     nan "^2.17.0"
 
+crc-32@^1.1.1:
+  version "1.2.2"
+  resolved "https://registry.npmmirror.com/crc-32/-/crc-32-1.2.2.tgz#3cad35a934b8bf71f25ca524b6da51fb7eace2ff"
+  integrity sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==
+
 crc@^3.8.0:
   version "3.8.0"
   resolved "https://registry.npmmirror.com/crc/-/crc-3.8.0.tgz#ad60269c2c856f8c299e2c4cc0de4556914056c6"
@@ -5437,3 +5442,10 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.npmmirror.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zmodem.js@^0.1.10:
+  version "0.1.10"
+  resolved "https://registry.npmmirror.com/zmodem.js/-/zmodem.js-0.1.10.tgz#848ae071ea0f2706e3decd24ec66fc009ed19c47"
+  integrity sha512-Z1DWngunZ/j3BmIzSJpFZVNV73iHkj89rxXX4IciJdU9ga3nZ7rJ5LkfjV/QDsKhc7bazDWTTJCLJ+iRXD82dw==
+  dependencies:
+    crc-32 "^1.1.1"

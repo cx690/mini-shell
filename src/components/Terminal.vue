@@ -9,6 +9,8 @@ import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/preload/ssh2';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import Zmodem from 'zmodem.js/src/zmodem_browser.js';
+
 const props = defineProps<{ init?: boolean }>()
 const clientStore = useClient();
 const div = ref<HTMLDivElement>()
@@ -42,16 +44,93 @@ onMounted(() => {
 })
 
 async function initShell() {
-    channel.value = await clientStore.client?.shell(data => {
-        if (typeof data === 'string') {
-            term.write(data);
+    // 使用静态导入的Zmodem
+    let zsentry: any = null;
+    let zsession: any = null;
+    let ZmodemActive = false;
+
+    function sendToRemote(buf: Uint8Array) {
+        // 确保传递的是Uint8Array或Buffer
+        if (Array.isArray(buf)) {
+            channel.value?.write(new Uint8Array(buf));
         } else {
-            if (data.action === 'upload') {
-                term.write(data.message);
-                ElMessage.warning('终端内直接上传文件还没施工呢！');
-                channel.value?.write('\x18\x18\x18\x18\x18');
-            }
-            term.write(data.message);
+            channel.value?.write(buf);
+        }
+    }
+
+    function handleZmodemDetect(detection: any) {
+        ZmodemActive = true;
+        const session = detection.confirm();
+        zsession = session;
+        if (session.type === 'receive') {
+            // rz 上传到本地
+            session.on('offer', (xfer: any) => {
+                xfer.accept().then((payload: Uint8Array[]) => {
+                    // 合并所有块，确保为BlobPart[]
+                    const blob = new Blob(payload.map(p => new Uint8Array(p)), { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+                    // 自动下载
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = xfer.get_details().name;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    term.writeln(`\r\n[Zmodem] 文件已下载: ${xfer.get_details().name}`);
+                });
+            });
+            session.start();
+        } else if (session.type === 'send') {
+            // sz 上传到远程
+            // 触发文件选择
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.onchange = () => {
+                const files = Array.from(input.files || []);
+                if (files.length === 0) {
+                    session.abort();
+                    ZmodemActive = false;
+                    return;
+                }
+                Zmodem.Browser.send_files(session, files, {
+                    on_offer_response: (obj: any, xfer: any) => {
+                        term.writeln(`\r\n[Zmodem] 正在上传: ${obj.name}`);
+                    },
+                    on_file_complete: (obj: any) => {
+                        term.writeln(`\r\n[Zmodem] 上传完成: ${obj.name}`);
+                    },
+                    on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
+                        // 可选：显示进度
+                    }
+                }).then(() => {
+                    session.close();
+                    ZmodemActive = false;
+                });
+            };
+            input.click();
+        }
+    }
+
+    zsentry = new Zmodem.Sentry({
+        to_terminal: (octets: Uint8Array) => {
+            // 非Zmodem数据输出到终端
+            term.write(new Uint8Array(octets));
+        },
+        on_detect: handleZmodemDetect,
+        on_retract: () => {
+            ZmodemActive = false;
+        },
+        sender: sendToRemote
+    });
+
+    channel.value = await clientStore.client?.shell((data: any) => {
+        // data 可能是Buffer/Uint8Array
+        if (ZmodemActive || zsentry) {
+            zsentry.consume(new Uint8Array(data));
+        } else {
+            term.write(typeof data === 'string' ? data : new Uint8Array(data));
         }
     });
 }
