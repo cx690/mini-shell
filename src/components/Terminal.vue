@@ -43,10 +43,10 @@ onMounted(() => {
     })
 })
 
+let zsession: any = null;
 async function initShell() {
     // 使用静态导入的Zmodem
     let zsentry: any = null;
-    let zsession: any = null;
     let ZmodemActive = false;
 
     function sendToRemote(buf: Uint8Array) {
@@ -104,8 +104,9 @@ async function initShell() {
                     on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
                         // 可选：显示进度
                     }
-                }).then(() => {
+                }).finally(() => {
                     session.close();
+                    zsession = null;
                     ZmodemActive = false;
                 });
             };
@@ -125,13 +126,23 @@ async function initShell() {
         sender: sendToRemote
     });
 
-    channel.value = await clientStore.client?.shell((data: any) => {
-        // data 可能是Buffer/Uint8Array
-        if (ZmodemActive || zsentry) {
+    channel.value = await clientStore.client?.shell((data) => {
+        if (data instanceof Uint8Array) {
             zsentry.consume(new Uint8Array(data));
-        } else {
-            term.write(typeof data === 'string' ? data : new Uint8Array(data));
+            return;
         }
+        if (data && typeof data === 'object') {
+            if (data.action === 'close') {
+                if (zsession) {
+                    zsession.close();
+                    zsession = null;
+                    ZmodemActive = false;
+                }
+            }
+            term.write(data.message);
+            return;
+        }
+        term.write(data);
     });
 }
 
@@ -148,6 +159,10 @@ defineExpose({
 });
 
 onBeforeUnmount(() => {
+    if (zsession) {
+        zsession.close();
+        zsession = null;
+    }
     channel.value?.end();
 })
 
