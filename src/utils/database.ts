@@ -11,11 +11,11 @@ export function getDatabase() {
         request.onupgradeneeded = () => {
             const db = request.result;
             //会话表
-            createStore(db, 'serverList', ['name', 'host', 'port', 'username', 'password', 'desc', 'uuid', 'aa']);
+            createStore(db, 'serverList', ['name', 'host', 'port', 'username', 'password', 'desc', 'uuid']);
             //脚本表
             createStore(db, 'shellList', ['scriptName', 'host', 'envVar', 'localDir', 'mainPath', 'baseScripts', 'group', 'uuid', 'hidden']);
             //执行记录表
-            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children', 'excuteId']);
+            createStore(db, 'excuteList', ['shellName', 'host', 'startTime', 'endTime', 'excuteId', 'excuteGroup', 'excuteType', 'status', 'logs', 'uuid', 'children', 'connectId']);
         }
         request.onsuccess = function () {
             resolve(request.result);
