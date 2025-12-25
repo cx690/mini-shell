@@ -77,7 +77,7 @@ async function initShell() {
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    term.writeln(`\r\n[Zmodem] 文件已下载: ${xfer.get_details().name}`);
+                    term.writeln(`\r\n[Zmodem] ${t('downloadfile-success')}: ${xfer.get_details().name}`);
                 });
             });
             session.start();
@@ -96,10 +96,10 @@ async function initShell() {
                 }
                 Zmodem.Browser.send_files(session, files, {
                     on_offer_response: (obj: any, xfer: any) => {
-                        term.writeln(`\r\n[Zmodem] 正在上传: ${obj.name}`);
+                        term.writeln(`\r\n[Zmodem] ${t('Uploading')}: ${obj.name}`);
                     },
                     on_file_complete: (obj: any) => {
-                        term.writeln(`\r\n[Zmodem] 上传完成: ${obj.name}`);
+                        term.writeln(`\r\n[Zmodem] ${t('upload-success')}: ${obj.name}`);
                     },
                     on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
                         // 可选：显示进度
