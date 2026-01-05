@@ -66,6 +66,7 @@ async function initShell() {
         if (session.type === 'receive') {
             // rz 上传到本地
             session.on('offer', (xfer: any) => {
+                term.writeln(`\r\n[Zmodem] Receiving ……`);
                 xfer.accept().then((payload: Uint8Array[]) => {
                     // 合并所有块，确保为BlobPart[]
                     const blob = new Blob(payload.map(p => new Uint8Array(p)), { type: 'application/octet-stream' });
@@ -78,7 +79,7 @@ async function initShell() {
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    term.writeln(`\r\n[Zmodem] ${t('downloadfile-success')}: ${xfer.get_details().name}`);
+                    term.writeln(`\r[Zmodem] ${t('downloadfile-success')}: ${xfer.get_details().name}`);
                 });
             });
             session.start();
