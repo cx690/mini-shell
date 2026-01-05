@@ -47,6 +47,7 @@ let zsession: any = null;
 async function initShell() {
     // 使用静态导入的Zmodem
     let zsentry: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let ZmodemActive = false;
 
     function sendToRemote(buf: Uint8Array) {
@@ -110,7 +111,7 @@ async function initShell() {
                     return;
                 }
                 Zmodem.Browser.send_files(session, files, {
-                    on_offer_response: (obj: any, xfer: any) => {
+                    on_offer_response: (obj: any) => {
                         term.writeln(`\r\n[Zmodem] ${t('Uploading')}: ${obj.name}`);
                     },
                     on_file_complete: (obj: any) => {
