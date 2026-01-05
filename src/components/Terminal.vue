@@ -83,15 +83,30 @@ async function initShell() {
             session.start();
         } else if (session.type === 'send') {
             // sz 上传到远程
-            // 触发文件选择
             const input = document.createElement('input');
             input.type = 'file';
             input.multiple = true;
+            let cancelCheckTimeout: any = null;
+            const focusHandler = () => {
+                if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
+                cancelCheckTimeout = setTimeout(() => {
+                    if (!input.files || input.files.length === 0) {
+                        // 用户取消选择文件
+                        session.abort();
+                        zsession = null;
+                        ZmodemActive = false;
+                        setTimeout(() => {
+                            channel.value?.write('\x18\x18\x18\x18\x18');
+                        }, 100)
+                        window.removeEventListener('focus', focusHandler, true);
+                    }
+                }, 200);
+            };
             input.onchange = () => {
+                window.removeEventListener('focus', focusHandler, true);
+                if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
                 const files = Array.from(input.files || []);
                 if (files.length === 0) {
-                    session.abort();
-                    ZmodemActive = false;
                     return;
                 }
                 Zmodem.Browser.send_files(session, files, {
@@ -99,17 +114,17 @@ async function initShell() {
                         term.writeln(`\r\n[Zmodem] ${t('Uploading')}: ${obj.name}`);
                     },
                     on_file_complete: (obj: any) => {
-                        term.writeln(`\r\n[Zmodem] ${t('upload-success')}: ${obj.name}`);
+                        term.writeln(`\r[Zmodem] ${t('upload-success')}: ${obj.name}`);
                     },
-                    on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
-                        // 可选：显示进度
-                    }
+                    // on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
+                    // }
                 }).finally(() => {
                     session.close();
                     zsession = null;
                     ZmodemActive = false;
                 });
             };
+            window.addEventListener('focus', focusHandler, true);
             input.click();
         }
     }
@@ -134,7 +149,7 @@ async function initShell() {
         if (data && typeof data === 'object') {
             if (data.action === 'close') {
                 if (zsession) {
-                    zsession.close();
+                    zsession.close?.();
                     zsession = null;
                     ZmodemActive = false;
                 }
@@ -160,7 +175,7 @@ defineExpose({
 
 onBeforeUnmount(() => {
     if (zsession) {
-        zsession.close();
+        zsession.close?.();
         zsession = null;
     }
     channel.value?.end();
