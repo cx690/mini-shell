@@ -18,7 +18,7 @@ export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | 
     const taskFn = async () => {
         const list: T[] = [];
         let index = 0;
-        async function excuteTask() {
+        async function executeTask() {
             const it = iterator.next();
             const currentIndex = index;
             index++;
@@ -34,10 +34,10 @@ export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | 
                     });
                     list[currentIndex] = res;
                 }
-                await excuteTask();
+                await executeTask();
             }
         }
-        await Promise.all(Array.from({ length: maxCount }, () => excuteTask()));
+        await Promise.all(Array.from({ length: maxCount }, () => executeTask()));
         PInfo.resolve(list);
         return list;
     }
