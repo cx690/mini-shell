@@ -9,26 +9,35 @@ let maxCountDefault = 10;
  * @param tasks 生成任务的函数
  * @param maxCount 最多并行任务
  */
-export async function parallelTask<T = any>(tasks: (() => Promise<T>)[], maxCount = maxCountDefault) {
-    const source = Object.entries(tasks);
+export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | Promise<T>)>, maxCount = maxCountDefault) {
+    if (!tasks || typeof tasks !== 'object' || typeof tasks[Symbol.iterator] !== 'function') {
+        throw new Error('tasks must be an iterable object');
+    }
+    const iterator = tasks[Symbol.iterator]();
     const PInfo = Promise.withResolvers<T[]>();
     const taskFn = async () => {
         const list: T[] = [];
+        let index = 0;
         async function excuteTask() {
-            const item = source.shift();
-            if (item) {
-                const [i, task] = item;
-                const res = await task().catch(err => {
-                    PInfo.reject(err);
-                    throw err;//终止当前上传
-                });
-                list[+i] = res;
-                if (tasks.length) {
-                    await excuteTask();
+            const it = iterator.next();
+            const currentIndex = index;
+            index++;
+            if (!it.done) {
+                let promise: any = typeof it.value === 'function' ? it.value() : it.value;
+                if (typeof promise?.then !== 'function') {
+                    promise = Promise.resolve(promise);
                 }
+                if (promise) {
+                    const res = await promise.catch((err: any) => {
+                        PInfo.reject(err);
+                        throw err;//终止当前上传
+                    });
+                    list[currentIndex] = res;
+                }
+                await excuteTask();
             }
         }
-        await Promise.all(tasks.slice(0, maxCount).map(() => excuteTask()));
+        await Promise.all(Array.from({ length: maxCount }, () => excuteTask()));
         PInfo.resolve(list);
         return list;
     }

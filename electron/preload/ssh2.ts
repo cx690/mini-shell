@@ -153,51 +153,56 @@ function getClient() {
                         return;
                     }
                     let start = false;
-                    const tasks = uploadPathList.map(({ base, id, dir }) => async () => {
-                        if (signal.aborted) {
-                            throw new Error(message);
-                        }
-                        if (!start) {
-                            emit({
-                                successNum,
-                                errorNum,
-                                total,
-                                status: 1,
-                                name,
-                            })
-                            start = true;
-                        }
-                        const gapDir = path.relative(localDir, dir);
-                        const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
-                        if (signal.aborted) {
-                            throw new Error(message);
-                        }
-                        if (mkstatus !== true) {
-                            throw mkstatus;
-                        } else {
-                            const remotePath = path.join(remoteDir, gapDir, base);
-                            const status = await fastPut(sftp, id, remotePath);
-                            if (signal.aborted) {
-                                throw new Error(message);
+                    function* genTasks() {// 防止上传数量过多导致内存占用过高，改为迭代器方式生成任务，不直接使用数组
+                        for (let i = 0, len = uploadPathList.length; i < len; i++) {
+                            const { base, id, dir } = uploadPathList[i];
+                            yield async () => {
+                                if (signal.aborted) {
+                                    throw new Error(message);
+                                }
+                                if (!start) {
+                                    emit({
+                                        successNum,
+                                        errorNum,
+                                        total,
+                                        status: 1,
+                                        name,
+                                    })
+                                    start = true;
+                                }
+                                const gapDir = path.relative(localDir, dir);
+                                const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
+                                if (signal.aborted) {
+                                    throw new Error(message);
+                                }
+                                if (mkstatus !== true) {
+                                    throw mkstatus;
+                                } else {
+                                    const remotePath = path.join(remoteDir, gapDir, base);
+                                    const status = await fastPut(sftp, id, remotePath);
+                                    if (signal.aborted) {
+                                        throw new Error(message);
+                                    }
+                                    if (status !== true) {
+                                        errorNum++;
+                                        throw status;
+                                    } else {
+                                        successNum++;
+                                    }
+                                    emit({
+                                        successNum,
+                                        errorNum,
+                                        total,
+                                        status: (successNum + errorNum) === total ? 2 : 1,
+                                        message: status + '',
+                                        name,
+                                    })
+                                    return status;
+                                }
                             }
-                            if (status !== true) {
-                                errorNum++;
-                                throw status;
-                            } else {
-                                successNum++;
-                            }
-                            emit({
-                                successNum,
-                                errorNum,
-                                total,
-                                status: (successNum + errorNum) === total ? 2 : 1,
-                                message: status + '',
-                                name,
-                            })
-                            return status;
                         }
-                    });
-                    await parallelTask(tasks).catch(err => reject(err));
+                    }
+                    await parallelTask(genTasks()).catch(err => reject(err));
                     resolve(true);
                     sftp.end();
                 });
