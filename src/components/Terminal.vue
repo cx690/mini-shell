@@ -118,6 +118,9 @@ async function initShell() {
                     on_file_complete: (obj: any) => {
                         term.writeln(`\r[Zmodem] ${t('upload-success')}: ${obj.name}`);
                     },
+                    on_error: (err: any) => {
+                        term.writeln(`\r[Zmodem] ${t('upload-err', { err })}`);
+                    },
                     // on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
                     // }
                 }).finally(() => {
