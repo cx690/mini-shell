@@ -6,7 +6,7 @@ let maxRunning = 3;
 let maxCountDefault = 10;
 /**
  * 并行执行指定数量的任务
- * @param tasks 生成任务的函数
+ * @param tasks 任务生成器，要求可迭代
  * @param maxCount 最多并行任务
  */
 export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | Promise<T>)>, maxCount = maxCountDefault) {
@@ -14,36 +14,34 @@ export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | 
         throw new Error('tasks must be an iterable object');
     }
     const iterator = tasks[Symbol.iterator]();
-    const PInfo = Promise.withResolvers<T[]>();
+    const { promise, resolve, reject } = Promise.withResolvers<T[]>();
     const taskFn = async () => {
         const list: T[] = [];
         let index = 0;
         async function executeTask() {
-            const it = iterator.next();
+            const { done, value } = iterator.next();
             const currentIndex = index;
             index++;
-            if (!it.done) {
-                let promise: any = typeof it.value === 'function' ? it.value() : it.value;
-                if (typeof promise?.then !== 'function') {
-                    promise = Promise.resolve(promise);
+            if (!done) {
+                let p: any = typeof value === 'function' ? value() : value;
+                if (typeof p?.then !== 'function') {
+                    p = Promise.resolve(p);
                 }
-                if (promise) {
-                    const res = await promise.catch((err: any) => {
-                        PInfo.reject(err);
-                        throw err;//终止当前上传
-                    });
-                    list[currentIndex] = res;
-                }
+                const res = await p.catch((err: any) => {
+                    reject(err);
+                    throw err;//终止当前全部任务
+                });
+                list[currentIndex] = res;
                 await executeTask();
             }
         }
         await Promise.all(Array.from({ length: maxCount }, () => executeTask()));
-        PInfo.resolve(list);
+        resolve(list);
         return list;
     }
     queue.push(taskFn);
     startTask();
-    return await PInfo.promise;
+    return await promise;
 }
 
 /** 执行队列任务 */
