@@ -63,8 +63,8 @@ function getClient() {
                                 }
                             });
                         },
-                        end: function (...args: any[]) {
-                            channel.end(...args);
+                        destroy: function () {
+                            channel.destroy();
                         },
                         setWindow: function ({ cols, rows, width, height }: { cols: number, rows: number, height: number, width: number }) {
                             channel.setWindow(rows, cols, height, width);
@@ -315,6 +315,6 @@ function emitUpload(quiet: boolean, uuid: string) {
 export type ClientType = ReturnType<typeof getClient>;
 export type ChannelType = {
     write(chunk: any): void,
-    end(...args: any[]): void,
+    destroy(): void,
     setWindow(opt: { cols: number, rows: number, height: number, width: number }): void,
 }

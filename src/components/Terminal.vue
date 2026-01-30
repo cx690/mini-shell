@@ -170,6 +170,7 @@ defineExpose({
     initShell: () => {
         nextTick(() => {
             term.clear();
+            channel.value?.destroy();
             initShell();
         })
     },
@@ -183,7 +184,7 @@ onBeforeUnmount(() => {
         zsession.close?.();
         zsession = null;
     }
-    channel.value?.end();
+    channel.value?.destroy();
 })
 
 function onClick() {
