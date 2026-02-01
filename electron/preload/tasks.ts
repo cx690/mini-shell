@@ -8,8 +8,9 @@ let maxCountDefault = 10;
  * 并行执行指定数量的任务
  * @param tasks 任务生成器，要求可迭代
  * @param maxCount 最多并行任务
+ * @param handleRes 是否处理返回结果，默认false，返回空数组，否则依次返回迭代器promise的结果
  */
-export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | Promise<T>)>, maxCount = maxCountDefault) {
+export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | Promise<T>)>, maxCount = maxCountDefault, handleRes = false) {
     if (!tasks || typeof tasks !== 'object' || typeof tasks[Symbol.iterator] !== 'function') {
         throw new Error('tasks must be an iterable object');
     }
@@ -31,7 +32,7 @@ export async function parallelTask<T = any>(tasks: Iterable<(() => Promise<T> | 
                     reject(err);
                     throw err;//终止当前全部任务
                 });
-                list[currentIndex] = res;
+                handleRes && (list[currentIndex] = res);
                 await executeTask();
             }
         }
