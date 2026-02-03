@@ -295,6 +295,7 @@
   "Log": "日志",
   "Queuing": "队列中",
   "Uploading": "上传中",
+  "zmodem-upload-mode": "请选择上传方式",
   "Finished": "已完成",
   "UploadError": "上传失败",
   "confirm-switch-hidden-item": "确定要变更选中的{num}条数据的显示/隐藏吗？",

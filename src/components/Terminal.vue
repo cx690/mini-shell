@@ -7,7 +7,7 @@ import { useResize } from '@/utils/hooks';
 import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
 import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/preload/ssh2';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import Zmodem from 'zmodem.js/src/zmodem_browser.js';
 
@@ -47,8 +47,6 @@ let zsession: any = null;
 async function initShell() {
     // 使用静态导入的Zmodem
     let zsentry: any = null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let ZmodemActive = false;
 
     function sendToRemote(buf: Uint8Array) {
         // 确保传递的是Uint8Array或Buffer
@@ -60,7 +58,6 @@ async function initShell() {
     }
 
     function handleZmodemDetect(detection: any) {
-        ZmodemActive = true;
         const session = detection.confirm();
         zsession = session;
         if (session.type === 'receive') {
@@ -84,36 +81,19 @@ async function initShell() {
             });
             session.start();
         } else if (session.type === 'send') {
-            // sz 上传到远程
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            let cancelCheckTimeout: any = null;
-            const focusHandler = () => {
-                if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
-                cancelCheckTimeout = setTimeout(() => {
-                    if (!input.files || input.files.length === 0) {
-                        // 用户取消选择文件
-                        session.abort();
-                        zsession = null;
-                        ZmodemActive = false;
-                        setTimeout(() => {
-                            channel.value?.write('\x18\x18\x18\x18\x18');
-                        }, 100)
-                        window.removeEventListener('focus', focusHandler, true);
-                    }
-                }, 200);
+            // sz 上传到远程：先让用户选择「上传文件」或「上传文件夹」
+            const abortSession = () => {
+                session.abort();
+                zsession = null;
+                setTimeout(() => {
+                    channel.value?.write('\x18\x18\x18\x18\x18');
+                }, 100);
             };
-            input.onchange = () => {
-                window.removeEventListener('focus', focusHandler, true);
-                if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
-                const files = Array.from(input.files || []);
-                if (files.length === 0) {
-                    return;
-                }
-                Zmodem.Browser.send_files(session, files, {
+
+            const sendFiles = (files: File[]) => {
+                return Zmodem.Browser.send_files(session, files, {
                     on_offer_response: (obj: any) => {
-                        term.writeln(`\r\n[Zmodem] ${t('Uploading')}: ${obj.name}`);
+                        term.writeln(`\r[Zmodem] ${t('Uploading')}: ${obj.name}`);
                     },
                     on_file_complete: (obj: any) => {
                         term.writeln(`\r[Zmodem] ${t('upload-success')}: ${obj.name}`);
@@ -121,16 +101,63 @@ async function initShell() {
                     on_error: (err: any) => {
                         term.writeln(`\r[Zmodem] ${t('upload-err', { err })}`);
                     },
-                    // on_progress: (obj: any, xfer: any, buffer: Uint8Array) => {
-                    // }
                 }).finally(() => {
                     session.close();
                     zsession = null;
-                    ZmodemActive = false;
                 });
             };
-            window.addEventListener('focus', focusHandler, true);
-            input.click();
+
+            const openPicker = (isFolder: boolean) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = true;
+                if (isFolder) {
+                    input.setAttribute('webkitdirectory', '');
+                    input.setAttribute('directory', '');
+                }
+                let cancelCheckTimeout: any = null;
+                const focusHandler = () => {
+                    if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
+                    cancelCheckTimeout = setTimeout(() => {
+                        if (!input.files || input.files.length === 0) {
+                            abortSession();
+                            window.removeEventListener('focus', focusHandler, true);
+                        }
+                    }, 200);
+                };
+                input.onchange = () => {
+                    window.removeEventListener('focus', focusHandler, true);
+                    if (cancelCheckTimeout) clearTimeout(cancelCheckTimeout);
+                    let files = Array.from(input.files || []);
+                    if (files.length === 0) {
+                        return;
+                    }
+                    if (isFolder && files[0].webkitRelativePath) {
+                        files = files.map((f) =>
+                            new File([f], f.webkitRelativePath || f.name, { lastModified: f.lastModified })
+                        );
+                    }
+                    sendFiles(files);
+                };
+                window.addEventListener('focus', focusHandler, true);
+                input.click();
+            };
+
+            ElMessageBox.confirm(t('zmodem-upload-mode'), 'Zmodem', {
+                confirmButtonText: t('select-file'),
+                cancelButtonText: t('select-dir'),
+                cancelButtonClass: 'el-button--primary',
+                type: 'warning',
+                distinguishCancelAndClose: true,
+            })
+                .then(() => openPicker(false))
+                .catch((action: string) => {
+                    if (action === 'cancel') {
+                        openPicker(true);
+                    } else {
+                        abortSession();
+                    }
+                });
         }
     }
 
@@ -141,7 +168,7 @@ async function initShell() {
         },
         on_detect: handleZmodemDetect,
         on_retract: () => {
-            ZmodemActive = false;
+            console.log('zmodem on_retract');
         },
         sender: sendToRemote
     });
@@ -156,7 +183,6 @@ async function initShell() {
                 if (zsession) {
                     zsession.close?.();
                     zsession = null;
-                    ZmodemActive = false;
                 }
             }
             term.write(data.message);

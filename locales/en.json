@@ -295,6 +295,7 @@
   "Log": "Log",
   "Queuing": "Queuing",
   "Uploading": "Uploading",
+  "zmodem-upload-mode": "Choose upload type",
   "Finished": "Finished",
   "UploadError": "Upload Error",
   "confirm-switch-hidden-item": "Are you sure want to switch show/hide the selected record {num}?",
