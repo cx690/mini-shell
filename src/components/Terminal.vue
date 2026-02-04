@@ -274,9 +274,11 @@ async function drop(e: DragEvent) {
             dragFiles = files;
             channel.value.write(`rz${settings.config.zmodemOverwrite ? ' -y' : ''}${settings.config.zmodemAnsiEscape ? ' -e' : ''}\r`);
         }
+    } else {
+        dragFiles = [];
     }
 }
-console.log(settings.config);
+
 function dragleave(e: DragEvent) {
     if (!e.dataTransfer?.types?.includes('Files')) return;
     e.preventDefault();
@@ -285,6 +287,7 @@ function dragleave(e: DragEvent) {
     if (relatedTarget && terminalDiv.value?.contains(relatedTarget)) {
         return;
     }
+    dragFiles = [];
     state.draging = false;
 }
 </script>
