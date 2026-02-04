@@ -1,22 +1,43 @@
 <template>
-    <div class="terminal dark" ref="div" @click="onClick"></div>
+    <div class="terminal-div dark" ref="terminalDiv" @click="onClick" @dragenter="dragenter" @dragover="dragover"
+        @drop="drop" @dragleave="dragleave">
+        <div class="draging" v-if="state.draging">
+            <div>
+                <el-icon>
+                    <Plus />
+                </el-icon>
+                <span>
+                    {{ t('drag-files-to-upload') }}
+                </span>
+            </div>
+        </div>
+        <div class="terminal" ref="div"></div>
+    </div>
 </template>
 <script setup lang="ts">
 import useClient from '@/store/useClient';
 import { useResize } from '@/utils/hooks';
-import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
+import { onMounted, ref, onBeforeUnmount, nextTick, reactive } from 'vue';
 import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/preload/ssh2';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import Zmodem from 'zmodem.js/src/zmodem_browser.js';
+import { Plus } from '@element-plus/icons-vue';
+import { getAllFilesFromDataTransfer } from '@/utils/files';
+import useSettings from '@/store/useSetting';
 
 const props = defineProps<{ init?: boolean }>()
 const clientStore = useClient();
 const div = ref<HTMLDivElement>()
 const term = new Terminal();
-
+const settings = useSettings();
 const channel = ref<ChannelType | null | undefined>(null);
+let dragFiles: File[] = [];
+const state = reactive({
+    draging: false,
+})
+const terminalDiv = ref<HTMLDivElement>()
 const { t } = useI18n();
 useResize(div, term, channel);
 onMounted(() => {
@@ -85,6 +106,7 @@ async function initShell() {
             const abortSession = () => {
                 session.abort();
                 zsession = null;
+                dragFiles = [];
                 setTimeout(() => {
                     channel.value?.write('\x18\x18\x18\x18\x18');
                 }, 100);
@@ -104,8 +126,14 @@ async function initShell() {
                 }).finally(() => {
                     session.close();
                     zsession = null;
+                    dragFiles = [];
                 });
             };
+
+            if (dragFiles.length > 0) {
+                sendFiles(dragFiles);
+                return;
+            }
 
             const openPicker = (isFolder: boolean) => {
                 const input = document.createElement('input');
@@ -216,14 +244,82 @@ onBeforeUnmount(() => {
 function onClick() {
     term.focus();
 }
+
+function dragenter(e: DragEvent) {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragFiles = [];
+    state.draging = true;
+}
+function dragover(e: DragEvent) {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.draging = true;
+}
+
+async function drop(e: DragEvent) {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.draging = false;
+    const dt = e.dataTransfer;
+    if (!dt) return;
+    const files = await getAllFilesFromDataTransfer(dt);
+    if (files.length > 0) {
+        if (clientStore.status !== 2) {
+            ElMessage.warning(t('connect-lose-term'));
+        } else if (channel.value) {
+            dragFiles = files;
+            channel.value.write(`rz${settings.config.zmodemOverwrite ? ' -y' : ''}${settings.config.zmodemAnsiEscape ? ' -e' : ''}\r`);
+        }
+    }
+}
+console.log(settings.config);
+function dragleave(e: DragEvent) {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const relatedTarget = e.relatedTarget as Node | null;
+    if (relatedTarget && terminalDiv.value?.contains(relatedTarget)) {
+        return;
+    }
+    state.draging = false;
+}
 </script>
 <style lang="less" scoped>
-.terminal {
+.terminal-div {
     width: 100%;
     min-width: 900px;
     min-height: 740px;
     background: #000;
     overflow: hidden;
     padding: 5px 0 0 11px;
+    position: relative;
+
+    .draging {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        z-index: 1;
+    }
+
+    .terminal {
+        width: 100%;
+        height: 100%;
+        background: #000;
+        overflow: hidden;
+        padding: 5px 0 0 11px;
+    }
 }
 </style>

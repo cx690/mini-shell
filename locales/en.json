@@ -320,5 +320,9 @@
   "menu.speech": "Speech",
   "menu.startSpeaking": "Start Speaking",
   "menu.stopSpeaking": "Stop Speaking",
-  "currentConnect": "Current connect"
+  "currentConnect": "Current connect",
+  "Zmodem-Settings": "Transfer Settings - ZMODEM (rz)",
+  "zmodem-overwrite": "Overwrite existing files",
+  "zmodem-ansi-escape": "ANSI control code escape",
+  "drag-files-to-upload": "Drag files here to upload"
 }

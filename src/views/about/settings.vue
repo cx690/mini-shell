@@ -49,6 +49,18 @@
                     <el-switch v-model="settings.config.showUploadProcess" />
                 </el-form-item>
             </el-card>
+
+            <el-card>
+                <template #header>
+                    {{ t('Zmodem-Settings') }}
+                </template>
+                <el-form-item :label="t('zmodem-overwrite')" prop="zmodemOverwrite">
+                    <el-switch v-model="settings.config.zmodemOverwrite" />
+                </el-form-item>
+                <el-form-item :label="t('zmodem-ansi-escape')" prop="zmodemAnsiEscape">
+                    <el-switch v-model="settings.config.zmodemAnsiEscape" />
+                </el-form-item>
+            </el-card>
         </el-form>
     </BasePage>
 </template>
