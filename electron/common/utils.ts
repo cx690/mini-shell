@@ -55,8 +55,11 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
         return [{ localPath, remotePath: path.join(remoteDir, path.parse(localPath).base).replace(/\\/g, '/') }];
     } else if (stat.isDirectory()) {
         if (!remoteDir.endsWith('/')) {
-            remoteDir += `/${path.parse(localPath).base}/`;
+            remoteDir += '/';
         };
+        if (!localPath.endsWith('/') && !localPath.endsWith('\\')) {
+            remoteDir += `${path.parse(localPath).base}/`;
+        }
         const result: UploadFileItem[] = [];
         const patterns = exclude ? exclude.split(',').filter(str => str.trim() !== '').map((s) => {
             const withWildcard = s.trim().replace(/\*/g, '.*');
@@ -92,3 +95,10 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
         throw new Error('本地路径不存在或者无权限访问！');
     }
 }
+
+async function test() {
+    const files = await getUploadFiles('D:\\work\\hippocampus\\dist', '/root');
+    console.log(files[0]);
+}
+
+test();
