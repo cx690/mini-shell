@@ -52,7 +52,7 @@
 
             <el-card>
                 <template #header>
-                    {{ t('Zmodem-Settings') }}
+                    {{ t('Zmodem-drag-Settings') }}
                 </template>
                 <el-form-item :label="t('zmodem-overwrite')" prop="zmodemOverwrite">
                     <el-switch v-model="settings.config.zmodemOverwrite" />

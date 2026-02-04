@@ -321,7 +321,7 @@
   "menu.startSpeaking": "开始阅读",
   "menu.stopSpeaking": "停止阅读",
   "currentConnect": "当前连接",
-  "Zmodem-Settings": "传输设置 - ZMODEM (rz)",
+  "Zmodem-drag-Settings": "拖拽传输设置 - ZMODEM (rz)",
   "zmodem-overwrite": "覆盖同名文件",
   "zmodem-ansi-escape": "ANSI 控制代码转义",
   "drag-files-to-upload": "拖拽文件到此处上传"
