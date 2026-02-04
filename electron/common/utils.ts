@@ -95,10 +95,3 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
         throw new Error('本地路径不存在或者无权限访问！');
     }
 }
-
-async function test() {
-    const files = await getUploadFiles('D:\\work\\hippocampus\\dist', '/root');
-    console.log(files[0]);
-}
-
-test();
