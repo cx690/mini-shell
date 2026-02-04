@@ -3,7 +3,7 @@ import path from 'path';
 import { stat } from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
 import fs from 'fs/promises';
-import { getAllFiles, typeFileItem } from '../common/utils';
+import { getAllFiles, getUploadFiles, typeFileItem, UploadFileItem } from '../common/utils';
 import { parallelTask } from './tasks';
 
 function getClient() {
@@ -83,23 +83,7 @@ function getClient() {
         },
         uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string }) => {
             const { quiet = false, name, uuid } = option;
-            let uploadPathList: typeFileItem[] = [];
-            let localDir = '';
-            try {
-                const stat = await fs.stat(localPath);
-                if (stat.isFile()) {
-                    const item = { id: localPath, ...path.parse(localPath) };
-                    uploadPathList.push(item);
-                    localDir = item.dir;
-                } else if (stat.isDirectory()) {
-                    localDir = path.parse(localPath).dir;
-                    uploadPathList = await getAllFiles(localPath);
-                } else {
-                    return new Error('上传文件出错，请检查本地路径是否存在并且有权限访问！');
-                }
-            } catch (err) {
-                return err;
-            }
+            const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir);
             const emit = emitUpload(quiet, uuid);
             let successNum = 0;
             let errorNum = 0;
@@ -155,7 +139,7 @@ function getClient() {
                     let start = false;
                     function* genTasks() {// 防止上传数量过多导致内存占用过高，改为迭代器方式生成任务，不直接使用数组
                         for (let i = 0, len = uploadPathList.length; i < len; i++) {
-                            const { base, id, dir } = uploadPathList[i];
+                            const { localPath, remotePath } = uploadPathList[i];
                             yield async () => {
                                 if (signal.aborted) {
                                     throw new Error(message);
@@ -170,16 +154,15 @@ function getClient() {
                                     })
                                     start = true;
                                 }
-                                const gapDir = path.relative(localDir, dir);
-                                const mkstatus = await mkRemotedir(path.join(remoteDir, gapDir));
+                                const itDir = path.dirname(remotePath);
+                                const mkstatus = await mkRemotedir(itDir);
                                 if (signal.aborted) {
                                     throw new Error(message);
                                 }
                                 if (mkstatus !== true) {
                                     throw mkstatus;
                                 } else {
-                                    const remotePath = path.join(remoteDir, gapDir, base);
-                                    const status = await fastPut(sftp, id, remotePath);
+                                    const status = await fastPut(sftp, localPath, remotePath);
                                     if (signal.aborted) {
                                         throw new Error(message);
                                     }
@@ -291,7 +274,7 @@ async function mkRemotedir(client: Client, dir: string) {
 
 async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string) {
     return new Promise<true | Error>((resolve) => {
-        sftp.fastPut(localPath, remotePath.replaceAll(/\\/g, '/'), function (err) {
+        sftp.fastPut(localPath, remotePath, function (err) {
             if (err) {
                 console.error(err);
                 resolve(err);
