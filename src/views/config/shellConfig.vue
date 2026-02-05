@@ -231,10 +231,45 @@
                                 </el-form-item>
                             </el-col>
                             <el-col :span="12">
-                                <el-form-item :label="t('remote-dir')"
-                                    :rules="{ required: true, message: t('enter-remote-dir') }"
+                                <el-form-item :rules="{ required: true, message: t('enter-remote-dir') }"
                                     :prop="`baseScripts.${num}.remoteDir`">
+                                    <template #label>
+                                        <div>
+                                            <span class="script-config">
+                                                {{ t('remote-dir') }}
+                                                <el-tooltip placement="top">
+                                                    <el-icon>
+                                                        <QuestionFilled />
+                                                    </el-icon>
+                                                    <template #content>
+                                                        <p>{{ t('remote-dir-suffix-tip') }}</p>
+                                                    </template>
+                                                </el-tooltip>：
+                                            </span>
+                                        </div>
+                                    </template>
                                     <el-input v-model="base.remoteDir" :placeholder="t('enter-remote-dir')" clearable
+                                        :spellcheck="false" />
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item :prop="`baseScripts.${num}.exclude`">
+                                    <template #label>
+                                        <div>
+                                            <span class="script-config">
+                                                {{ t('ignore-rules') }}
+                                                <el-tooltip placement="top">
+                                                    <el-icon>
+                                                        <QuestionFilled />
+                                                    </el-icon>
+                                                    <template #content>
+                                                        <p>{{ t('ignore-rules-tip') }}</p>
+                                                    </template>
+                                                </el-tooltip>：
+                                            </span>
+                                        </div>
+                                    </template>
+                                    <el-input v-model="base.exclude" :placeholder="t('enter-ignore-rules')" clearable
                                         :spellcheck="false" />
                                 </el-form-item>
                             </el-col>

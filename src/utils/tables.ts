@@ -34,6 +34,8 @@ export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
     }[],
     localFile?: string,
     remoteDir?: string,
+    /** 忽略规则 */
+    exclude?: string,
     /** 组合脚本组 */
     combine?: { value: string, name: string }[],
 }[]

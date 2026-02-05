@@ -80,9 +80,9 @@ function getClient() {
             client.destroy();
             return clientProxy;
         },
-        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string }) => {
-            const { quiet = false, name, uuid } = option;
-            const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir);
+        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
+            const { quiet = false, name, uuid, exclude } = option;
+            const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir, exclude);
             const emit = emitUpload(quiet, uuid);
             let successNum = 0;
             let errorNum = 0;

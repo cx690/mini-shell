@@ -593,23 +593,25 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 }
             }
         } else if (item.type === 3) {//upload
-            const { remoteDir, localFile } = item;
+            const { remoteDir, localFile, exclude: excludeStr } = item;
             if (!remoteDir || !localFile) {
                 ElMessage.warning(t('no-upload-found'));
             } else {
                 logInfo(`<p class="title">${t('start-excute-script', { num: i + 1, type: shellTypeEnum.value[item.type] })}</p>`);
                 const local = formatterShell(envVar, localFile);
                 const remote = formatterShell(envVar, remoteDir);
-                logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}</p>`);
+                const exclude = excludeStr ? formatterShell(envVar, excludeStr) : undefined;
+                logInfo(`<p class="subtitle">${t('upload-config', { local: `<span class="cmd">${local}</span>`, remote: `<span class="cmd">${remote}</span>` })}${exclude ? ` ${t('ignore-rules')}: <span class="cmd">${exclude}</span>` : ''}</p>`);
                 const uploadId = v4();
                 const start = dayjs();
                 excuteAbort[uuid].signal.addEventListener('abort', () => {
                     clientStore.client!.abortUploadFile(uploadId);
                 })
-                const result = await (clientStore.client!.uploadFile(local, remote, { quiet: !settings.config.showUploadProcess, name: exceteRecord.shellName, uuid: uploadId }));
+                const result = await (clientStore.client!.uploadFile(local, remote, { quiet: !settings.config.showUploadProcess, name: exceteRecord.shellName, uuid: uploadId, exclude }));
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
+                    
                     if (signal.aborted) {
                         return abortRecord();
                     }
