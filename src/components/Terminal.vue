@@ -132,6 +132,7 @@ async function initShell() {
 
             if (dragFiles.length > 0) {
                 sendFiles(dragFiles);
+                dragFiles = []
                 return;
             }
 
@@ -225,6 +226,7 @@ defineExpose({
         nextTick(() => {
             term.clear();
             channel.value?.destroy();
+            dragFiles = [];
             initShell();
         })
     },
@@ -237,6 +239,7 @@ onBeforeUnmount(() => {
     if (zsession) {
         zsession.close?.();
         zsession = null;
+        dragFiles = [];
     }
     channel.value?.destroy();
 })
