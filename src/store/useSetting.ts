@@ -68,7 +68,7 @@ const useSettings = defineStore('settings', () => {
                     ...config,
                     showUploadProcess: data.showUploadProcess ?? true,
                     zmodemOverwrite: data.zmodemOverwrite ?? true,
-                    zmodemAnsiEscape: data.zmodemAnsiEscape ?? true
+                    zmodemAnsiEscape: data.zmodemAnsiEscape ?? false
                 });
             } catch (error) {
                 localStorage.removeItem('config');
