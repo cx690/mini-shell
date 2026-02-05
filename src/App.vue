@@ -11,7 +11,7 @@ import { reactive, h, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useSettings from './store/useSetting';
 import useClient from './store/useClient';
-import { Content } from './utils';
+import { Content, formatSize } from './utils';
 const { t } = useI18n();
 const settings = useSettings();//不能直接解构ref解包结果
 const uploadInfo = reactive<Record<string, {
@@ -62,7 +62,9 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
                             percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
                             style: "width:250px;"
                         }, {
-                            default: () => h('span', null, `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
+                            default: () => h('span', null,
+                                uploadInfo[uuid].data.type === 'fileSize' ? `${formatSize(uploadInfo[uuid].data.successNum)}/${formatSize(uploadInfo[uuid].data.total)}` :
+                                    `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
                         })
                     ]
                 }),

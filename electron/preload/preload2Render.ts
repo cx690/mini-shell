@@ -26,6 +26,8 @@ export interface UploadInfoType {
     total: number;
     /** 上传的名称一般是脚本名称 */
     name?: string;
+    /** 文件大小或者数量 */
+    type?: 'fileSize' | 'fileNumber';
 }
 
 export type InfoTyoe<T extends keyof InfoEvent = 'upload', S = InfoEvent[T]> = {

@@ -2,8 +2,7 @@ import { Client, SFTPWrapper } from 'ssh2';
 import path from 'path';
 import { stat } from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
-import fs from 'fs/promises';
-import { getAllFiles, getUploadFiles, typeFileItem, UploadFileItem } from '../common/utils';
+import { getUploadFiles, UploadFileItem } from '../common/utils';
 import { parallelTask } from './tasks';
 
 function getClient() {
@@ -162,7 +161,20 @@ function getClient() {
                                 if (mkstatus !== true) {
                                     throw mkstatus;
                                 } else {
-                                    const status = await fastPut(sftp, localPath, remotePath);
+                                    let totalSize = 0;
+                                    let transferredSize = 0;
+                                    const emitProgress = total === 1 ? function (total: number, fsize: number) {
+                                        totalSize = fsize;
+                                        transferredSize = total;
+                                        emit({
+                                            successNum: transferredSize,
+                                            errorNum: 0,
+                                            total: fsize,
+                                            status: 1,
+                                            type: 'fileSize'
+                                        })
+                                    } : undefined;
+                                    const status = await fastPut(sftp, localPath, remotePath, emitProgress);
                                     if (signal.aborted) {
                                         throw new Error(message);
                                     }
@@ -172,14 +184,25 @@ function getClient() {
                                     } else {
                                         successNum++;
                                     }
-                                    emit({
-                                        successNum,
-                                        errorNum,
-                                        total,
-                                        status: (successNum + errorNum) === total ? 2 : 1,
-                                        message: status + '',
-                                        name,
-                                    })
+                                    if (total === 1) {
+                                        emit({
+                                            successNum: transferredSize,
+                                            errorNum,
+                                            total: totalSize,
+                                            status: 2,
+                                            name,
+                                            type: 'fileSize'
+                                        })
+                                    } else {
+                                        emit({
+                                            successNum,
+                                            errorNum,
+                                            total,
+                                            status: (successNum + errorNum) === total ? 2 : 1,
+                                            name,
+                                        })
+                                    }
+
                                     return status;
                                 }
                             }
@@ -272,9 +295,14 @@ async function mkRemotedir(client: Client, dir: string) {
     })
 }
 
-async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string) {
+async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string, emitProgress?: (total: number, fsize: number) => void) {
     return new Promise<true | Error>((resolve) => {
-        sftp.fastPut(localPath, remotePath, function (err) {
+        const option = emitProgress ? {
+            step: (total: number, nb: number, fsize: number) => {
+                emitProgress(total, fsize);
+            }
+        } : {};
+        sftp.fastPut(localPath, remotePath, option, function (err) {
             if (err) {
                 console.error(err);
                 resolve(err);
