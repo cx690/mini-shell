@@ -66,6 +66,7 @@ const useSettings = defineStore('settings', () => {
                 }
                 electronAPI.changeSystemConfig({
                     ...config,
+                    showUploadProcess: data.showUploadProcess ?? true,
                     zmodemOverwrite: data.zmodemOverwrite ?? true,
                     zmodemAnsiEscape: data.zmodemAnsiEscape ?? true
                 });
