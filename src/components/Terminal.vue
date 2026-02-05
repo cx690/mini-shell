@@ -325,7 +325,9 @@ function dragleave(e: DragEvent) {
         height: 100%;
         background: #000;
         overflow: hidden;
-        padding: 5px 0 0 11px;
+        position: relative;
+        min-width: 900px;
+        min-height: 740px;
     }
 }
 </style>
