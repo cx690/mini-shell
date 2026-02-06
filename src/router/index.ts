@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Desk from '@/layouts/desk.vue';
 import { ElMessage } from 'element-plus';
 import { t } from '@/i18n';
+import { Component } from 'vue';
+import { Monitor, List, VideoPlay, Setting, Connection, Document, Upload, InfoFilled, Cpu, } from '@element-plus/icons-vue';
 
 /** meta类型说明 */
 export interface MetaType {
@@ -15,6 +17,8 @@ export interface MetaType {
     active?: string;
     /** 页面是否缓存，默认true */
     keepAlive?: boolean;
+    /** element-plus菜单图标 */
+    icon?: Component;
 }
 // name会用作菜单的key,且必须与path一致，根路径请加左/，请必填
 export const routes: RouteRecordRaw[] = [
@@ -34,6 +38,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             title: '交互桌面',
             t: 'route-desk',
+            icon: Monitor,
         },
         children: [
             {
@@ -44,6 +49,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '服务列表',
                     t: 'route-main',
                     keepAlive: false,
+                    icon: List,
                 },
             },
             {
@@ -54,6 +60,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '脚本执行',
                     t: 'route-excute',
                     keepAlive: true,
+                    icon: VideoPlay,
                 },
             },
         ]
@@ -66,6 +73,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             title: '配置管理',
             t: 'route-config',
+            icon: Setting,
         },
         children: [
             {
@@ -76,6 +84,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '服务连接配置',
                     t: 'route-server',
                     keepAlive: false,
+                    icon: Connection,
                 },
             },
             {
@@ -86,6 +95,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '脚本配置管理',
                     t: 'route-shellConfig',
                     keepAlive: false,
+                    icon: Document,
                 },
             },
             {
@@ -95,6 +105,7 @@ export const routes: RouteRecordRaw[] = [
                 meta: {
                     title: '导入导出数据',
                     t: 'route-ioConfig',
+                    icon: Upload,
                 },
             },
         ]
@@ -106,6 +117,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             title: '关于',
             t: 'route-about',
+            icon: InfoFilled,
         },
         children: [
             {
@@ -115,6 +127,7 @@ export const routes: RouteRecordRaw[] = [
                 meta: {
                     title: '系统设置',
                     t: 'route-settings',
+                    icon: Setting,
                 },
             },
             {
@@ -124,6 +137,7 @@ export const routes: RouteRecordRaw[] = [
                 meta: {
                     title: '系统信息',
                     t: 'route-system',
+                    icon: Cpu,
                 },
             },
             {
@@ -133,6 +147,7 @@ export const routes: RouteRecordRaw[] = [
                 meta: {
                     title: '开源协议',
                     t: 'route-license',
+                    icon: Document,
                 },
             },
         ]

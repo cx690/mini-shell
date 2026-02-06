@@ -59,19 +59,40 @@
                             <template v-if="item.children?.length">
                                 <el-sub-menu :index="item.name">
                                     <template #title>
-                                        {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
+                                        <span v-if="item.meta?.icon">
+                                            <el-icon>
+                                                <component :is="item.meta.icon" />
+                                            </el-icon>
+                                        </span>
+                                        <span>
+                                            {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
+                                        </span>
                                     </template>
                                     <el-menu-item v-for="subItem of item.children" :key="subItem.name"
                                         :index="subItem.name">
                                         <router-link :to="{ name: subItem.name }">
-                                            {{ subItem.meta?.t ? t(subItem.meta.t) : subItem.meta?.title }}
+                                            <span v-if="subItem.meta?.icon">
+                                                <el-icon>
+                                                    <component :is="subItem.meta.icon" />
+                                                </el-icon>
+                                            </span>
+                                            <span>
+                                                {{ subItem.meta?.t ? t(subItem.meta.t) : subItem.meta?.title }}
+                                            </span>
                                         </router-link>
                                     </el-menu-item>
                                 </el-sub-menu>
                             </template>
                             <el-menu-item :index="item.name" v-else>
                                 <router-link :to="{ name: item.name }">
-                                    {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
+                                    <span v-if="item.meta?.icon">
+                                        <el-icon>
+                                            <component :is="item.meta.icon" />
+                                        </el-icon>
+                                    </span>
+                                    <span>
+                                        {{ item.meta?.t ? t(item.meta.t) : item.meta?.title }}
+                                    </span>
                                 </router-link>
                             </el-menu-item>
                         </template>
