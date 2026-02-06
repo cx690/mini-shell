@@ -326,7 +326,7 @@
   "menu.stopSpeaking": "Stop Speaking",
   "currentConnect": "Current connect",
   "Zmodem-drag-Settings": "Drag transfer settings - ZMODEM (rz)",
-  "zmodem-overwrite": "Overwrite existing files",
-  "zmodem-ansi-escape": "ANSI control code escape",
-  "drag-files-to-upload": "Drag files here to upload"
+  "drag-files-to-upload": "Drag files here to upload",
+  "zmodem-cmd": "Command triggered by drag upload",
+  "zmodem-cmd-placeholder": "such as: rz -y -e"
 }

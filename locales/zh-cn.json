@@ -326,7 +326,7 @@
   "menu.stopSpeaking": "停止阅读",
   "currentConnect": "当前连接",
   "Zmodem-drag-Settings": "拖拽传输设置 - ZMODEM (rz)",
-  "zmodem-overwrite": "覆盖同名文件",
-  "zmodem-ansi-escape": "ANSI 控制代码转义",
-  "drag-files-to-upload": "拖拽文件到此处上传"
+  "drag-files-to-upload": "拖拽文件到此处上传",
+  "zmodem-cmd": "拖拽上传触发的命令",
+  "zmodem-cmd-placeholder": "例如：rz -y -e"
 }

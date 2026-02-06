@@ -275,7 +275,7 @@ async function drop(e: DragEvent) {
             ElMessage.warning(t('connect-lose-term'));
         } else if (channel.value) {
             dragFiles = files;
-            channel.value.write(`rz${settings.config.zmodemOverwrite ? ' -y' : ''}${settings.config.zmodemAnsiEscape ? ' -e' : ''}\r`);
+            channel.value.write(`${settings.config.zmodemCmd || 'rz -y -e'}\r`);
         }
     } else {
         dragFiles = [];

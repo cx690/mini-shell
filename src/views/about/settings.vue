@@ -54,11 +54,9 @@
                 <template #header>
                     {{ t('Zmodem-drag-Settings') }}
                 </template>
-                <el-form-item :label="t('zmodem-overwrite')" prop="zmodemOverwrite">
-                    <el-switch v-model="settings.config.zmodemOverwrite" />
-                </el-form-item>
-                <el-form-item :label="t('zmodem-ansi-escape')" prop="zmodemAnsiEscape">
-                    <el-switch v-model="settings.config.zmodemAnsiEscape" />
+                <el-form-item :label="t('zmodem-cmd')" prop="zmodemCmd">
+                    <el-input v-model="settings.config.zmodemCmd" :placeholder="t('zmodem-cmd-placeholder')" clearable
+                        class="w-200" />
                 </el-form-item>
             </el-card>
         </el-form>
@@ -80,5 +78,9 @@ const maxFiles = [5, 10, 15, 20];
 .el-select {
     width: 200px;
     margin-right: @gap;
+}
+
+.w-200 {
+    width: 200px;
 }
 </style>

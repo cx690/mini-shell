@@ -20,10 +20,8 @@ export type ConfigType = {
     /** 是否黑暗模式 */
     dark: boolean,
     locale: string,
-    /** rz是否覆盖同名文件 */
-    zmodemOverwrite: boolean,
-    /** rz是否转义ANSI控制代码 */
-    zmodemAnsiEscape: boolean,
+    /** 拖拽上传rz命令，默认rz -y -e */
+    zmodemCmd: string,
 }
 
 const useSettings = defineStore('settings', () => {
@@ -34,8 +32,7 @@ const useSettings = defineStore('settings', () => {
         showUploadProcess: false,
         dark: false,
         locale: 'zh-cn',
-        zmodemOverwrite: true,
-        zmodemAnsiEscape: true,
+        zmodemCmd: 'rz -y -e',
     })
     const ElLocale = ref(zhCn);
     const { locale } = useI18n();
@@ -67,8 +64,7 @@ const useSettings = defineStore('settings', () => {
                 electronAPI.changeSystemConfig({
                     ...config,
                     showUploadProcess: data.showUploadProcess ?? true,
-                    zmodemOverwrite: data.zmodemOverwrite ?? true,
-                    zmodemAnsiEscape: data.zmodemAnsiEscape ?? false
+                    zmodemCmd: data.zmodemCmd?.trim() ? data.zmodemCmd : 'rz -y -e',
                 });
             } catch (error) {
                 localStorage.removeItem('config');
