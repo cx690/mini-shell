@@ -81,37 +81,48 @@ async function initShell() {
     function handleZmodemDetect(detection: any) {
         const session = detection.confirm();
         zsession = session;
+        const abortSession = () => {
+            session.abort();
+            zsession = null;
+            dragFiles = [];
+        };
         if (session.type === 'receive') {
-            // rz 上传到本地
-            session.on('offer', (xfer: any) => {
-                term.writeln(`\r\n[Zmodem] Receiving ……`);
-                xfer.accept().then((payload: Uint8Array[]) => {
-                    // 合并所有块，确保为BlobPart[]
-                    const blob = new Blob(payload.map(p => new Uint8Array(p)), { type: 'application/octet-stream' });
-                    const url = URL.createObjectURL(blob);
-                    // 自动下载
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = xfer.get_details().name;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    term.writeln(`\r[Zmodem] ${t('downloadfile-success')}: ${xfer.get_details().name}`);
+            // sz 下载到本地：每次只选择一次目录
+            async function openPickerDir() {
+                const res = await electronAPI.showOpenDialog({
+                    title: t('pls-enter-save-dir'),
+                    properties: ['openDirectory'],
                 });
-            });
-            session.start();
-        } else if (session.type === 'send') {
-            // sz 上传到远程：先让用户选择「上传文件」或「上传文件夹」
-            const abortSession = () => {
-                session.abort();
-                zsession = null;
-                dragFiles = [];
-                setTimeout(() => {
-                    channel.value?.write('\x18\x18\x18\x18\x18');
-                }, 100);
+                if (res.canceled || !res.filePaths?.[0]) {
+                    return null;
+                }
+                return res.filePaths[0].replace(/[/\\]+$/, '');
             };
 
+            openPickerDir().then((dir: string | null) => {
+                if (!dir) {
+                    abortSession();
+                    return
+                };
+                term.writeln(`\r[Zmodem] Receiving ……`);
+                session.on('offer', (xfer: any) => {
+                    xfer.accept().then(async (payload: Uint8Array[]) => {
+                        const { name } = xfer.get_details();
+                        const filePath = `${dir}/${name}`;
+                        const blob = new Blob(payload.map(p => new Uint8Array(p)), { type: 'application/octet-stream' });
+                        const arrayBuffer = await blob.arrayBuffer();
+                        const status = await electronAPI.writeFile(filePath, arrayBuffer);
+                        if (status === true) {
+                            term.writeln(`\r[Zmodem] ${t('downloadfile-success')}: ${name}`);
+                        } else {
+                            term.writeln(`\r[Zmodem] ${t('downloadfile-error')}`);
+                        }
+                    })
+                });
+                session.start();
+            });
+        } else if (session.type === 'send') {
+            // sz 上传到远程：先让用户选择「上传文件」或「上传文件夹」
             const sendFiles = (files: File[]) => {
                 return Zmodem.Browser.send_files(session, files, {
                     on_offer_response: (obj: any) => {
@@ -124,7 +135,9 @@ async function initShell() {
                         term.writeln(`\r[Zmodem] ${t('upload-err', { err })}`);
                     },
                 }).finally(() => {
-                    session.close();
+                    if (session && typeof session.close === 'function') {
+                        session.close();
+                    }
                     zsession = null;
                     dragFiles = [];
                 });
@@ -204,14 +217,19 @@ async function initShell() {
 
     channel.value = await clientStore.client?.shell((data) => {
         if (data instanceof Uint8Array) {
-            zsentry.consume(new Uint8Array(data));
+            try {
+                zsentry.consume(new Uint8Array(data));
+            } catch (error) {
+                console.log('consume error', error);
+            }
             return;
         }
         if (data && typeof data === 'object') {
             if (data.action === 'close') {
-                if (zsession) {
-                    zsession.close?.();
+                try {
+                    zsession?.close?.();
                     zsession = null;
+                } catch (error) {
                 }
             }
             term.write(data.message);
@@ -236,11 +254,13 @@ defineExpose({
 });
 
 onBeforeUnmount(() => {
-    if (zsession) {
-        zsession.close?.();
-        zsession = null;
-        dragFiles = [];
+    try {
+        zsession?.close?.();
+    } catch (error) {
+        console.log('error', error);
     }
+    zsession = null;
+    dragFiles = [];
     channel.value?.destroy();
 })
 
