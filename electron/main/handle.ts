@@ -17,7 +17,9 @@ export function handles() {
         return fs.readFile(path, 'utf8');
     })
     ipcMain.handle('write-file', async function (e, { path, data }) {
-        return fs.writeFile(path, data).then(() => true).catch((err) => err);
+        // 支持 ArrayBuffer（Zmodem 二进制下载）
+        const buf = data instanceof ArrayBuffer ? Buffer.from(data) : data;
+        return fs.writeFile(path, buf).then(() => true).catch((err) => err);
     })
     ipcMain.handle('show-open-dialog', async function (e, option: OpenDialogOptions) {
         return dialog.showOpenDialog({
