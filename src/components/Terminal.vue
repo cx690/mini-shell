@@ -104,19 +104,19 @@ async function initShell() {
                     abortSession();
                     return
                 };
+                electronAPI.setZmodemDownloadDir(dir);
                 term.writeln(`\r[Zmodem] Receiving ……`);
                 session.on('offer', (xfer: any) => {
                     xfer.accept().then(async (payload: Uint8Array[]) => {
                         const { name } = xfer.get_details();
-                        const filePath = `${dir}/${name}`;
                         const blob = new Blob(payload.map(p => new Uint8Array(p)), { type: 'application/octet-stream' });
-                        const arrayBuffer = await blob.arrayBuffer();
-                        const status = await electronAPI.writeFile(filePath, arrayBuffer);
-                        if (status === true) {
-                            term.writeln(`\r[Zmodem] ${t('downloadfile-success')}: ${name}`);
-                        } else {
-                            term.writeln(`\r[Zmodem] ${t('downloadfile-error')}`);
-                        }
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = name;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        term.writeln(`\r[Zmodem] ${t('downloadfile-success')}: ${name}`);
                     })
                 });
                 session.start();

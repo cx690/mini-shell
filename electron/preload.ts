@@ -15,6 +15,9 @@ const electronAPI = {
     switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
+    getUniqueFilePath: (path: string) => ipcRenderer.invoke('get-unique-file-path', path) as Promise<string>,
+    /** 设置 Zmodem 下载目录（选择目录后调用，后续浏览器下载将写入该目录） */
+    setZmodemDownloadDir: (dir: string) => ipcRenderer.send('set-zmodem-download-dir', dir),
     /** 本地命令行执行代码 */
     execCmd: (command: string, type?: 'powershell' | 'ps1' | 'bat' | 'native', options?: OptionsType) => ipcRenderer.invoke('exec-cmd', command, type, options) as ReturnType<typeof import('./main/cmd').execCmd>,
     /** 打开某个exe，打开某个目录之类的 */
