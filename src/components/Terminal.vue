@@ -220,7 +220,21 @@ async function initShell() {
             try {
                 zsentry.consume(new Uint8Array(data));
             } catch (error) {
-                console.log('consume error', error);
+                const errMsg = String(error);
+                // ZMODEM 传输结束后，协议期望收到 "OO"，但 SSH 有时会混入 shell 提示符/转义序列
+                if (errMsg.includes('Only thing after ZFIN should be') && errMsg.includes('not:')) {
+                    const match = errMsg.match(/not:\s*([\d,\s]+)/);
+                    if (match) {
+                        const bytes = match[1].split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
+                        if (bytes.length > 0) {
+                            term.write(new Uint8Array(bytes));
+                        }
+                    }
+                    zsession = null;
+                    zsentry._zsession = null;  // 清除 zsentry 内部 session，避免后续数据继续发往损坏的 session 导致重复输出
+                } else {
+                    console.log('consume error', error);
+                }
             }
             return;
         }
