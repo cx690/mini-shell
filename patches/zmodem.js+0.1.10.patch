@@ -1,0 +1,108 @@
+diff --git a/node_modules/zmodem.js/src/zmodem_browser.js b/node_modules/zmodem.js/src/zmodem_browser.js
+index 7405f54..b193fea 100644
+--- a/node_modules/zmodem.js/src/zmodem_browser.js
++++ b/node_modules/zmodem.js/src/zmodem_browser.js
+@@ -95,56 +95,64 @@ Zmodem.Browser = {
+                 }
+ 
+                 return new Promise( function(res) {
+-                    var reader = new FileReader();
++                    var file = cur_b.obj;
++                    var fileSize = file.size || 0;
++                    var CHUNK_SIZE = 64 * 1024;  // 64KB per chunk so we get multiple progress updates
++                    var offset = 0;
+ 
+-                    //This really shouldn’t happen … so let’s
+-                    //blow up if it does.
+-                    reader.onerror = function reader_onerror(e) {
++                    function onReadError(e) {
+                         console.error("file read error", e);
+                         throw("File read error: " + e);
+-                    };
+-
+-                    var piece;
+-                    reader.onprogress = function reader_onprogress(e) {
+-
+-                        //Some browsers (e.g., Chrome) give partial returns,
+-                        //while others (e.g., Firefox) don’t.
+-                        if (e.target.result) {
+-                            piece = new Uint8Array(e.target.result, xfer.get_offset())
+-
+-                            _check_aborted(session);
+-
+-                            xfer.send(piece);
+-
+-                            if (options.on_progress) {
+-                                options.on_progress(cur_b.obj, xfer, piece);
+-                            }
+-                        }
+-                    };
+-
+-                    reader.onload = function reader_onload(e) {
+-                        piece = new Uint8Array(e.target.result, xfer, piece)
++                    }
+ 
++                    function readNextChunk() {
+                         _check_aborted(session);
+-
+-                        xfer.end(piece).then( function() {
+-                            if (options.on_progress && piece.length) {
+-                                options.on_progress(cur_b.obj, xfer, piece);
+-                            }
+-
++                        if (offset >= fileSize) {
+                             if (options.on_file_complete) {
+                                 options.on_file_complete(cur_b.obj, xfer);
+                             }
++                            res( promise_callback() );
++                            return;
++                        }
++                        var end = Math.min(offset + CHUNK_SIZE, fileSize);
++                        var blob = file.slice(offset, end);
++                        var isLast = end >= fileSize;
++
++                        var reader = new FileReader();
++                        reader.onerror = onReadError;
++                        reader.onload = function(e) {
++                            var piece = new Uint8Array(e.target.result);
++                            _check_aborted(session);
++                            if (isLast) {
++                                xfer.end(piece).then( function() {
++                                    if (options.on_progress) {
++                                        options.on_progress(cur_b.obj, xfer, piece);
++                                    }
++                                    if (options.on_file_complete) {
++                                        options.on_file_complete(cur_b.obj, xfer);
++                                    }
++                                    res( promise_callback() );
++                                } );
++                            } else {
++                                xfer.send(piece);
++                                if (options.on_progress) {
++                                    options.on_progress(cur_b.obj, xfer, { loaded: offset + piece.length, total: fileSize });
++                                }
++                                offset = end;
++                                readNextChunk();
++                            }
++                        };
++                        reader.readAsArrayBuffer(blob);
++                    }
+ 
+-                            //Resolve the current file-send promise with
+-                            //another promise. That promise resolves immediately
+-                            //if we’re done, or with another file-send promise
+-                            //if there’s more to send.
++                    if (fileSize === 0) {
++                        xfer.end(new Uint8Array(0)).then( function() {
++                            if (options.on_file_complete) options.on_file_complete(cur_b.obj, xfer);
+                             res( promise_callback() );
+                         } );
+-                    };
+-
+-                    reader.readAsArrayBuffer(cur_b.obj);
++                    } else {
++                        readNextChunk();
++                    }
+                 } );
+             } );
+         }

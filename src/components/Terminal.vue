@@ -124,15 +124,40 @@ async function initShell() {
         } else if (session.type === 'send') {
             // sz 上传到远程：先让用户选择「上传文件」或「上传文件夹」
             const sendFiles = (files: File[]) => {
+                let lastProgressPercent = -1;
+                let lastProgressTime = 0;
+                const PROGRESS_THROTTLE_MS = 150;
+
                 return Zmodem.Browser.send_files(session, files, {
                     on_offer_response: (obj: any) => {
-                        term.writeln(`\r[Zmodem] ${t('Uploading')}: ${obj.name}`);
+                        term.write(`\r[Zmodem] ${t('Uploading')}: ${obj.name}`);
+                        lastProgressPercent = -1;
+                    },
+                    on_progress: (file: File, xfer: any, piece: Uint8Array | { loaded: number; total: number }) => {
+                        const size = file.size || 1;
+                        const offset = piece && typeof (piece as { total?: number }).total === 'number'
+                            ? (piece as { loaded: number; total: number }).loaded
+                            : xfer.get_offset();
+                        const total = piece && typeof (piece as { total?: number }).total === 'number'
+                            ? (piece as { loaded: number; total: number }).total
+                            : size;
+                        const percent = total ? Math.min(100, Math.floor((offset / total) * 100)) : 0;
+                        const now = Date.now();
+                        if (percent !== lastProgressPercent && (percent >= 100 || now - lastProgressTime >= PROGRESS_THROTTLE_MS)) {
+                            lastProgressPercent = percent;
+                            lastProgressTime = now;
+                            const barLen = 20;
+                            const filled = Math.round((percent / 100) * barLen);
+                            const bar = '█'.repeat(filled) + '░'.repeat(barLen - filled);
+                            const line = `\r[Zmodem] ${t('Uploading')}: ${file.name} [${bar}] ${percent}%\x1b[K`;
+                            term.write(line);
+                        }
                     },
                     on_file_complete: (obj: any) => {
-                        term.writeln(`\r[Zmodem] ${t('upload-success')}: ${obj.name}`);
+                        term.writeln(`\n\r[Zmodem] ${t('upload-success')}: ${obj.name}`);
                     },
                     on_error: (err: any) => {
-                        term.writeln(`\r[Zmodem] ${t('upload-err', { err })}`);
+                        term.writeln(`\n\r[Zmodem] ${t('upload-err', { err })}`);
                     },
                 }).finally(() => {
                     if (session && typeof session.close === 'function') {
