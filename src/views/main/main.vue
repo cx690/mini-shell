@@ -31,8 +31,8 @@
             <el-table-column prop="desc" :label="t('desc')" show-overflow-tooltip />
             <el-table-column prop="action" :label="t('Action')">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="showDetail(row)">{{ t('View') }}</el-link>
-                    <el-link type="primary" :underline="false" @click="onLink(row)">{{ t('Connect') }}</el-link>
+                    <el-link type="primary" underline="never" @click="showDetail(row)">{{ t('View') }}</el-link>
+                    <el-link type="primary" underline="never" @click="onLink(row)">{{ t('Connect') }}</el-link>
                 </template>
             </el-table-column>
         </Table>

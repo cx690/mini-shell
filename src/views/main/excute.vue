@@ -185,17 +185,17 @@
                         </el-table-column>
                         <el-table-column :label="t('Action')">
                             <template #default="{ row }">
-                                <el-link type="primary" :underline="false" @click="onShowLogs(row)">
+                                <el-link type="primary" underline="never" @click="onShowLogs(row)">
                                     {{ t('Log') }}
                                 </el-link>
-                                <el-link type="primary" :underline="false" v-if="row.status === 0"
+                                <el-link type="primary" underline="never" v-if="row.status === 0"
                                     @click="showTargetShell(row)">
                                     {{ t('View') }}
                                 </el-link>
                                 <el-popconfirm :title="t('confirm-cancel-task')" v-if="row.status === 0 && !row.pid"
                                     @confirm="cancelExecute(row)">
                                     <template #reference>
-                                        <el-link type="danger" :underline="false">
+                                        <el-link type="danger" underline="never">
                                             {{ t('cancel-excute') }}
                                         </el-link>
                                     </template>
@@ -203,7 +203,7 @@
                                 <el-popconfirm :title="t('confirm-delete-item')" v-if="row.id"
                                     @confirm="delItem(row.id)">
                                     <template #reference>
-                                        <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
+                                        <el-link type="danger" underline="never">{{ t('Delete') }}</el-link>
                                     </template>
                                 </el-popconfirm>
                             </template>

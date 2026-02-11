@@ -46,7 +46,7 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
                                 h('span', `${uploadInfo[uuid].data.name ? (uploadInfo[uuid].data.name + '-') : ''}${statusMap.value[uploadInfo[uuid].data.status]}`),
                                 (!uploadInfo[uuid].data.name && (uploadInfo[uuid].data.status === 0 || uploadInfo[uuid].data.status === 1)) ? h(ElLink, {//脚本中的上传不做此设置
                                     type: 'danger',
-                                    underline: false,
+                                    underline: 'never',
                                     style: { marginLeft: '16px' },
                                     onclick: async () => {
                                         const action = await ElMessageBox.confirm(t('confirm-cancel-task'), {}).catch(action => action);
@@ -59,7 +59,7 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
                         ),
                         h(ElProgress, {
                             status: uploadInfo[uuid].data.status === 2 ? 'success' : uploadInfo[uuid].data.status === 3 ? 'exception' : undefined,
-                            percentage: Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100),
+                            percentage: uploadInfo[uuid].data.total ? Math.floor((uploadInfo[uuid].data.successNum / uploadInfo[uuid].data.total) * 100) : 0,
                             style: "width:250px;"
                         }, {
                             default: () => h('span', null,

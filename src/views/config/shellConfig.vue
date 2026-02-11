@@ -43,21 +43,21 @@
             <el-table-column prop="host" :label="t('relevancy-host')" />
             <el-table-column prop="action" :label="t('Action')">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="showDetail(row)">{{ t('Edit') }}</el-link>
-                    <el-link type="primary" :underline="false" @click="showDetail(row, true)">{{ t('Copy') }}</el-link>
-                    <el-link type="primary" :underline="false" v-if="row.baseScripts && row.baseScripts.length"
+                    <el-link type="primary" underline="never" @click="showDetail(row)">{{ t('Edit') }}</el-link>
+                    <el-link type="primary" underline="never" @click="showDetail(row, true)">{{ t('Copy') }}</el-link>
+                    <el-link type="primary" underline="never" v-if="row.baseScripts && row.baseScripts.length"
                         @click="showShell(row)">{{ t('View') }}</el-link>
                     <el-popconfirm :title="t('confirm-delete-item')" @confirm="delItem(row.id)">
                         <template #reference>
-                            <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
+                            <el-link type="danger" underline="never">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
                     <el-popconfirm :title="t('confirm-hidden-item')" @confirm="switchItems(row)" v-if="!row.hidden">
                         <template #reference>
-                            <el-link type="warning" :underline="false">{{ t('Hide') }}</el-link>
+                            <el-link type="warning" underline="never">{{ t('Hide') }}</el-link>
                         </template>
                     </el-popconfirm>
-                    <el-link v-else type="warning" :underline="false" @click="switchItems(row)">
+                    <el-link v-else type="warning" underline="never" @click="switchItems(row)">
                         {{ t('Show') }}
                     </el-link>
                 </template>

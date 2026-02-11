@@ -33,11 +33,11 @@
             <el-table-column prop="desc" :label="t('desc')" show-overflow-tooltip />
             <el-table-column prop="action" :label="t('Action')">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="showDetail(row)">{{ t('Edit') }}</el-link>
-                    <el-link type="primary" :underline="false" @click="copyItem(row)">{{ t('Copy') }}</el-link>
+                    <el-link type="primary" underline="never" @click="showDetail(row)">{{ t('Edit') }}</el-link>
+                    <el-link type="primary" underline="never" @click="copyItem(row)">{{ t('Copy') }}</el-link>
                     <el-popconfirm :title="t('confirm-delete-item')" @confirm="delItem(row.id)">
                         <template #reference>
-                            <el-link type="danger" :underline="false">{{ t('Delete') }}</el-link>
+                            <el-link type="danger" underline="never">{{ t('Delete') }}</el-link>
                         </template>
                     </el-popconfirm>
                 </template>
