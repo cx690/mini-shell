@@ -20,8 +20,7 @@
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
-                    <el-button size="small" :icon="FolderAdd" :disabled="state.isDriveRoot"
-                        @click="addDir('local')">
+                    <el-button size="small" :icon="FolderAdd" :disabled="state.isDriveRoot" @click="addDir('local')">
                         {{ t('new-folder') }}
                     </el-button>
                     <el-button size="small" :icon="Delete"
@@ -40,7 +39,7 @@
                         {{ t('upload') }}
                     </el-button>
                 </div>
-                <div class="panel-list">
+                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'local')">
                     <div v-if="!state.localPath && !state.localList.length" class="list-hint">
                         {{ t('select-dir-hint') }}
                     </div>
@@ -99,8 +98,7 @@
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
-                    <el-button size="small" :icon="FolderAdd" :disabled="!remoteConnected"
-                        @click="addDir('remote')">
+                    <el-button size="small" :icon="FolderAdd" :disabled="!remoteConnected" @click="addDir('remote')">
                         {{ t('new-folder') }}
                     </el-button>
                     <el-button size="small" :icon="Delete" :disabled="!state.remoteSelected || !remoteConnected"
@@ -117,7 +115,7 @@
                         {{ t('download') }}
                     </el-button>
                 </div>
-                <div class="panel-list">
+                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'remote')">
                     <div v-if="!remoteConnected" class="list-hint">{{ t('connect-first-hint') }}</div>
                     <el-table v-loading="state.remoteLoading" v-else :data="remoteTableData" :row-key="rowKey"
                         highlight-current-row :current-row-key="remoteCurrentRowKey"
@@ -156,13 +154,52 @@
                 </div>
             </div>
         </div>
+        <!-- 右键菜单：el-dropdown 虚拟触发 -->
+        <el-dropdown ref="contextDropdownRef" :virtual-ref="triggerRef" virtual-triggering trigger="contextmenu"
+            placement="bottom-start" :show-arrow="false"
+            :popper-options="{ modifiers: [{ name: 'offset', options: { offset: [0, 0] } }] }"
+            @command="handleContextCommand">
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <template v-if="state.contextMenuType === 'local-row'">
+                        <el-dropdown-item :icon="Edit" command="rename" :disabled="state.isDriveRoot">
+                            {{ t('rename') }}
+                        </el-dropdown-item>
+                        <el-dropdown-item :icon="Delete" command="delete" :disabled="state.isDriveRoot">
+                            {{ t('delete') }}
+                        </el-dropdown-item>
+                        <el-dropdown-item v-if="state.contextMenuType === 'local-row'"
+                            :disabled="state.isDriveRoot || !remoteConnected" :icon="Upload" command="upload">
+                            {{ t('upload') }}
+                        </el-dropdown-item>
+                    </template>
+                    <template v-if="state.contextMenuType === 'remote-row'">
+                        <el-dropdown-item :icon="Edit" command="rename">
+                            {{ t('rename') }}
+                        </el-dropdown-item>
+                        <el-dropdown-item :icon="Delete" command="delete">
+                            {{ t('delete') }}
+                        </el-dropdown-item>
+                        <el-dropdown-item v-if="state.contextMenuType === 'remote-row'" :icon="Download"
+                            command="download">
+                            {{ t('download') }}
+                        </el-dropdown-item>
+                    </template>
+                    <template
+                        v-if="state.contextMenuType === 'local-panel' || state.contextMenuType === 'remote-panel'">
+                        <el-dropdown-item command="refresh" :icon="Refresh">{{ t('refresh') }}</el-dropdown-item>
+                        <el-dropdown-item command="newFolder" :icon="FolderAdd">{{ t('new-folder') }}</el-dropdown-item>
+                    </template>
+                </el-dropdown-menu>
+            </template>
+        </el-dropdown>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus';
-import { FolderOpened, FolderAdd, Delete, Edit, Upload, Download, Back, Folder, Document, Monitor, Postcard } from '@element-plus/icons-vue';
+import { FolderOpened, FolderAdd, Delete, Edit, Upload, Download, Back, Folder, Document, Monitor, Postcard, Refresh } from '@element-plus/icons-vue';
 import useClient from '@/store/useClient';
 import { useI18n } from 'vue-i18n';
 import { formatSize } from '@/utils';
@@ -177,6 +214,9 @@ const sftpInstance = ref<SFTPType | null>(null);
 async function initSftp() {
     if (!clientStore.client || clientStore.status !== 2) return;
     try {
+        state.remotePath = '/';
+        state.remotePathShow = '/';
+        state.remoteList = [];
         const sftp = await clientStore.client.sftp();
         sftpInstance.value = sftp;
     } catch (err) {
@@ -215,7 +255,7 @@ const state = reactive({
     localSelected: null as LocalFileItem | null,
     isDriveRoot: false,
 
-    remotePathShow: '',
+    remotePathShow: '/',
     remotePath: '/',
     remoteList: [] as RemoteFileItem[],
     remoteLoading: false,
@@ -223,6 +263,8 @@ const state = reactive({
 
     showNewLocalDir: false,
     showNewRemoteDir: false,
+
+    contextMenuType: '' as '' | 'local-row' | 'remote-row' | 'local-panel' | 'remote-panel',
 });
 
 const remoteConnected = computed(() => clientStore.status === 2);
@@ -284,6 +326,13 @@ const remoteCurrentRowKey = computed(() => {
     return (sel as RemoteRow).isParent ? parentKey : sel.name;
 });
 
+/** 右键菜单：虚拟触发位置（el-dropdown 虚拟触发用） */
+const contextMenuPosition = ref({ x: 0, y: 0, width: 0, height: 0 } as DOMRect);
+const triggerRef = ref({
+    getBoundingClientRect: () => contextMenuPosition.value,
+});
+const contextDropdownRef = ref<{ handleOpen: () => void } | null>(null);
+
 function onLocalRowDblclick(row: LocalRow) {
     if (row.isParent) localGoUp();
     else localEnter(row);
@@ -291,6 +340,56 @@ function onLocalRowDblclick(row: LocalRow) {
 function onRemoteRowDblclick(row: RemoteRow) {
     if (row.isParent) remoteGoUp();
     else remoteEnter(row);
+}
+
+function onPanelContextMenu(e: MouseEvent, side: 'local' | 'remote') {
+    const tr = (e.target as HTMLElement).closest('tr.el-table__row');
+    if (tr) {
+        const tableRef = side === 'local' ? localTableRef.value : remoteTableRef.value;
+        const tbody = tableRef?.$el?.querySelector('.el-table__body-wrapper tbody');
+        if (tbody) {
+            const rows = Array.from(tbody.querySelectorAll('tr.el-table__row'));
+            const index = rows.indexOf(tr as Element);
+            if (index >= 0) {
+                const tableData = side === 'local' ? localTableData.value : remoteTableData.value;
+                const row = tableData[index];
+                if (row && !(row as LocalRow).isParent && !(row as LocalRow).isNew) {
+                    if (side === 'local') state.localSelected = row as LocalFileItem;
+                    else state.remoteSelected = row as RemoteFileItem;
+                    state.contextMenuType = (side + '-row') as 'local-row' | 'remote-row';
+                    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
+                    nextTick(() => contextDropdownRef.value?.handleOpen());
+                    return;
+                } else {
+                    state.contextMenuType = '';
+                }
+            }
+        }
+    }
+    state.contextMenuType = (side + '-panel') as 'local-panel' | 'remote-panel';
+    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
+    nextTick(() => contextDropdownRef.value?.handleOpen());
+}
+
+function handleContextCommand(command: string | number | object) {
+    const cmd = String(command);
+    if (cmd === 'rename') {
+        if (state.contextMenuType === 'local-row') renameLocal();
+        else if (state.contextMenuType === 'remote-row') renameRemote();
+    } else if (cmd === 'delete') {
+        if (state.contextMenuType === 'local-row') deleteLocal();
+        else if (state.contextMenuType === 'remote-row') deleteRemote();
+    } else if (cmd === 'upload') {
+        uploadToRemote();
+    } else if (cmd === 'download') {
+        downloadToLocal();
+    } else if (cmd === 'refresh') {
+        if (state.contextMenuType === 'local-panel') refreshLocal();
+        else if (state.contextMenuType === 'remote-panel') applyRemotePathAndLoad();
+    } else if (cmd === 'newFolder') {
+        if (state.contextMenuType === 'local-panel') addDir('local');
+        else if (state.contextMenuType === 'remote-panel') addDir('remote');
+    }
 }
 
 async function loadDrivesView() {
@@ -549,7 +648,7 @@ async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | Remo
     if (!row) return;
     if (row.name === row.renameValue || !row.renameValue?.trim()) {
         row.isEdit = false;
-        row.renameValue = row.name;        
+        row.renameValue = row.name;
         state.showNewLocalDir = false;
         state.showNewRemoteDir = false;
         return
@@ -660,10 +759,6 @@ watch(remoteConnected, (v) => {
     }
 });
 
-onBeforeUnmount(() => {
-    clearSftp();
-});
-
 onMounted(async () => {
     try {
         const desktop = await electronAPI.getDesktopDir();
@@ -675,8 +770,12 @@ onMounted(async () => {
         state.localPathShow = '';
     }
     if (remoteConnected.value) {
-        initSftp();
+        initSftp().then(() => loadRemoteDir());
     }
+});
+
+onBeforeUnmount(() => {
+    clearSftp();
 });
 </script>
 
@@ -686,6 +785,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     padding: @gap;
+    height: 100%;
 }
 
 .sftp-panels {
@@ -693,7 +793,7 @@ onMounted(async () => {
     gap: @gap * 2;
     flex: 1;
     min-height: 0;
-    max-height: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -755,6 +855,7 @@ onMounted(async () => {
 
         .file-table {
             flex: 1;
+            height: 100%;
 
             .table-name {
                 display: inline-flex;
