@@ -190,5 +190,5 @@ export function formatSize(size?: number | string) {
         size /= 1024;
         index++;
     }
-    return `${size.toFixed(2)} ${units[index]}`;
+    return `${parseFloat(size.toFixed(1))} ${units[index]}`;
 }

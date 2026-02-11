@@ -1,5 +1,5 @@
 <template>
-    <div class="base-page">
+    <div :class="{ 'base-page': true, 'base-page-full': full }">
         <header v-if="$slots.form || $slots.extra" class="base-page-header">
             <div class="base-page-form">
                 <slot name="form"></slot>
@@ -9,13 +9,15 @@
             </div>
         </header>
         <div v-if="$slots.default" class="base-page-tableContainer">
-
             <slot></slot>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+defineProps<{
+    full?: boolean;
+}>()
 defineSlots<{
     /** 表单部分 */
     form: any;
@@ -29,7 +31,7 @@ defineSlots<{
 <style scoped lang="less">
 .base-page {
     box-sizing: border-box;
-    padding: 0 2*@gap 0 2*@gap;
+    padding: @gap 2*@gap 0 2*@gap;
     display: flex;
     flex-direction: column;
 
@@ -44,8 +46,9 @@ defineSlots<{
 
     .base-page-header {
         line-height: inherit;
+        margin-top: @gap;
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         width: 100%;
 
         .base-page-form {
@@ -54,6 +57,17 @@ defineSlots<{
 
         .base-page-extra {
             margin-left: @gap;
+        }
+    }
+
+    &.base-page-full {
+        width: 100%;
+        height: calc(100% - var(--layout-breadcrumb-header, 0));
+        position: relative;
+
+        .base-page-tableContainer {
+            flex: 1 1 0;
+            min-height: 0;
         }
     }
 }

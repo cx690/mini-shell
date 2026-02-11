@@ -15,7 +15,15 @@ const electronAPI = {
     switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
-    getUniqueFilePath: (path: string) => ipcRenderer.invoke('get-unique-file-path', path) as Promise<string>,
+    fsReaddir: (dirPath: string) => ipcRenderer.invoke('fs-readdir', dirPath) as Promise<Array<{ name: string; isDirectory: boolean }>>,
+    fsMkdir: (dirPath: string) => ipcRenderer.invoke('fs-mkdir', dirPath) as ReturnType<typeof import('fs/promises')['mkdir']>,
+    fsUnlink: (filePath: string) => ipcRenderer.invoke('fs-unlink', filePath) as ReturnType<typeof import('fs/promises')['unlink']>,
+    fsRmdir: (dirPath: string) => ipcRenderer.invoke('fs-rmdir', dirPath) as ReturnType<typeof import('fs/promises')['rmdir']>,
+    fsRm: (targetPath: string, options?: { recursive?: boolean }) => ipcRenderer.invoke('fs-rm', targetPath, options) as ReturnType<typeof import('fs/promises')['rm']>,
+    fsRename: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs-rename', oldPath, newPath) as ReturnType<typeof import('fs/promises')['rename']>,
+    fsStat: (filePath: string) => ipcRenderer.invoke('fs-stat', filePath) as Promise<{ isDirectory: boolean; size: number; mtime: number }>,
+    getDesktopDir: () => ipcRenderer.invoke('get-desktop-dir') as Promise<string>,
+    getDrives: () => ipcRenderer.invoke('get-drives') as Promise<string[]>,
     /** 设置 Zmodem 下载目录（选择目录后调用，后续浏览器下载将写入该目录） */
     setZmodemDownloadDir: (dir: string) => ipcRenderer.send('set-zmodem-download-dir', dir),
     /** 本地命令行执行代码 */

@@ -37,10 +37,12 @@ function getClient() {
             })
         },
         shell: async (callbackInfo?: (data: Uint8Array | { code: number, message: string, action: string, signal?: number | null }) => any) => {
-            return new Promise<ChannelType>((resolve) => {
+            return new Promise<ChannelType>((resolve, reject) => {
                 client.shell((err, channel) => {
                     if (err) {
                         console.error(err);
+                        reject(err);
+                        return;
                     }
                     channel.on('close', (code: number, signal: number) => {
                         callbackInfo?.({
@@ -71,6 +73,67 @@ function getClient() {
                     });
                 })
             })
+        },
+        sftp: async () => {
+            return new Promise<SFTPType>((resolve, reject) => {
+                client.sftp((err, sftp) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    resolve({
+                        readdir: (path: string) => new Promise<Array<{ name: string; isDirectory: boolean; size?: number; mtime?: number }>>((resolve, reject) => {
+                            sftp.readdir(path, (err, list) => {
+                                if (err) {
+                                    reject(err);
+                                }
+                                resolve(list.map((item) => ({
+                                    name: item.filename,
+                                    isDirectory: (item.attrs.mode & 0o170000) === 0o040000,
+                                    size: item.attrs.size,
+                                    mtime: item.attrs.mtime ? item.attrs.mtime * 1000 : undefined,
+                                })));
+                            });
+                        }),
+                        mkdir: (path: string) => new Promise<true | Error>((resolve, reject) => {
+                            sftp.mkdir(path, (err) => {
+                                if (err) {
+                                    reject(err);
+                                }
+                                resolve(true);
+                            });
+                        }),
+                        rmdir: (path: string) => new Promise<true | Error>((resolve, reject) => {
+                            sftp.rmdir(path, (err) => {
+                                if (err) {
+                                    reject(err);
+                                }
+                                resolve(true);
+                            });
+                        }),
+                        unlink: (path: string) => new Promise<true | Error>((resolve, reject) => {
+                            sftp.unlink(path, (err) => {
+                                if (err) {
+                                    reject(err);
+                                }
+                                resolve(true);
+                            });
+                        }),
+                        rename: (oldPath: string, newPath: string) => new Promise<true | Error>((resolve, reject) => {
+                            sftp.rename(oldPath, newPath, (err) => {
+                                if (err) {
+                                    reject(err);
+                                }
+                                resolve(true);
+                            });
+                        }),
+                        end: () => new Promise<void>((resolve) => {
+                            sftp.end();
+                            resolve();
+                        }),
+                    });
+                });
+            });
         },
         end: (...args: Parameters<Client['end']>) => {
             client.end(...args);
@@ -328,4 +391,12 @@ export type ChannelType = {
     write(chunk: any): void,
     destroy(): void,
     setWindow(opt: { cols: number, rows: number, height: number, width: number }): void,
+}
+export type SFTPType = {
+    readdir(path: string): Promise<Array<{ name: string; isDirectory: boolean; size?: number; mtime?: number }>>,
+    mkdir(path: string): Promise<true | Error>,
+    rmdir(path: string): Promise<true | Error>,
+    unlink(path: string): Promise<true | Error>,
+    rename(oldPath: string, newPath: string): Promise<true | Error>,
+    end(): Promise<void>,
 }

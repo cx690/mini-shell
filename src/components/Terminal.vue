@@ -357,7 +357,7 @@ function dragleave(e: DragEvent) {
 .terminal-div {
     width: 100%;
     min-width: 900px;
-    min-height: 740px;
+    height: 100%;
     background: #000;
     overflow: hidden;
     padding: 5px 0 0 11px;
@@ -386,7 +386,7 @@ function dragleave(e: DragEvent) {
         overflow: hidden;
         position: relative;
         min-width: 900px;
-        min-height: 740px;
+        height: 100%;
     }
 }
 </style>

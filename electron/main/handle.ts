@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, dialog, ipcMain, shell, session } from "electron";
+import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, app, dialog, ipcMain, shell, session } from "electron";
 import { openExe, execCmd } from './cmd';
 import getLocales from './locales';
 import { checkForUpdatesAndNotify, downloadUpdate } from './updater';
@@ -54,6 +54,61 @@ export function handles() {
         return fs.writeFile(path, buf).then(() => true).catch((err) => err);
     })
     ipcMain.handle('get-unique-file-path', (e, filePath: string) => getUniqueFilePath(filePath))
+
+    /** 本地文件系统：列出目录 */
+    ipcMain.handle('fs-readdir', async (e, dirPath: string) => {
+        const normalized = path.normalize(dirPath);
+        const entries = await fs.readdir(normalized, { withFileTypes: true });
+        return entries.map((d) => ({
+            name: d.name,
+            isDirectory: d.isDirectory(),
+        }));
+    })
+    /** 本地：创建目录 */
+    ipcMain.handle('fs-mkdir', async (e, dirPath: string) => {
+        return fs.mkdir(path.normalize(dirPath), { recursive: true });
+    })
+    /** 本地：删除文件 */
+    ipcMain.handle('fs-unlink', async (e, filePath: string) => {
+        return fs.unlink(path.normalize(filePath));
+    })
+    /** 本地：删除空目录 */
+    ipcMain.handle('fs-rmdir', async (e, dirPath: string) => {
+        return fs.rmdir(path.normalize(dirPath));
+    })
+    /** 本地：删除文件或目录（递归） */
+    ipcMain.handle('fs-rm', async (e, targetPath: string, options?: { recursive?: boolean }) => {
+        return fs.rm(path.normalize(targetPath), { recursive: options?.recursive ?? false });
+    })
+    /** 本地：重命名/移动 */
+    ipcMain.handle('fs-rename', async (e, oldPath: string, newPath: string) => {
+        return fs.rename(path.normalize(oldPath), path.normalize(newPath));
+    })
+    /** 本地：文件信息 */
+    ipcMain.handle('fs-stat', async (e, filePath: string) => {
+        const info = await fs.stat(path.normalize(filePath));
+        return { isDirectory: info.isDirectory(), size: info.size, mtime: info.mtimeMs };
+    })
+
+    ipcMain.handle('get-desktop-dir', () => app.getPath('desktop'))
+
+    /** Windows 下获取所有逻辑磁盘根路径（如 ['C:\\', 'D:\\']），非 Windows 返回空数组 */
+    ipcMain.handle('get-drives', async (): Promise<string[]> => {
+        if (process.platform !== 'win32') return [];
+        const drives: string[] = [];
+        for (let i = 65; i <= 90; i++) {
+            const letter = String.fromCharCode(i);
+            const root = letter + ':\\';
+            try {
+                await fs.access(root);
+                drives.push(root);
+            } catch {
+                // 该盘符不存在，跳过
+            }
+        }
+        return drives;
+    })
+
     ipcMain.handle('show-open-dialog', async function (e, option: OpenDialogOptions) {
         return dialog.showOpenDialog({
             ...option,

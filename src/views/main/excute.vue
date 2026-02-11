@@ -1,5 +1,5 @@
 <template>
-    <BasePage>
+    <BasePage full>
         <template #form>
             <div class="status">
                 <template v-if="clientStore.config">
@@ -30,9 +30,9 @@
             </div>
         </template>
 
-        <el-tabs v-model="state.activeName" type="border-card" editable @edit="handleTabsEdit"
+        <el-tabs v-model="state.activeName" class="excute-tabs" type="border-card" editable @edit="handleTabsEdit"
             @tab-change="onActiveChange">
-            <el-tab-pane label="Execute" name="Execute">
+            <el-tab-pane label="Execute" name="Execute" :closable="false">
                 <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
                     {{ t('Back') }}
                 </el-button>
@@ -211,19 +211,21 @@
                     </Table>
                 </div>
             </el-tab-pane>
-            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane">
+            <el-tab-pane :label="t('sftp')" name="SFTP" :closable="false" lazy>
+                <Sftp />
+            </el-tab-pane>
+            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane" :closable="false" lazy>
                 <template #label>
-                    <span>Terminal</span>
-                    <el-icon class="refresh-icon" @click="initShell()"
-                        v-if="createdTerm && state.activeName === 'Terminal'">
+                    <span>{{ t('Terminal') }}</span>
+                    <el-icon class="refresh-icon" @click="initShell()" v-if="state.activeName === 'Terminal'">
                         <Refresh />
                     </el-icon>
                 </template>
-                <Terminal v-if="createdTerm" ref="holdTermRef" />
+                <Terminal ref="holdTermRef" />
             </el-tab-pane>
             <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index" class="terminal-pane">
                 <template #label>
-                    <span>{{ item.shellName }}</span>
+                    <span>{{ t('Terminal') + ' ' + item.shellNum }}</span>
                     <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
                         <Refresh />
                     </el-icon>
@@ -289,6 +291,7 @@ import Output from '@/components/output.vue';
 import { computedTime, utilTime, formatScriptStr, formatterShell, exportData, useShellTypeEnum, formatEnv } from '@/utils';
 import { deleteItemsById, findAll, getDatabase } from '@/utils/database';
 import Terminal from '@/components/Terminal.vue';
+import Sftp from '@/components/Sftp.vue';
 import { ExcuteListRecoed, ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
 import dayjs from 'dayjs';
@@ -306,8 +309,7 @@ const shellTypeEnum = useShellTypeEnum();
 const StatusEnum = useStatusEnum();
 const clientStore = useClient();
 
-const holdTermRef = ref();
-const createdTerm = ref(false);
+const holdTermRef = ref<InstanceType<typeof Terminal>>();
 const terminalsRef = ref();
 function reLink() {
     if (!clientStore.config) return;
@@ -340,15 +342,12 @@ onBeforeUnmount(clientStore.reset);
 const formRef = ref<InstanceType<typeof import('element-plus').ElForm>>();
 const formDownLoadRef = ref<InstanceType<typeof import('element-plus').ElForm>>();
 
-type ShellItem = {
-    shellName: string,
-}
 
 const formData = reactive({
     cmd: '',
     file: '',
     uploadDir: '/root',
-    terminals: [] as ShellItem[],
+    terminals: [] as { shellNum: number }[],
     selectShell: null as null | ShellListRecoed | undefined,
     selectShellCode: null as any,
     group: '',
@@ -611,7 +610,7 @@ async function executeShell(exceteRecord: ExcuteListRecoed, selectShell: ShellLi
                 logInfo(`<p class="success">Done in ${dayjs().diff(start, 'seconds')}s.</p>`);
                 if (result === true) {
                     logInfo(`<p class="success">${t('upload-success')}</p>`);
-                    
+
                     if (signal.aborted) {
                         return abortRecord();
                     }
@@ -765,7 +764,7 @@ function expandItem(exceteRecord: ExcuteListRecoed, selectShell: ShellListRecoed
 function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
     if (action === 'add') {
         formData.terminals.push({
-            shellName: 'New Terminal' + state.shellNum++,
+            shellNum: state.shellNum++,
         })
         state.activeName = formData.terminals.length - 1;
     } else {
@@ -791,13 +790,10 @@ function onActiveChange(activeName: any) {
         if (clientStore.status !== 2) {
             ElMessage.warning(t('unuse-term'));
         } else {
-            if (createdTerm.value === false) {
-                nextTick(() => {
-                    holdTermRef.value?.initShell();
-                })
-            }
+            nextTick(() => {
+                holdTermRef.value?.initShell();
+            })
         }
-        createdTerm.value = true;
     }
 }
 
@@ -1012,7 +1008,9 @@ function rowKey(row: ShellListRecoed) {
     line-height: 30px;
 }
 
-.el-tabs {
+.excute-tabs {
+    height: 100%;
+
     :deep(.el-tabs__header) {
         >.el-tabs__new-tab {
             margin-right: 10px;
@@ -1021,7 +1019,8 @@ function rowKey(row: ShellListRecoed) {
         >.el-tabs__nav-wrap {
 
             .el-tabs__item:nth-child(1)>.is-icon-close,
-            .el-tabs__item:nth-child(2)>.is-icon-close {
+            .el-tabs__item:nth-child(2)>.is-icon-close,
+            .el-tabs__item:nth-child(3)>.is-icon-close {
                 display: none;
             }
         }
@@ -1030,11 +1029,29 @@ function rowKey(row: ShellListRecoed) {
     :deep(.el-tabs__content) {
         padding: 4px 0 0 0;
         width: 100%;
+        position: relative;
+        overflow: hidden;
+
+        .el-tab-pane {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
     }
 }
 
 .terminal-pane {
     width: 100%;
+}
+
+.sftp-pane {
+    width: 100%;
+    max-height: 100%;
 }
 
 .current-path {
