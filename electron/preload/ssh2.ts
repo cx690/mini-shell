@@ -87,12 +87,18 @@ function getClient() {
                                 if (err) {
                                     reject(err);
                                 }
-                                resolve(list.map((item) => ({
-                                    name: item.filename,
-                                    isDirectory: (item.attrs.mode & 0o170000) === 0o040000,
-                                    size: item.attrs.size,
-                                    mtime: item.attrs.mtime ? item.attrs.mtime * 1000 : undefined,
-                                })));
+                                resolve(list.map((item) => {
+                                    const isDir = typeof item.attrs.isDirectory === 'function'
+                                        ? item.attrs.isDirectory()
+                                        : (item.attrs.mode != null && (item.attrs.mode & 0o170000) === 0o040000)
+                                        || (typeof item.longname === 'string' && item.longname.trimStart().charAt(0) === 'd');
+                                    return {
+                                        name: item.filename,
+                                        isDirectory: isDir,
+                                        size: isDir ? undefined : item.attrs.size,
+                                        mtime: item.attrs.mtime ? item.attrs.mtime * 1000 : undefined,
+                                    };
+                                }));
                             });
                         }),
                         mkdir: (path: string) => new Promise<true | Error>((resolve, reject) => {
