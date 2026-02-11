@@ -27,9 +27,9 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
             setTimeout(() => {
                 uploadInfo[uuid].notificationHandle!.close();
                 if (data.status === 3) {
-                    ElMessage.error(t('upload-err', { err: data.message || 'unkonw' }));
+                    ElMessage.error(uploadInfo[uuid].data.transferType !== 'download' ? t('upload-err', { err: data.message || 'unkonw' }) : t('download-err', { err: data.message || 'unkonw' }));
                 } else {
-                    ElMessage.success(t('upload-success'));
+                    ElMessage.success(uploadInfo[uuid].data.transferType !== 'download' ? t('upload-success') : t('download-success'));
                 }
             }, 1000)
         }
@@ -37,14 +37,14 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
         uploadInfo[uuid] = { data };//转换响应式
         uploadInfo[uuid].notificationHandle =
             ElNotification({
-                title: t('uploadfile'),
+                title: uploadInfo[uuid].data.transferType !== 'download' ? t('uploadfile') : t('downloadfile'),
                 showClose: false,
                 message: h(Content, null, {
                     default: () => [
                         h('div', {},
                             [
                                 h('span', `${uploadInfo[uuid].data.name ? (uploadInfo[uuid].data.name + '-') : ''}${statusMap.value[uploadInfo[uuid].data.status]}`),
-                                (!uploadInfo[uuid].data.name && (uploadInfo[uuid].data.status === 0 || uploadInfo[uuid].data.status === 1)) ? h(ElLink, {//脚本中的上传不做此设置
+                                (!uploadInfo[uuid].data.name && (uploadInfo[uuid].data.status === 0 || uploadInfo[uuid].data.status === 1 || uploadInfo[uuid].data.status === 4)) ? h(ElLink, {//脚本中的传输不做此设置
                                     type: 'danger',
                                     underline: 'never',
                                     style: { marginLeft: '16px' },
@@ -77,9 +77,10 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
 const statusMap = computed(() => {
     return {
         0: t('Queuing'),
-        1: t('Uploading'),
+        1: t('Transmitting'),
         2: t('Finished'),
-        3: t('UploadError')
+        3: t('UploadError'),
+        4: t('Discovering')
     }
 })
 </script>

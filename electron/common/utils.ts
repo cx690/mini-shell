@@ -35,7 +35,7 @@ export type UploadFileItem = {
 }
 
 /** 检查路径是否匹配排除规则 */
-function isExcluded(relativePath: string, patterns: RegExp[]): boolean {
+export function isExcluded(relativePath: string, patterns: RegExp[]): boolean {
     const normalizedPath = relativePath.replace(/\\/g, '/');
     for (const pattern of patterns) {
         if (pattern.test(normalizedPath)) return true;

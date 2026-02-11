@@ -1,8 +1,8 @@
-import { Client, SFTPWrapper } from 'ssh2';
+import { Client, type FileEntryWithStats, SFTPWrapper } from 'ssh2';
 import path from 'path';
-import { stat } from 'fs/promises';
+import fs from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
-import { getUploadFiles, UploadFileItem } from '../common/utils';
+import { getUploadFiles, isExcluded, UploadFileItem } from '../common/utils';
 import { parallelTask } from './tasks';
 
 function getClient() {
@@ -86,12 +86,10 @@ function getClient() {
                             sftp.readdir(path, (err, list) => {
                                 if (err) {
                                     reject(err);
+                                    return;
                                 }
                                 resolve(list.map((item) => {
-                                    const isDir = typeof item.attrs.isDirectory === 'function'
-                                        ? item.attrs.isDirectory()
-                                        : (item.attrs.mode != null && (item.attrs.mode & 0o170000) === 0o040000)
-                                        || (typeof item.longname === 'string' && item.longname.trimStart().charAt(0) === 'd');
+                                    const isDir = testDir(item);
                                     return {
                                         name: item.filename,
                                         isDirectory: isDir,
@@ -105,6 +103,7 @@ function getClient() {
                             sftp.mkdir(path, (err) => {
                                 if (err) {
                                     reject(err);
+                                    return;
                                 }
                                 resolve(true);
                             });
@@ -113,6 +112,7 @@ function getClient() {
                             sftp.rmdir(path, (err) => {
                                 if (err) {
                                     reject(err);
+                                    return;
                                 }
                                 resolve(true);
                             });
@@ -121,6 +121,7 @@ function getClient() {
                             sftp.unlink(path, (err) => {
                                 if (err) {
                                     reject(err);
+                                    return;
                                 }
                                 resolve(true);
                             });
@@ -129,6 +130,7 @@ function getClient() {
                             sftp.rename(oldPath, newPath, (err) => {
                                 if (err) {
                                     reject(err);
+                                    return;
                                 }
                                 resolve(true);
                             });
@@ -240,6 +242,7 @@ function getClient() {
                                             errorNum: 0,
                                             total: fsize,
                                             status: 1,
+                                            transferType: 'upload',
                                             type: 'fileSize'
                                         })
                                     } : undefined;
@@ -260,6 +263,7 @@ function getClient() {
                                             total: totalSize,
                                             status: 2,
                                             name,
+                                            transferType: 'upload',
                                             type: 'fileSize'
                                         })
                                     } else {
@@ -279,6 +283,13 @@ function getClient() {
                     }
                     await parallelTask(genTasks()).catch(err => reject(err));
                     resolve(true);
+                    emit({
+                        successNum: total,
+                        errorNum,
+                        total,
+                        status: 2,
+                        name,
+                    })
                     sftp.end();
                 });
             }).catch((err: Error) => {
@@ -301,32 +312,130 @@ function getClient() {
                 uploadAbort[uuid].abort();
             };
         },
-        downloadFile: async (localDir: string, remotePath: string) => {
-            return new Promise<boolean | Error | string>(async (resolve) => {
-                const info = await stat(localDir);
+        downloadFile: async (localDir: string, remotePath: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
+            const { quiet = false, name, uuid, exclude } = option;
+            const emit = emitUpload(quiet, uuid, { transferType: 'download' });
+            let successNum = 0;
+            let errorNum = 0;
+            let total = 0;
+            uploadAbort[uuid] = new AbortController();
+            const { signal } = uploadAbort[uuid];
+            let _sftp: SFTPWrapper | null = null;
+            const status = await new Promise<boolean | Error | string>(async (resolve, reject) => {
+                const message = `${name ? (name + ' d') : 'D'}ownload canceled!`;
+                signal.addEventListener('abort', () => {
+                    reject(new Error(message));
+                })
+                const info = await fs.stat(localDir);
                 if (!info.isDirectory()) {
-                    resolve(`${localDir}不是一个文件夹目录！`);
+                    reject(new Error(`${localDir} is not a directory!`));
                     return;
                 }
-                client.sftp(function (err, sftp) {
+                if (signal.aborted) {
+                    reject(new Error(message));
+                    return;
+                }
+                client.sftp(async function (err, sftp) {
+                    _sftp = sftp;
                     if (err) {
                         console.error(err);
-                        resolve(err);
-                        sftp.end();
+                        reject(err);
                         return;
-                    };
-                    const { base } = path.parse(remotePath);
-                    const localPath = localDir + '/' + base;
-                    sftp.fastGet(remotePath, localPath, function (err) {
-                        if (err) {
-                            console.error(err);
-                            resolve(err);
-                        };
+                    }
+                    if (signal.aborted) {
+                        return;
+                    }
+                    emit({
+                        successNum,
+                        errorNum,
+                        total: 0,
+                        status: 4,
+                        name,
+                    })
+                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, signal, exclude);
+                    total = downloadList.length;
+                    emit({
+                        successNum,
+                        errorNum,
+                        total,
+                        status: 0,
+                        name,
+                    })
+
+                    if (total === 0) {
                         resolve(true);
-                        sftp.end();
-                    });
+                        return;
+                    }
+                    let start = false;
+                    const mkLocalDir = getMkLocalDir();
+                    function* genTasks() {
+                        for (const item of downloadList) {
+                            yield async () => {
+                                if (!start) {
+                                    emit({
+                                        successNum,
+                                        errorNum,
+                                        total,
+                                        status: 1,
+                                        name,
+                                    })
+                                    start = true;
+                                }
+                                if (signal.aborted) {
+                                    throw new Error(message);
+                                }
+                                let totalSize = 0;
+                                let transferredSize = 0;
+                                const emitProgress = total === 1 ? function (total: number, fsize: number) {
+                                    totalSize = fsize;
+                                    transferredSize = total;
+                                } : undefined;
+                                const dir = path.dirname(item.localPath);
+                                await mkLocalDir(dir);
+                                await sftpFastGet(sftp, item.remotePath, item.localPath, emitProgress);
+                                successNum++;
+                                if (signal.aborted) {
+                                    throw new Error(message);
+                                }
+                                if (total === 1) {
+                                    emit({
+                                        successNum: transferredSize,
+                                        errorNum,
+                                        total: totalSize,
+                                        status: 2,
+                                        name,
+                                        type: 'fileSize'
+                                    })
+                                } else {
+                                    emit({
+                                        successNum,
+                                        errorNum,
+                                        total,
+                                        status: (successNum + errorNum) === total ? 2 : 1,
+                                        name,
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    await parallelTask(genTasks()).catch(err => reject(err));
+                    resolve(true);
                 });
-            }).catch((err: Error) => err)
+            }).catch((err: Error) => {
+                emit({
+                    successNum,
+                    errorNum,
+                    total,
+                    status: 3,
+                    message: err + '',
+                    name,
+                    transferType: 'download',
+                })
+                return err;
+            })
+            delete uploadAbort[uuid];
+            (_sftp as SFTPWrapper | null)?.end();
+            return status;
         }
     };
     return clientProxy;
@@ -340,6 +449,16 @@ function getMkRemoteDir(client: Client) {
     return async (dir: string) => {
         if (!promiseInfo[dir]) {
             promiseInfo[dir] = mkRemotedir(client, dir);
+        }
+        return promiseInfo[dir];
+    }
+}
+
+function getMkLocalDir() {
+    const promiseInfo: Record<string, Promise<any>> = {}
+    return async (dir: string) => {
+        if (!promiseInfo[dir]) {
+            promiseInfo[dir] = fs.mkdir(dir, { recursive: true });
         }
         return promiseInfo[dir];
     }
@@ -381,13 +500,13 @@ async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string,
     })
 }
 
-function emitUpload(quiet: boolean, uuid: string) {
+function emitUpload(quiet: boolean, uuid: string, others = { transferType: 'upload' as 'upload' | 'download' }) {
     return function emit(data: UploadInfoType) {
         if (quiet) return;
         preload2Render({
             type: 'upload',
             uuid,
-            data
+            data: { ...others, ...data }
         })
     }
 }
@@ -405,4 +524,89 @@ export type SFTPType = {
     unlink(path: string): Promise<true | Error>,
     rename(oldPath: string, newPath: string): Promise<true | Error>,
     end(): Promise<void>,
+}
+
+/** 封装 sftp.stat 为 Promise */
+function sftpStat(sftp: SFTPWrapper, p: string): Promise<{ isDirectory: () => boolean }> {
+    return new Promise((resolve, reject) => {
+        sftp.stat(p, (err, stats) => (err ? reject(err) : resolve(stats!)));
+    });
+}
+
+function sftpReaddir(sftp: SFTPWrapper, remote: string) {
+    return new Promise<FileEntryWithStats[]>((resolve, reject) => {
+        sftp.readdir(remote, (err, list) => (err ? reject(err) : resolve(list!)));
+    });
+}
+
+/** 封装 sftp.fastGet 为 Promise */
+function sftpFastGet(sftp: SFTPWrapper, remotePath: string, localPath: string, emitProgress?: (total: number, fsize: number) => void): Promise<void> {
+    return new Promise((resolve, reject) => {
+        sftp.fastGet(remotePath, localPath, {
+            step: (total, nb, fsize) => {
+                emitProgress?.(total, fsize);
+            }
+        }, (err) => (err ? reject(err) : resolve()));
+    });
+}
+
+function testDir(item: FileEntryWithStats) {
+    return typeof item.attrs.isDirectory === 'function'
+        ? item.attrs.isDirectory()
+        : (item.attrs.mode != null && (item.attrs.mode & 0o170000) === 0o040000)
+        || (typeof item.longname === 'string' && item.longname.trimStart().charAt(0) === 'd');
+}
+
+/** 获取下载文件列表 */
+/**
+ * @param sftp SFTPWrapper
+ * @param remotePath 远程路径
+ * @param localPath 本地路径
+ * @param signal AbortSignal
+ * @param exclude 排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串
+ * @returns 下载文件列表
+ */
+async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath: string, signal: AbortSignal, exclude?: string) {
+    const result: { localPath: string, remotePath: string }[] = [];
+    if (signal.aborted) {
+        return result;
+    }
+    const stats = await sftpStat(sftp, remotePath);
+    if (signal.aborted) {
+        return result;
+    }
+    if (stats.isDirectory()) {
+        if (!localPath.endsWith('/') || !localPath.endsWith('\\')) {
+            localPath += process.platform === 'win32' ? '\\' : '/';
+        };
+        if (!remotePath.endsWith('/')) {
+            localPath += `${path.parse(remotePath).base}/`;
+        }
+        const patterns = exclude ? exclude.split(',').filter(str => str.trim() !== '').map((s) => {
+            const withWildcard = s.trim().replace(/\*/g, '.*');
+            return new RegExp(withWildcard);
+        }) : [];
+        async function walk(currentDir: string) {
+            const list = await sftpReaddir(sftp, currentDir);
+            for (let i = 0, len = list.length; i < len; i++) {
+                if (signal.aborted) {
+                    return result;
+                }
+                const item = list[i];
+                const name = item.filename;
+                const currentPath = path.join(currentDir, name).replace(/\\/g, '/');
+                const relativePath = path.relative(remotePath, currentPath).replace(/\\/g, '/');
+                if (patterns.length && isExcluded(relativePath, patterns)) continue;
+                if (testDir(item)) {
+                    await walk(currentDir + '/' + item.filename);
+                } else {
+                    result.push({ localPath: path.join(localPath, relativePath), remotePath: currentPath });
+                }
+            }
+        }
+        await walk(remotePath);
+    } else {
+        result.push({ localPath: path.join(localPath, path.parse(remotePath).base), remotePath: remotePath });
+    }
+    return result;
 }

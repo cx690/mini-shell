@@ -13,7 +13,7 @@
             </el-card>
             <el-card>
                 <template #header>
-                    {{ t('Upload-Settings') }}
+                    {{ t('Transfer-Settings') }}
                 </template>
                 <el-form-item :label="t('max-upload-tasks')" prop="maxTasks">
                     <el-select v-model="settings.config.maxTasks">

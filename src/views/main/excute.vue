@@ -257,7 +257,7 @@
                 <el-button @click="state.showUpload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
-        <el-dialog v-model="state.showDownload" :title="t('downloadfile-unsport')" width="900px"
+        <el-dialog v-model="state.showDownload" :title="t('downloadfile')" width="900px"
             :close-on-click-modal="false">
             <el-form :model="formData" ref="formDownLoadRef" :rules="downLoadRules" label-width="180px">
                 <el-form-item :label="t('select-save')" prop="locaDir">
@@ -438,12 +438,8 @@ async function onDownLoad() {
         return;
     }
     state.uploadLoading = true;
-    const result = await (clientStore.client!.downloadFile(formData.locaDir, formData.downloadFile));
+    await (clientStore.client!.downloadFile(formData.locaDir, formData.downloadFile, { uuid: v4() }));
     state.uploadLoading = false;
-    ElMessage({
-        type: result === true ? 'success' : 'error',
-        message: result === true ? t('downloadfile-success') : (result ? (result + '') : t('downloadfile-error')),
-    })
 }
 
 function hasType(selectShell: ShellListRecoed, type: 1 | 2 | 3 | 4) {

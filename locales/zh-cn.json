@@ -163,7 +163,6 @@
   "pls-select-file-dir": "选择文件或者输入本地文件或文件夹地址",
   "remote-path-dir": "目标地址目录",
   "enter-upload-dir": "请输入文件上传目录",
-  "downloadfile-unsport": "下载文件（当前暂不支持下载远程文件夹！）",
   "enter-save-dir": "选择文件夹或者输入本地文件夹地址",
   "open-dir": "打开目录",
   "remote-file": "远端文件地址",
@@ -304,7 +303,7 @@
   "UploadError": "上传失败",
   "confirm-switch-hidden-item": "确定要变更选中的{num}条数据的显示/隐藏吗？",
   "Change-confirm": "变更确认",
-  "Upload-Settings": "上传设置",
+  "Transfer-Settings": "传输设置",
   "max-upload-tasks": "最大并发任务数量",
   "Max-files-tasks": "文件最大并发上传数量",
   "max-warn-tip": "并发数量过大的情况下，可能出现错误：‘(SSH) Channel open failure: open failed’",
@@ -351,9 +350,12 @@
   "confirm-delete": "确定要删除",
   "delete-success": "删除成功",
   "rename-success": "重命名成功",
-  "download-success": "下载成功",
+  "download-success": "文件下载成功",
   "load-failed": "加载失败",
   "size": "大小",
   "this-pc": "此电脑",
-  "enter-desktop": "进入桌面"
+  "enter-desktop": "进入桌面",
+  "Transmitting": "传输中",
+  "Discovering": "文件发现中",
+  "download-err": "文件下载失败：{err}"
 }

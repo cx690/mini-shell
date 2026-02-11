@@ -10,13 +10,17 @@ export interface InfoEvent {
 
 // enum statusInfo {
 //     '准备上传,队列中',
-//     '上传中',
-//     '上传完成',
-//     '上传失败'
+//     '传输中',
+//     '传输完成',
+//     '传输失败'
+//     '正在发现远程文件',
 // }
 
+/** 传输信息类型 */
 export interface UploadInfoType {
-    status: 0 | 1 | 2 | 3,
+    status: 0 | 1 | 2 | 3 | 4,
+    /** 传输类型，默认上传 */
+    transferType?: 'upload' | 'download',
     message?: string,
     /** 已上传 */
     successNum: number,

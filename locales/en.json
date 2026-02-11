@@ -163,7 +163,6 @@
   "pls-select-file-dir": "Select a file or enter a local file or folder path",
   "remote-path-dir": "Remote directory",
   "enter-upload-dir": "Please enter the file upload directory",
-  "downloadfile-unsport": "Download files (download folders is currently not supported!)",
   "enter-save-dir": "Select a folder or enter the folder path",
   "open-dir": "Open Directory",
   "remote-file": "Remote file path",
@@ -304,7 +303,7 @@
   "UploadError": "Upload Error",
   "confirm-switch-hidden-item": "Are you sure want to switch show/hide the selected record {num}?",
   "Change-confirm": "Change Confirm",
-  "Upload-Settings": "Upload Settings",
+  "Transfer-Settings": "Transfer Settings",
   "max-upload-tasks": "Maximum concurrent tasks",
   "Max-files-tasks": "Maximum files uploaded concurrently",
   "max-warn-tip": "When the number of concurrent requests is too large, an error may occur: '(SSH) Channel open failure: open failed'",
@@ -355,5 +354,8 @@
   "load-failed": "Load failed",
   "size": "Size",
   "this-pc": "This PC",
-  "enter-desktop": "Enter Desktop"
+  "enter-desktop": "Enter Desktop",
+  "Discovering": "Discovering",
+  "Transmitting": "Transmitting",
+  "download-err": "Download error:{err}"
 }

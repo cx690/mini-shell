@@ -110,8 +110,9 @@
                         @click="renameRemote">
                         {{ t('rename') }}
                     </el-button>
-                    <el-button size="small" :icon="Download" :disabled="!state.remoteSelected || !remoteConnected"
-                        type="primary" @click="downloadToLocal">
+                    <el-button size="small" :icon="Download"
+                        :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot" type="primary"
+                        @click="downloadToLocal">
                         {{ t('download') }}
                     </el-button>
                 </div>
@@ -204,6 +205,7 @@ import useClient from '@/store/useClient';
 import { useI18n } from 'vue-i18n';
 import { formatSize } from '@/utils';
 import type { SFTPType } from 'electron/preload/ssh2';
+import { v4 } from 'uuid';
 
 const { t } = useI18n();
 const clientStore = useClient();
@@ -443,7 +445,8 @@ async function loadLocalDir(targetPath?: string) {
         state.localSelected = null;
         state.isDriveRoot = false;
     } catch (err: any) {
-        ElMessage.error(t('load-failed') + ': ' + (err?.message || err));
+        ElMessage.error(pathToLoad + " " + t('load-failed') + ': ' + (err?.message || err));
+        state.localPathShow = state.localPath;
     } finally {
         state.localLoading = false;
     }
@@ -471,8 +474,8 @@ async function loadRemoteDir(targetPath?: string) {
         state.remotePathShow = pathToLoad;
         state.remoteSelected = null;
     } catch (err: any) {
-        ElMessage.error(t('load-failed') + ': ' + (err?.message || err));
-        state.remoteList = [];
+        ElMessage.error(pathToLoad + " " + t('load-failed') + ': ' + (err?.message || err));
+        state.remotePathShow = state.remotePath;
     } finally {
         state.remoteLoading = false;
     }
@@ -549,7 +552,7 @@ function remoteGoUp() {
 function remoteEnter(item: { name: string; isDirectory: boolean }) {
     if (!item.isDirectory) return;
     const base = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
-    const newPath = base === '/' ? '/' + item.name : base + '/' + item.name;
+    const newPath = /\/$/.test(base) ? base + item.name : base + '/' + item.name;
     loadRemoteDir(newPath);
 }
 
@@ -726,8 +729,8 @@ async function uploadToRemote() {
     const localFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + state.localSelected.name).replace(/\//g, pathSep);
     const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '');
     try {
-        await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: 'sftp-' + Date.now() });
-        ElMessage.success(t('upload-success'));
+        await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
+        loadRemoteDir();
     } catch (e: any) {
         ElMessage.error(e?.message || e);
     }
@@ -735,15 +738,15 @@ async function uploadToRemote() {
 
 async function downloadToLocal() {
     if (!state.remoteSelected || !remoteConnected.value || !clientStore.client || !state.localPath) return;
-    const remoteFull = (state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '') + (state.remotePath === '/' ? '' : '/') + state.remoteSelected.name;
+    const remotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
+    const remoteFull = (/\/$/.test(remotePath) ? (remotePath + state.remoteSelected.name) : (remotePath + '/' + state.remoteSelected.name));
     const localDir = state.localPath;
     try {
-        const res = await clientStore.client.downloadFile(localDir, remoteFull);
+        const res = await clientStore.client.downloadFile(localDir, remoteFull, { quiet: false, uuid: v4() });
         if (res !== true) {
             ElMessage.error(String(res));
             return;
         }
-        ElMessage.success(t('download-success'));
         loadLocalDir();
     } catch (e: any) {
         ElMessage.error(e?.message || e);
