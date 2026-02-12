@@ -55,8 +55,8 @@
                         }">
                             <template #default="{ row }">
                                 <div class="table-name"
-                                    :data-drop-target="!row.isParent && !row.isEdit && row.isDirectory ? 'folder' : undefined"
-                                    :data-drop-name="!row.isParent && !row.isEdit && row.isDirectory ? row.name : undefined"
+                                    :data-drop-target="!row.isParent && !row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? 'folder' : undefined"
+                                    :data-drop-name="!row.isParent && !row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? row.name : undefined"
                                     :draggable="!row.isParent && !row.isEdit && !!state.localPath && remoteConnected"
                                     @dragstart="onLocalDragStart($event, row)"
                                     @dragover.prevent="onLocalFolderDragOver($event, row)"
@@ -827,7 +827,7 @@ function onRemoteDragStart(e: DragEvent, row: Row) {
 
 /** 本地文件夹行 dragover：仅当拖拽的是远程文件时高亮该行 */
 function onLocalFolderDragOver(e: DragEvent, row: Row) {
-    if (row.isParent || row.isEdit || !row.isDirectory) return;
+    if (row.isParent || row.isEdit || row.isNew || state.isDriveRoot || !row.isDirectory) return;
     if (!e.dataTransfer?.types?.includes(SFTP_DRAG_REMOTE)) return;
     e.dataTransfer.dropEffect = 'copy';
     state.localDropTargetFolder = row.name;
