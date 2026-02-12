@@ -727,10 +727,11 @@ async function uploadToRemote() {
     if (!state.localSelected || !remoteConnected.value || !clientStore.client || !state.localPath?.trim()) return;
     const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
     const localFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + state.localSelected.name).replace(/\//g, pathSep);
-    const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '');
+    const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
 
     const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
-    if (status === true && state.remotePath === targetDir) {
+    const nowRemotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    if (status === true && nowRemotePath === targetDir) {
         loadRemoteDir();
     }
 }
@@ -738,7 +739,7 @@ const throttleUploadToRemote = throttle(uploadToRemote);
 
 async function downloadToLocal() {
     if (!state.remoteSelected || !remoteConnected.value || !clientStore.client || !state.localPath) return;
-    const remotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
+    const remotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
     const remoteFull = (/\/$/.test(remotePath) ? (remotePath + state.remoteSelected.name) : (remotePath + '/' + state.remoteSelected.name));
     const localDir = state.localPath;
 
