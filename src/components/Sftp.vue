@@ -728,11 +728,10 @@ async function uploadToRemote() {
     const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
     const localFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + state.localSelected.name).replace(/\//g, pathSep);
     const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '');
-    try {
-        await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
+
+    const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
+    if (status === true && state.remotePath === targetDir) {
         loadRemoteDir();
-    } catch (e: any) {
-        ElMessage.error(e?.message || e);
     }
 }
 
@@ -741,15 +740,11 @@ async function downloadToLocal() {
     const remotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
     const remoteFull = (/\/$/.test(remotePath) ? (remotePath + state.remoteSelected.name) : (remotePath + '/' + state.remoteSelected.name));
     const localDir = state.localPath;
-    try {
-        const res = await clientStore.client.downloadFile(localDir, remoteFull, { quiet: false, uuid: v4() });
-        if (res !== true) {
-            ElMessage.error(String(res));
-            return;
-        }
+
+    const status = await clientStore.client.downloadFile(localDir, remoteFull, { quiet: false, uuid: v4() });
+    if (status === true && state.localPath === localDir) {
         loadLocalDir();
-    } catch (e: any) {
-        ElMessage.error(e?.message || e);
+        return;
     }
 }
 
