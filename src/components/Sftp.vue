@@ -12,14 +12,17 @@
                     </el-button>
                 </div>
                 <div class="panel-path">
-                    <el-input v-model="state.localPathShow" size="small" @keypress.enter="refreshLocal">
+                    <el-input v-model="state.localPathShow" size="small" @keypress.enter="enterLocal">
                         <template #prepend>{{ t('path') }}</template>
                     </el-input>
-                    <el-button size="small" @click="refreshLocal" :loading="state.localLoading">
+                    <el-button size="small" @click="enterLocal" :loading="state.localLoading" :icon="Refresh">
                         {{ t('refresh') }}
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
+                    <el-button size="small" :icon="Back" :disabled="!hasLocalParent" @click="localGoUp"
+                        :loading="state.localLoading">
+                    </el-button>
                     <el-button size="small" :icon="FolderAdd" :disabled="state.isDriveRoot" @click="addDir('local')">
                         {{ t('new-folder') }}
                     </el-button>
@@ -59,7 +62,7 @@
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
                         :row-class-name="localRowClassName" highlight-current-row :current-row-key="localCurrentRowKey"
                         @current-change="state.localSelected = $event" @row-dblclick="onRowDblclick"
-                        @row-contextmenu="onRowContextmenu" class="file-table no-select" height="100%" size="small"
+                        @row-contextmenu="onRowContextmenu" class="file-table no-select" size="small"
                         ref="localTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
                             appendTo: 'body'
@@ -108,14 +111,17 @@
                     <el-tag v-else type="info" size="small">{{ t('not-connected') }}</el-tag>
                 </div>
                 <div class="panel-path">
-                    <el-input v-model="state.remotePathShow" size="small" @keypress.enter="applyRemotePathAndLoad">
+                    <el-input v-model="state.remotePathShow" size="small" @keypress.enter="enterRemote">
                         <template #prepend>{{ t('remote-path') }}</template>
                     </el-input>
-                    <el-button size="small" @click="applyRemotePathAndLoad" :loading="state.remoteLoading">
+                    <el-button size="small" @click="enterRemote" :loading="state.remoteLoading" :icon="Refresh">
                         {{ t('refresh') }}
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
+                    <el-button size="small" :icon="Back" :disabled="!hasRemoteParent" @click="remoteGoUp"
+                        :loading="state.remoteLoading">
+                    </el-button>
                     <el-button size="small" :icon="FolderAdd" :disabled="!remoteConnected" @click="addDir('remote')">
                         {{ t('new-folder') }}
                     </el-button>
@@ -153,7 +159,7 @@
                         :row-class-name="remoteRowClassName" highlight-current-row
                         :current-row-key="remoteCurrentRowKey" @current-change="state.remoteSelected = $event"
                         @row-dblclick="onRemoteRowDblclick" @row-contextmenu="onRemoteRowContextmenu"
-                        class="file-table no-select" height="100%" size="small" ref="remoteTableRef">
+                        class="file-table no-select" size="small" ref="remoteTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
                             appendTo: 'body'
                         }">
@@ -326,12 +332,12 @@ const isLocalDriveRoot = computed(() => {
     if (electronAPI.platform !== 'win32') return false;
     return localPathParts.value.length === 1;
 });
-
+const hasLocalParent = computed(() => {
+    return electronAPI.platform === 'win32' && isLocalDriveRoot.value || localPathParts.value.length > 0;
+});
 const localTableData = computed<Row[]>(() => {
     const rows: Row[] = [];
-    if (electronAPI.platform === 'win32' && isLocalDriveRoot.value) {
-        rows.push({ name: '..', isDirectory: true, isParent: true });
-    } else if (localPathParts.value.length > 0) {
+    if (hasLocalParent.value) {
         rows.push({ name: '..', isDirectory: true, isParent: true });
     }
     if (state.showNewLocalDir) {
@@ -341,9 +347,12 @@ const localTableData = computed<Row[]>(() => {
     return rows;
 });
 
+const hasRemoteParent = computed(() => {
+    return state.remotePath !== '/' && state.remotePath !== '';
+});
 const remoteTableData = computed<Row[]>(() => {
     const rows: Row[] = [];
-    if (state.remotePath !== '/' && state.remotePath !== '') {
+    if (hasRemoteParent.value) {
         rows.push({ name: '..', isDirectory: true, isParent: true });
     }
     if (state.showNewRemoteDir) {
@@ -435,8 +444,8 @@ function handleContextCommand(command: string | number | object) {
     } else if (cmd === 'download') {
         downloadToLocal();
     } else if (cmd === 'refresh') {
-        if (state.contextMenuType === 'local-panel') refreshLocal();
-        else if (state.contextMenuType === 'remote-panel') applyRemotePathAndLoad();
+        if (state.contextMenuType === 'local-panel') enterLocal();
+        else if (state.contextMenuType === 'remote-panel') enterRemote();
     } else if (cmd === 'newFolder') {
         if (state.contextMenuType === 'local-panel') addDir('local');
         else if (state.contextMenuType === 'remote-panel') addDir('remote');
@@ -530,7 +539,8 @@ async function loadRemoteDir(targetPath?: string) {
     }
 }
 
-function refreshLocal() {
+function enterLocal() {
+    if (state.localLoading) return;
     if (electronAPI.platform === 'win32' && state.localPathShow === t('this-pc')) {
         loadDrivesView();
     } else {
@@ -606,7 +616,7 @@ function remoteEnter(item: { name: string; isDirectory: boolean }) {
 }
 
 
-function applyRemotePathAndLoad() {
+function enterRemote() {
     const pathNorm = (state.remotePathShow || state.remotePath).replace(/\\/g, '/').trim() || '/';
     loadRemoteDir(pathNorm);
 }
