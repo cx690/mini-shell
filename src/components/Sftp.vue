@@ -46,8 +46,9 @@
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
                         highlight-current-row :current-row-key="localCurrentRowKey"
                         @current-change="state.localSelected = $event" @row-dblclick="onLocalRowDblclick"
-                        class="file-table" height="100%" size="small" ref="localTableRef">
-                        <el-table-column :label="t('Name')" min-width="0">
+                        @row-contextmenu="onLocalRowContextmenu" class="file-table" height="100%" size="small"
+                        ref="localTableRef">
+                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
                                 <span class="table-name">
                                     <el-icon v-if="row.isParent">
@@ -70,7 +71,7 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="size" :label="t('size')" width="100" align="right">
+                        <el-table-column prop="size" :label="t('size')" width="100" align="right" sortable>
                             <template #default="{ row }">
                                 <span v-if="!row.isDirectory && !row.isParent && row.size != null">{{
                                     formatSize(row.size) }}</span>
@@ -121,8 +122,9 @@
                     <el-table v-loading="state.remoteLoading" v-else :data="remoteTableData" :row-key="rowKey"
                         highlight-current-row :current-row-key="remoteCurrentRowKey"
                         @current-change="state.remoteSelected = $event" @row-dblclick="onRemoteRowDblclick"
-                        class="file-table" height="100%" size="small" ref="remoteTableRef">
-                        <el-table-column :label="t('Name')" min-width="0">
+                        @row-contextmenu="onRemoteRowContextmenu" class="file-table" height="100%" size="small"
+                        ref="remoteTableRef">
+                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
                                 <span class="table-name">
                                     <el-icon v-if="row.isParent">
@@ -145,10 +147,11 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="size" :label="t('size')" width="100" align="right">
+                        <el-table-column prop="size" :label="t('size')" width="100" align="right" sortable>
                             <template #default="{ row }">
-                                <span v-if="!row.isDirectory && !row.isParent && row.size != null">{{
-                                    formatSize(row.size) }}</span>
+                                <span v-if="!row.isDirectory && !row.isParent && row.size != null">
+                                    {{ formatSize(row.size) }}
+                                </span>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -345,30 +348,25 @@ function onRemoteRowDblclick(row: RemoteRow) {
 }
 
 function onPanelContextMenu(e: MouseEvent, side: 'local' | 'remote') {
-    const tr = (e.target as HTMLElement).closest('tr.el-table__row');
-    if (tr) {
-        const tableRef = side === 'local' ? localTableRef.value : remoteTableRef.value;
-        const tbody = tableRef?.$el?.querySelector('.el-table__body-wrapper tbody');
-        if (tbody) {
-            const rows = Array.from(tbody.querySelectorAll('tr.el-table__row'));
-            const index = rows.indexOf(tr as Element);
-            if (index >= 0) {
-                const tableData = side === 'local' ? localTableData.value : remoteTableData.value;
-                const row = tableData[index];
-                if (row && !(row as LocalRow).isParent && !(row as LocalRow).isNew) {
-                    if (side === 'local') state.localSelected = row as LocalFileItem;
-                    else state.remoteSelected = row as RemoteFileItem;
-                    state.contextMenuType = (side + '-row') as 'local-row' | 'remote-row';
-                    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
-                    nextTick(() => contextDropdownRef.value?.handleOpen());
-                    return;
-                } else {
-                    state.contextMenuType = '';
-                }
-            }
-        }
-    }
     state.contextMenuType = (side + '-panel') as 'local-panel' | 'remote-panel';
+    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
+    nextTick(() => contextDropdownRef.value?.handleOpen());
+}
+
+function onLocalRowContextmenu(row: any, column: any, e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    state.localSelected = row;
+    state.contextMenuType = 'local-row';
+    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
+    nextTick(() => contextDropdownRef.value?.handleOpen());
+}
+
+function onRemoteRowContextmenu(row: any, column: any, e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    state.remoteSelected = row;
+    state.contextMenuType = 'remote-row';
     contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
     nextTick(() => contextDropdownRef.value?.handleOpen());
 }
@@ -625,16 +623,11 @@ const localTableRef = ref<InstanceType<typeof ElTable>>();
 const remoteTableRef = ref<InstanceType<typeof ElTable>>();
 function focusRename(side: 'local' | 'remote') {
     nextTick(() => {
-        if (side === 'local') {
-            const input = localTableRef.value?.$el?.querySelector('.inline-rename-input input');
-            if (input) {
-                input.focus();
-            }
-        } else {
-            const input = remoteTableRef.value?.$el?.querySelector('.inline-rename-input input');
-            if (input) {
-                input.focus();
-            }
+        const input = side === 'local' ? localTableRef.value?.$el?.querySelector('.inline-rename-input input') : remoteTableRef.value?.$el?.querySelector('.inline-rename-input input');
+        if (input) {
+            input.focus();
+            input.select();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     })
 }
