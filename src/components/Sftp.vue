@@ -39,18 +39,22 @@
                         {{ t('upload') }}
                     </el-button>
                 </div>
-                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'local')">
+                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'local')"
+                    :class="{ 'drop-zone-active': state.localPanelDragOver }" @dragover.prevent="onLocalPanelDragOver"
+                    @dragleave="onLocalPanelDragLeave" @drop.prevent="onLocalPanelDrop">
                     <div v-if="!state.localPath && !state.localList.length" class="list-hint">
                         {{ t('select-dir-hint') }}
                     </div>
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
                         highlight-current-row :current-row-key="localCurrentRowKey"
                         @current-change="state.localSelected = $event" @row-dblclick="onLocalRowDblclick"
-                        @row-contextmenu="onLocalRowContextmenu" class="file-table" height="100%" size="small"
+                        @row-contextmenu="onLocalRowContextmenu" class="file-table no-select" height="100%" size="small"
                         ref="localTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
-                                <div class="table-name">
+                                <div class="table-name"
+                                    :draggable="!row.isParent && !row.isEdit && !!state.localPath && remoteConnected"
+                                    @dragstart="onLocalDragStart($event, row)">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -113,16 +117,19 @@
                         {{ t('download') }}
                     </el-button>
                 </div>
-                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'remote')">
+                <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'remote')"
+                    :class="{ 'drop-zone-active': state.remotePanelDragOver }" @dragover.prevent="onRemotePanelDragOver"
+                    @dragleave="onRemotePanelDragLeave" @drop.prevent="onRemotePanelDrop">
                     <div v-if="!remoteConnected" class="list-hint">{{ t('connect-first-hint') }}</div>
                     <el-table v-loading="state.remoteLoading" v-else :data="remoteTableData" :row-key="rowKey"
                         highlight-current-row :current-row-key="remoteCurrentRowKey"
                         @current-change="state.remoteSelected = $event" @row-dblclick="onRemoteRowDblclick"
-                        @row-contextmenu="onRemoteRowContextmenu" class="file-table" height="100%" size="small"
+                        @row-contextmenu="onRemoteRowContextmenu" class="file-table no-select" height="100%" size="small"
                         ref="remoteTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
-                                <div class="table-name">
+                                <div class="table-name" :draggable="!row.isParent && !row.isEdit"
+                                    @dragstart="onRemoteDragStart($event, row)">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -262,6 +269,9 @@ const state = reactive({
     showNewRemoteDir: false,
 
     contextMenuType: '' as '' | 'local-row' | 'remote-row' | 'local-panel' | 'remote-panel',
+
+    localPanelDragOver: false,
+    remotePanelDragOver: false,
 });
 
 const remoteConnected = computed(() => clientStore.status === 2);
@@ -768,6 +778,83 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     clearSftp();
 });
+
+//----------------拖拽--------------------
+const SFTP_DRAG_LOCAL = 'application/x-sftp-local';
+const SFTP_DRAG_REMOTE = 'application/x-sftp-remote';
+function onLocalDragStart(e: DragEvent, row: LocalRow) {
+    if (row.isParent || row.isEdit || !state.localPath || !remoteConnected.value) return;
+    const basePath = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
+    const payload = { type: 'local' as const, basePath, name: row.name, isDirectory: row.isDirectory };
+    e.dataTransfer!.setData(SFTP_DRAG_LOCAL, JSON.stringify(payload));
+    e.dataTransfer!.effectAllowed = 'copy';
+}
+
+function onRemoteDragStart(e: DragEvent, row: RemoteRow) {
+    if (row.isParent || row.isEdit) return;
+    const basePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
+    const payload = { type: 'remote' as const, basePath, name: row.name, isDirectory: row.isDirectory };
+    e.dataTransfer!.setData(SFTP_DRAG_REMOTE, JSON.stringify(payload));
+    e.dataTransfer!.effectAllowed = 'copy';
+}
+
+function onRemotePanelDragOver(e: DragEvent) {
+    if (e.dataTransfer?.types?.includes(SFTP_DRAG_LOCAL)) {
+        e.dataTransfer.dropEffect = 'copy';
+        state.remotePanelDragOver = true;
+    }
+}
+
+function onRemotePanelDragLeave() {
+    state.remotePanelDragOver = false;
+}
+
+async function onRemotePanelDrop(e: DragEvent) {
+    state.remotePanelDragOver = false;
+    const raw = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
+    if (!raw || !remoteConnected.value || !clientStore.client) return;
+
+    const { type, basePath, name } = JSON.parse(raw);
+    if (type !== 'local' || !basePath || !name) return;
+    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
+    const localFull = (basePath + '/' + name).replace(/\//g, pathSep);
+    const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
+    const nowRemotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    if (status === true && nowRemotePath === targetDir) {
+        loadRemoteDir();
+    }
+}
+
+function onLocalPanelDragOver(e: DragEvent) {
+    if (e.dataTransfer?.types?.includes(SFTP_DRAG_REMOTE)) {
+        e.dataTransfer.dropEffect = 'copy';
+        state.localPanelDragOver = true;
+    }
+}
+
+function onLocalPanelDragLeave() {
+    state.localPanelDragOver = false;
+}
+
+async function onLocalPanelDrop(e: DragEvent) {
+    state.localPanelDragOver = false;
+    const raw = e.dataTransfer?.getData(SFTP_DRAG_REMOTE);
+    if (!raw || !remoteConnected.value || !clientStore.client) return;
+    if (!state.localPath?.trim()) {
+        ElMessage.warning(t('select-dir-hint'));
+        return;
+    }
+
+    const { type, basePath, name } = JSON.parse(raw);
+    if (type !== 'remote' || !name) return;
+    const remotePath = (basePath ? basePath + '/' : '') + name;
+    const localDir = state.localPath;
+    const status = await clientStore.client.downloadFile(localDir, remotePath, { quiet: false, name, uuid: v4() });
+    if (status === true && state.localPath === localDir) {
+        loadLocalDir();
+    }
+}
 </script>
 
 <style scoped lang="less">
@@ -837,6 +924,14 @@ onBeforeUnmount(() => {
         padding: @gap;
         display: flex;
         flex-direction: column;
+        border: 2px dashed transparent;
+        border-radius: 6px;
+        transition: border-color 0.15s, background-color 0.15s;
+
+        &.drop-zone-active {
+            border-color: var(--el-color-primary);
+            background-color: var(--el-color-primary-light-9);
+        }
 
         .list-loading,
         .list-hint {
@@ -866,7 +961,18 @@ onBeforeUnmount(() => {
             :deep(.el-table__row) {
                 cursor: pointer;
             }
+
+            .table-name[draggable="true"] {
+                cursor: grab;
+
+                &:active {
+                    cursor: grabbing;
+                }
+            }
         }
+    }
+    .no-select {
+        user-select: none;
     }
 }
 </style>
