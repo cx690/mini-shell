@@ -357,5 +357,7 @@
   "enter-desktop": "进入桌面",
   "Transmitting": "传输中",
   "Discovering": "文件发现中",
-  "download-err": "文件下载失败：{err}"
+  "download-err": "文件下载失败：{err}",
+  "upload-to-remote-hint": "上传文件：\"{name}\"，到目录：\"{remotePath}\"",
+  "download-to-local-hint": "下载文件：\"{name}\"，到目录：\"{localPath}\""
 }

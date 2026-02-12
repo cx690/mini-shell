@@ -357,5 +357,7 @@
   "enter-desktop": "Enter Desktop",
   "Discovering": "Discovering",
   "Transmitting": "Transmitting",
-  "download-err": "Download error:{err}"
+  "download-err": "Download error:{err}",
+  "upload-to-remote-hint": "Upload file: \"{name}\" to directory: \"{remotePath}\"",
+  "download-to-local-hint": "Download file: \"{name}\" to directory: \"{localPath}\""
 }

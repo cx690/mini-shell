@@ -33,11 +33,22 @@
                         @click="renameLocal">
                         {{ t('rename') }}
                     </el-button>
-                    <el-button size="small" :icon="Upload"
-                        :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                        @click="throttleUploadToRemote">
-                        {{ t('upload') }}
-                    </el-button>
+                    <el-tooltip placement="top"
+                        :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot">
+                        <template #content>
+                            <p>
+                                {{ t('upload-to-remote-hint', {
+                                    name: state.localSelected?.name ?? '', remotePath:
+                                        state.remotePath
+                                }) }}
+                            </p>
+                        </template>
+                        <el-button size="small" :icon="Upload"
+                            :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot" type="primary"
+                            @click="throttleUploadToRemote">
+                            {{ t('upload') }}
+                        </el-button>
+                    </el-tooltip>
                 </div>
                 <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'local')"
                     :class="{ 'drop-zone-active': state.localPanelDragOver }" @dragover.prevent="onLocalPanelDragOver"
@@ -117,11 +128,22 @@
                         @click="renameRemote">
                         {{ t('rename') }}
                     </el-button>
-                    <el-button size="small" :icon="Download"
-                        :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                        @click="throttleDownloadToLocal">
-                        {{ t('download') }}
-                    </el-button>
+                    <el-tooltip placement="top"
+                        :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot">
+                        <template #content>
+                            <p>
+                                {{ t('download-to-local-hint', {
+                                    name: state.remoteSelected?.name ?? '', localPath:
+                                        state.localPath
+                                }) }}
+                            </p>
+                        </template>
+                        <el-button size="small" :icon="Download"
+                            :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot" type="primary"
+                            @click="throttleDownloadToLocal">
+                            {{ t('download') }}
+                        </el-button>
+                    </el-tooltip>
                 </div>
                 <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'remote')"
                     :class="{ 'drop-zone-active': state.remotePanelDragOver }" @dragover.prevent="onRemotePanelDragOver"
