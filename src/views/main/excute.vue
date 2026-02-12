@@ -257,8 +257,7 @@
                 <el-button @click="state.showUpload = false">{{ t('Cancel') }}</el-button>
             </template>
         </el-dialog>
-        <el-dialog v-model="state.showDownload" :title="t('downloadfile')" width="900px"
-            :close-on-click-modal="false">
+        <el-dialog v-model="state.showDownload" :title="t('downloadfile')" width="900px" :close-on-click-modal="false">
             <el-form :model="formData" ref="formDownLoadRef" :rules="downLoadRules" label-width="180px">
                 <el-form-item :label="t('select-save')" prop="locaDir">
                     <el-button type="primary" @click="onSelectDir">{{ t('select-dir') }}</el-button>
@@ -355,6 +354,10 @@ const formData = reactive({
     downloadFile: '',
     checkList: [] as ShellListRecoed['baseScripts']
 })
+electronAPI.appGetPath('downloads').then(dir => {
+    formData.locaDir = dir;
+})
+
 const rules = computed(() => ({
     file: {
         required: true,

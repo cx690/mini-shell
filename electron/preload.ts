@@ -22,7 +22,7 @@ const electronAPI = {
     fsRm: (targetPath: string, options?: { recursive?: boolean }) => ipcRenderer.invoke('fs-rm', targetPath, options) as ReturnType<typeof import('fs/promises')['rm']>,
     fsRename: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs-rename', oldPath, newPath) as ReturnType<typeof import('fs/promises')['rename']>,
     fsStat: (filePath: string) => ipcRenderer.invoke('fs-stat', filePath) as Promise<{ isDirectory: boolean; size: number; mtime: number }>,
-    getDesktopDir: () => ipcRenderer.invoke('get-desktop-dir') as Promise<string>,
+    appGetPath: (name: Parameters<typeof import('electron').app.getPath>[0]) => ipcRenderer.invoke('app-get-path', name) as Promise<string>,
     getDrives: () => ipcRenderer.invoke('get-drives') as Promise<string[]>,
     /** 设置 Zmodem 下载目录（选择目录后调用，后续浏览器下载将写入该目录） */
     setZmodemDownloadDir: (dir: string) => ipcRenderer.send('set-zmodem-download-dir', dir),

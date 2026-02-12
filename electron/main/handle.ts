@@ -90,7 +90,7 @@ export function handles() {
         return { isDirectory: info.isDirectory(), size: info.size, mtime: info.mtimeMs };
     })
 
-    ipcMain.handle('get-desktop-dir', () => app.getPath('desktop'))
+    ipcMain.handle('app-get-path', (e, name: Parameters<typeof app.getPath>[0]) => app.getPath(name))
 
     /** Windows 下获取所有逻辑磁盘根路径（如 ['C:\\', 'D:\\']），非 Windows 返回空数组 */
     ipcMain.handle('get-drives', async (): Promise<string[]> => {

@@ -491,7 +491,7 @@ function refreshLocal() {
 
 async function enterDesktop() {
     try {
-        const desktop = await electronAPI.getDesktopDir();
+        const desktop = await electronAPI.appGetPath('desktop');
         if (desktop) {
             loadLocalDir(desktop);
         }
@@ -759,7 +759,7 @@ watch(remoteConnected, (v) => {
 
 onMounted(async () => {
     try {
-        const desktop = await electronAPI.getDesktopDir();
+        const desktop = await electronAPI.appGetPath('desktop');
         if (desktop) {
             loadLocalDir(desktop);
         }
