@@ -113,14 +113,14 @@ export function handles() {
         return dialog.showOpenDialog({
             ...option,
         }).catch((error) => {
-            console.log(error);
+            console.error(error);
         })
     })
     ipcMain.handle('show-save-dialog', async function (e, option: SaveDialogOptions) {
         return dialog.showSaveDialog({
             ...option,
         }).catch((error) => {
-            console.log(error);
+            console.error(error);
         })
     })
     ipcMain.handle('get-locales', async function (e, locale?: string) {

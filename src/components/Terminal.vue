@@ -258,7 +258,7 @@ async function initShell() {
                     zsession = null;
                     zsentry._zsession = null;  // 清除 zsentry 内部 session，避免后续数据继续发往损坏的 session 导致重复输出
                 } else {
-                    console.log('consume error', error);
+                    console.error('consume error', error);
                 }
             }
             return;
@@ -296,7 +296,6 @@ onBeforeUnmount(() => {
     try {
         zsession?.close?.();
     } catch (error) {
-        console.log('error', error);
     }
     zsession = null;
     dragFiles = [];
