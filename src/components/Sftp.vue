@@ -50,7 +50,7 @@
                         ref="localTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
-                                <span class="table-name">
+                                <div class="table-name">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -60,15 +60,11 @@
                                     <el-icon v-else>
                                         <Document />
                                     </el-icon>
-                                    <span class="name-text">
-                                        <template v-if="!row.isParent && row.isEdit">
-                                            <el-input v-model="row.renameValue" size="small" class="inline-rename-input"
-                                                @keypress.enter="confirmRename('local', row)"
-                                                @blur="confirmRename('local', row)" />
-                                        </template>
-                                        <span v-else>{{ row.name }}</span>
-                                    </span>
-                                </span>
+                                    <el-input v-if="!row.isParent && row.isEdit" v-model="row.renameValue" size="small"
+                                        class="inline-rename-input" @keypress.enter="confirmRename('local', row)"
+                                        @blur="confirmRename('local', row)" />
+                                    <span v-else>{{ row.name }}</span>
+                                </div>
                             </template>
                         </el-table-column>
                         <el-table-column prop="size" :label="t('size')" width="100" align="right" sortable>
@@ -126,7 +122,7 @@
                         ref="remoteTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
                             <template #default="{ row }">
-                                <span class="table-name">
+                                <div class="table-name">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -136,15 +132,11 @@
                                     <el-icon v-else>
                                         <Document />
                                     </el-icon>
-                                    <span class="name-text">
-                                        <template v-if="!row.isParent && row.isEdit">
-                                            <el-input v-model="row.renameValue" size="small" class="inline-rename-input"
-                                                @keypress.enter="confirmRename('remote', row)"
-                                                @blur="confirmRename('remote', row)" />
-                                        </template>
-                                        <span v-else>{{ row.name }}</span>
-                                    </span>
-                                </span>
+                                    <el-input v-if="!row.isParent && row.isEdit" v-model="row.renameValue" size="small"
+                                        class="inline-rename-input" @keypress.enter="confirmRename('remote', row)"
+                                        @blur="confirmRename('remote', row)" />
+                                    <span v-else>{{ row.name }}</span>
+                                </div>
                             </template>
                         </el-table-column>
                         <el-table-column prop="size" :label="t('size')" width="100" align="right" sortable>
@@ -622,14 +614,14 @@ function renameRemote() {
 const localTableRef = ref<InstanceType<typeof ElTable>>();
 const remoteTableRef = ref<InstanceType<typeof ElTable>>();
 function focusRename(side: 'local' | 'remote') {
-    nextTick(() => {
+    setTimeout(() => {
         const input = side === 'local' ? localTableRef.value?.$el?.querySelector('.inline-rename-input input') : remoteTableRef.value?.$el?.querySelector('.inline-rename-input input');
         if (input) {
             input.focus();
             input.select();
             input.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    })
+    }, 100);
 }
 
 function addDir(side: 'local' | 'remote') {
@@ -661,6 +653,7 @@ async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | Remo
                 state.showNewLocalDir = false;
             } catch (e: any) {
                 ElMessage.error(e?.message || e);
+                state.showNewLocalDir = false;
             }
         } else {
             const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
@@ -673,6 +666,8 @@ async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | Remo
                 loadLocalDir();
             } catch (e: any) {
                 ElMessage.error(e?.message || e);
+                row.isEdit = false;
+                row.renameValue = row.name;
             }
         }
     } else if (side === 'remote') {
@@ -693,6 +688,7 @@ async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | Remo
                 state.showNewRemoteDir = false;
             } catch (e: any) {
                 ElMessage.error(e?.message || e);
+                state.showNewRemoteDir = false;
             }
         } else {
             const base = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
@@ -711,6 +707,8 @@ async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | Remo
                 loadRemoteDir();
             } catch (e: any) {
                 ElMessage.error(e?.message || e);
+                row.isEdit = false;
+                row.renameValue = row.name;
             }
         }
     }
@@ -851,22 +849,17 @@ onBeforeUnmount(() => {
             height: 100%;
 
             .table-name {
-                display: inline-flex;
+                display: flex;
                 align-items: center;
                 gap: @gap;
+                width: 100%;
+                flex-direction: row;
+                justify-content: flex-start;
 
-                .name-text {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: @gap;
+                .inline-rename-input {
+                    width: 100%;
+                    flex: 1 1 0;
                     min-width: 0;
-
-                    .inline-rename-input {
-                        width: 120px;
-                    }
                 }
             }
 
