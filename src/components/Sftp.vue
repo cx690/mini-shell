@@ -46,15 +46,21 @@
                         {{ t('select-dir-hint') }}
                     </div>
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
-                        highlight-current-row :current-row-key="localCurrentRowKey"
-                        @current-change="state.localSelected = $event" @row-dblclick="onLocalRowDblclick"
-                        @row-contextmenu="onLocalRowContextmenu" class="file-table no-select" height="100%" size="small"
+                        :row-class-name="localRowClassName" highlight-current-row :current-row-key="localCurrentRowKey"
+                        @current-change="state.localSelected = $event" @row-dblclick="onRowDblclick"
+                        @row-contextmenu="onRowContextmenu" class="file-table no-select" height="100%" size="small"
                         ref="localTableRef">
-                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
+                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
+                            appendTo: 'body'
+                        }">
                             <template #default="{ row }">
                                 <div class="table-name"
+                                    :data-drop-target="!row.isParent && !row.isEdit && row.isDirectory ? 'folder' : undefined"
+                                    :data-drop-name="!row.isParent && !row.isEdit && row.isDirectory ? row.name : undefined"
                                     :draggable="!row.isParent && !row.isEdit && !!state.localPath && remoteConnected"
-                                    @dragstart="onLocalDragStart($event, row)">
+                                    @dragstart="onLocalDragStart($event, row)"
+                                    @dragover.prevent="onLocalFolderDragOver($event, row)"
+                                    @dragleave="onLocalFolderDragLeave">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -67,7 +73,7 @@
                                     <el-input v-if="!row.isParent && row.isEdit" v-model="row.renameValue" size="small"
                                         class="inline-rename-input" @keypress.enter="confirmRename('local', row)"
                                         @blur="confirmRename('local', row)" />
-                                    <span v-else>{{ row.name }}</span>
+                                    <span class="ellipsis" v-else>{{ row.name }}</span>
                                 </div>
                             </template>
                         </el-table-column>
@@ -122,14 +128,21 @@
                     @dragleave="onRemotePanelDragLeave" @drop.prevent="onRemotePanelDrop">
                     <div v-if="!remoteConnected" class="list-hint">{{ t('connect-first-hint') }}</div>
                     <el-table v-loading="state.remoteLoading" v-else :data="remoteTableData" :row-key="rowKey"
-                        highlight-current-row :current-row-key="remoteCurrentRowKey"
-                        @current-change="state.remoteSelected = $event" @row-dblclick="onRemoteRowDblclick"
-                        @row-contextmenu="onRemoteRowContextmenu" class="file-table no-select" height="100%" size="small"
-                        ref="remoteTableRef">
-                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" show-overflow-tooltip>
+                        :row-class-name="remoteRowClassName" highlight-current-row
+                        :current-row-key="remoteCurrentRowKey" @current-change="state.remoteSelected = $event"
+                        @row-dblclick="onRemoteRowDblclick" @row-contextmenu="onRemoteRowContextmenu"
+                        class="file-table no-select" height="100%" size="small" ref="remoteTableRef">
+                        <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
+                            appendTo: 'body'
+                        }">
                             <template #default="{ row }">
-                                <div class="table-name" :draggable="!row.isParent && !row.isEdit"
-                                    @dragstart="onRemoteDragStart($event, row)">
+                                <div class="table-name"
+                                    :data-drop-target="!row.isParent && !row.isEdit && row.isDirectory ? 'folder' : undefined"
+                                    :data-drop-name="!row.isParent && !row.isEdit && row.isDirectory ? row.name : undefined"
+                                    :draggable="!row.isParent && !row.isEdit"
+                                    @dragstart="onRemoteDragStart($event, row)"
+                                    @dragover.prevent="onRemoteFolderDragOver($event, row)"
+                                    @dragleave="onRemoteFolderDragLeave">
                                     <el-icon v-if="row.isParent">
                                         <Back />
                                     </el-icon>
@@ -142,7 +155,7 @@
                                     <el-input v-if="!row.isParent && row.isEdit" v-model="row.renameValue" size="small"
                                         class="inline-rename-input" @keypress.enter="confirmRename('remote', row)"
                                         @blur="confirmRename('remote', row)" />
-                                    <span v-else>{{ row.name }}</span>
+                                    <span class="ellipsis" v-else>{{ row.name }}</span>
                                 </div>
                             </template>
                         </el-table-column>
@@ -248,22 +261,21 @@ async function ensureSftp(): Promise<SFTPType | null> {
     return sftpInstance.value;
 }
 
-type LocalFileItem = { name: string; isDirectory: boolean; size?: number, isEdit?: boolean, renameValue?: string, isNew?: boolean };
-type RemoteFileItem = { name: string; isDirectory: boolean; size?: number; mtime?: number, isEdit?: boolean, renameValue?: string, isNew?: boolean };
+type FileItem = { name: string; isDirectory: boolean; size?: number, mtime?: number, isEdit?: boolean, renameValue?: string, isNew?: boolean };
 
 const state = reactive({
     localPathShow: '',
     localPath: '',
-    localList: [] as LocalFileItem[],
+    localList: [] as FileItem[],
     localLoading: false,
-    localSelected: null as LocalFileItem | null,
+    localSelected: null as FileItem | null,
     isDriveRoot: false,
 
     remotePathShow: '/',
     remotePath: '/',
-    remoteList: [] as RemoteFileItem[],
+    remoteList: [] as FileItem[],
     remoteLoading: false,
-    remoteSelected: null as RemoteFileItem | null,
+    remoteSelected: null as FileItem | null,
 
     showNewLocalDir: false,
     showNewRemoteDir: false,
@@ -272,6 +284,9 @@ const state = reactive({
 
     localPanelDragOver: false,
     remotePanelDragOver: false,
+    /** 拖拽悬停时的目标文件夹名（用于高亮该行） */
+    localDropTargetFolder: null as string | null,
+    remoteDropTargetFolder: null as string | null,
 });
 
 const remoteConnected = computed(() => clientStore.status === 2);
@@ -282,8 +297,7 @@ const localPathParts = computed(() => {
     return p ? p.split('/').filter(Boolean) : [];
 });
 
-type LocalRow = LocalFileItem & { isParent?: boolean };
-type RemoteRow = RemoteFileItem & { isParent?: boolean };
+type Row = FileItem & { isParent?: boolean };
 
 /** Windows 下是否为盘符根目录（如 C:\） */
 const isLocalDriveRoot = computed(() => {
@@ -291,8 +305,8 @@ const isLocalDriveRoot = computed(() => {
     return localPathParts.value.length === 1;
 });
 
-const localTableData = computed<LocalRow[]>(() => {
-    const rows: LocalRow[] = [];
+const localTableData = computed<Row[]>(() => {
+    const rows: Row[] = [];
     if (electronAPI.platform === 'win32' && isLocalDriveRoot.value) {
         rows.push({ name: '..', isDirectory: true, isParent: true });
     } else if (localPathParts.value.length > 0) {
@@ -305,8 +319,8 @@ const localTableData = computed<LocalRow[]>(() => {
     return rows;
 });
 
-const remoteTableData = computed<RemoteRow[]>(() => {
-    const rows: RemoteRow[] = [];
+const remoteTableData = computed<Row[]>(() => {
+    const rows: Row[] = [];
     if (state.remotePath !== '/' && state.remotePath !== '') {
         rows.push({ name: '..', isDirectory: true, isParent: true });
     }
@@ -318,19 +332,32 @@ const remoteTableData = computed<RemoteRow[]>(() => {
 });
 
 const parentKey = '$$__parent__$$';
-function rowKey(row: LocalRow) {
+function rowKey(row: Row) {
     return row.isParent ? parentKey : row.name;
+}
+
+/** 本地表格行类名：拖拽悬停到该文件夹行时高亮 */
+function localRowClassName({ row }: { row: Row }) {
+    return !row.isParent && !row.isEdit && row.isDirectory && row.name === state.localDropTargetFolder
+        ? 'drop-target-folder-row'
+        : '';
+}
+/** 远程表格行类名：拖拽悬停到该文件夹行时高亮 */
+function remoteRowClassName({ row }: { row: Row }) {
+    return !row.isParent && !row.isEdit && row.isDirectory && row.name === state.remoteDropTargetFolder
+        ? 'drop-target-folder-row'
+        : '';
 }
 
 const localCurrentRowKey = computed(() => {
     const sel = state.localSelected;
     if (!sel) return undefined;
-    return (sel as LocalRow).isParent ? parentKey : sel.name;
+    return (sel as Row).isParent ? parentKey : sel.name;
 });
 const remoteCurrentRowKey = computed(() => {
     const sel = state.remoteSelected;
     if (!sel) return undefined;
-    return (sel as RemoteRow).isParent ? parentKey : sel.name;
+    return (sel as Row).isParent ? parentKey : sel.name;
 });
 
 /** 右键菜单：虚拟触发位置（el-dropdown 虚拟触发用） */
@@ -340,11 +367,11 @@ const triggerRef = ref({
 });
 const contextDropdownRef = ref<{ handleOpen: () => void } | null>(null);
 
-function onLocalRowDblclick(row: LocalRow) {
+function onRowDblclick(row: Row) {
     if (row.isParent) localGoUp();
     else localEnter(row);
 }
-function onRemoteRowDblclick(row: RemoteRow) {
+function onRemoteRowDblclick(row: Row) {
     if (row.isParent) remoteGoUp();
     else remoteEnter(row);
 }
@@ -355,7 +382,7 @@ function onPanelContextMenu(e: MouseEvent, side: 'local' | 'remote') {
     nextTick(() => contextDropdownRef.value?.handleOpen());
 }
 
-function onLocalRowContextmenu(row: any, column: any, e: MouseEvent) {
+function onRowContextmenu(row: any, column: any, e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     state.localSelected = row;
@@ -642,7 +669,7 @@ function addDir(side: 'local' | 'remote') {
     }
     focusRename(side);
 }
-async function confirmRename(side: 'local' | 'remote', row: LocalFileItem | RemoteFileItem) {
+async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem) {
     if (!row) return;
     if (row.name === row.renameValue || !row.renameValue?.trim()) {
         row.isEdit = false;
@@ -782,7 +809,7 @@ onBeforeUnmount(() => {
 //----------------拖拽--------------------
 const SFTP_DRAG_LOCAL = 'application/x-sftp-local';
 const SFTP_DRAG_REMOTE = 'application/x-sftp-remote';
-function onLocalDragStart(e: DragEvent, row: LocalRow) {
+function onLocalDragStart(e: DragEvent, row: Row) {
     if (row.isParent || row.isEdit || !state.localPath || !remoteConnected.value) return;
     const basePath = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
     const payload = { type: 'local' as const, basePath, name: row.name, isDirectory: row.isDirectory };
@@ -790,12 +817,50 @@ function onLocalDragStart(e: DragEvent, row: LocalRow) {
     e.dataTransfer!.effectAllowed = 'copy';
 }
 
-function onRemoteDragStart(e: DragEvent, row: RemoteRow) {
+function onRemoteDragStart(e: DragEvent, row: Row) {
     if (row.isParent || row.isEdit) return;
     const basePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
     const payload = { type: 'remote' as const, basePath, name: row.name, isDirectory: row.isDirectory };
     e.dataTransfer!.setData(SFTP_DRAG_REMOTE, JSON.stringify(payload));
     e.dataTransfer!.effectAllowed = 'copy';
+}
+
+/** 本地文件夹行 dragover：仅当拖拽的是远程文件时高亮该行 */
+function onLocalFolderDragOver(e: DragEvent, row: Row) {
+    if (row.isParent || row.isEdit || !row.isDirectory) return;
+    if (!e.dataTransfer?.types?.includes(SFTP_DRAG_REMOTE)) return;
+    e.dataTransfer.dropEffect = 'copy';
+    state.localDropTargetFolder = row.name;
+}
+
+function onLocalFolderDragLeave(e: DragEvent) {
+    const relatedTarget = e.relatedTarget as Node | null;
+    if (relatedTarget instanceof HTMLElement) {
+        if (!relatedTarget?.closest?.('[data-drop-target="folder"]') || relatedTarget.dataset.dropTarget !== 'folder') {
+            state.localDropTargetFolder = null;
+        }
+        return
+    }
+    state.localDropTargetFolder = null;
+}
+
+/** 远程文件夹行 dragover：仅当拖拽的是本地文件时高亮该行 */
+function onRemoteFolderDragOver(e: DragEvent, row: Row) {
+    if (row.isParent || row.isEdit || !row.isDirectory) return;
+    if (!e.dataTransfer?.types?.includes(SFTP_DRAG_LOCAL)) return;
+    e.dataTransfer.dropEffect = 'copy';
+    state.remoteDropTargetFolder = row.name;
+}
+
+function onRemoteFolderDragLeave(e: DragEvent) {
+    const relatedTarget = e.relatedTarget as Node | null;
+    if (relatedTarget instanceof HTMLElement) {
+        if (!relatedTarget?.closest?.('[data-drop-target="folder"]') || relatedTarget.dataset.dropTarget !== 'folder') {
+            state.remoteDropTargetFolder = null;
+        }
+        return
+    }
+    state.remoteDropTargetFolder = null;
 }
 
 function onRemotePanelDragOver(e: DragEvent) {
@@ -807,10 +872,18 @@ function onRemotePanelDragOver(e: DragEvent) {
 
 function onRemotePanelDragLeave() {
     state.remotePanelDragOver = false;
+    state.remoteDropTargetFolder = null;
+}
+
+/** 从 drop 事件中解析是否落在某文件夹行上，返回该文件夹名（未落在文件夹行则返回 null） */
+function getDropTargetFolderName(e: DragEvent): string | null {
+    const el = (e.target as HTMLElement)?.closest?.('[data-drop-target="folder"]');
+    return el?.getAttribute('data-drop-name') ?? null;
 }
 
 async function onRemotePanelDrop(e: DragEvent) {
     state.remotePanelDragOver = false;
+    state.remoteDropTargetFolder = null;
     const raw = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
     if (!raw || !remoteConnected.value || !clientStore.client) return;
 
@@ -818,10 +891,11 @@ async function onRemotePanelDrop(e: DragEvent) {
     if (type !== 'local' || !basePath || !name) return;
     const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
     const localFull = (basePath + '/' + name).replace(/\//g, pathSep);
-    const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const baseRemote = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const folderName = getDropTargetFolderName(e);
+    const targetDir = folderName ? (baseRemote + '/' + folderName).replace(/\/+/g, '/') : baseRemote;
     const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
-    const nowRemotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
-    if (status === true && nowRemotePath === targetDir) {
+    if (status === true) {
         loadRemoteDir();
     }
 }
@@ -835,10 +909,12 @@ function onLocalPanelDragOver(e: DragEvent) {
 
 function onLocalPanelDragLeave() {
     state.localPanelDragOver = false;
+    state.localDropTargetFolder = null;
 }
 
 async function onLocalPanelDrop(e: DragEvent) {
     state.localPanelDragOver = false;
+    state.localDropTargetFolder = null;
     const raw = e.dataTransfer?.getData(SFTP_DRAG_REMOTE);
     if (!raw || !remoteConnected.value || !clientStore.client) return;
     if (!state.localPath?.trim()) {
@@ -849,9 +925,14 @@ async function onLocalPanelDrop(e: DragEvent) {
     const { type, basePath, name } = JSON.parse(raw);
     if (type !== 'remote' || !name) return;
     const remotePath = (basePath ? basePath + '/' : '') + name;
-    const localDir = state.localPath;
+    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
+    const baseLocal = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
+    const folderName = getDropTargetFolderName(e);
+    const localDir = folderName
+        ? (baseLocal + '/' + folderName).replace(/\//g, pathSep)
+        : state.localPath;
     const status = await clientStore.client.downloadFile(localDir, remotePath, { quiet: false, name, uuid: v4() });
-    if (status === true && state.localPath === localDir) {
+    if (status === true) {
         loadLocalDir();
     }
 }
@@ -943,6 +1024,14 @@ async function onLocalPanelDrop(e: DragEvent) {
             flex: 1;
             height: 100%;
 
+            /* 拖拽悬停到文件夹行时的醒目高亮 */
+            :deep(tr.drop-target-folder-row .table-name) {
+                background: linear-gradient(90deg, var(--el-color-primary-light-7) 0%, var(--el-color-primary-light-9) 100%) !important;
+                border-left: 4px solid var(--el-color-primary) !important;
+                box-shadow: inset 0 0 0 2px var(--el-color-primary-light-5);
+                font-weight: 600;
+            }
+
             .table-name {
                 display: flex;
                 align-items: center;
@@ -955,6 +1044,13 @@ async function onLocalPanelDrop(e: DragEvent) {
                     width: 100%;
                     flex: 1 1 0;
                     min-width: 0;
+                }
+
+                .ellipsis {
+                    width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
             }
 
@@ -971,6 +1067,7 @@ async function onLocalPanelDrop(e: DragEvent) {
             }
         }
     }
+
     .no-select {
         user-select: none;
     }
