@@ -352,7 +352,7 @@ function getClient() {
                         status: 4,
                         name,
                     })
-                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, signal, exclude);
+                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, { signal, exclude });
                     total = downloadList.length;
                     emit({
                         successNum,
@@ -557,22 +557,27 @@ function testDir(item: FileEntryWithStats) {
         || (typeof item.longname === 'string' && item.longname.trimStart().charAt(0) === 'd');
 }
 
-/** 获取下载文件列表 */
-/**
+type OptionType = {
+    /** 取消信号 */
+    signal?: AbortSignal,
+    /**排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串 */
+    exclude?: string
+}
+/** 获取下载文件列表 
  * @param sftp SFTPWrapper
  * @param remotePath 远程路径
  * @param localPath 本地路径
- * @param signal AbortSignal
- * @param exclude 排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串
+ * @param option OptionType
  * @returns 下载文件列表
  */
-async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath: string, signal: AbortSignal, exclude?: string) {
+async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath: string, option?: OptionType) {
     const result: { localPath: string, remotePath: string }[] = [];
-    if (signal.aborted) {
+    const { signal, exclude } = option || {};
+    if (signal?.aborted) {
         return result;
     }
     const stats = await sftpStat(sftp, remotePath);
-    if (signal.aborted) {
+    if (signal?.aborted) {
         return result;
     }
     if (stats.isDirectory()) {
@@ -586,25 +591,40 @@ async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath:
             const withWildcard = s.trim().replace(/\*/g, '.*');
             return new RegExp(withWildcard);
         }) : [];
-        async function walk(currentDir: string) {
-            const list = await sftpReaddir(sftp, currentDir);
-            for (let i = 0, len = list.length; i < len; i++) {
-                if (signal.aborted) {
-                    return result;
+
+        const dirs: string[] = [remotePath];
+        function* genTasks(dirs: string[]) {
+            while (dirs.length) {
+                const currentDir = dirs.shift();
+                if (!currentDir) {
+                    return;
                 }
-                const item = list[i];
-                const name = item.filename;
-                const currentPath = path.join(currentDir, name).replace(/\\/g, '/');
-                const relativePath = path.relative(remotePath, currentPath).replace(/\\/g, '/');
-                if (patterns.length && isExcluded(relativePath, patterns)) continue;
-                if (testDir(item)) {
-                    await walk(currentDir + '/' + item.filename);
-                } else {
-                    result.push({ localPath: path.join(localPath, relativePath), remotePath: currentPath });
+                yield async () => {
+                    if (signal?.aborted) {
+                        return;
+                    }
+                    const list = await sftpReaddir(sftp, currentDir);
+                    for (let i = 0, len = list.length; i < len; i++) {
+                        if (signal?.aborted) {
+                            return result;
+                        }
+                        const item = list[i];
+                        const name = item.filename;
+                        const currentPath = path.join(currentDir, name).replace(/\\/g, '/');
+                        const relativePath = path.relative(remotePath, currentPath).replace(/\\/g, '/');
+                        if (patterns.length && isExcluded(relativePath, patterns)) continue;
+                        if (testDir(item)) {
+                            dirs.push(currentDir + '/' + item.filename);
+                        } else {
+                            result.push({ localPath: path.join(localPath, relativePath), remotePath: currentPath });
+                        }
+                    }
                 }
             }
         }
-        await walk(remotePath);
+        while (dirs.length) {
+            await parallelTask(genTasks(dirs));
+        }
     } else {
         result.push({ localPath: path.join(localPath, path.parse(remotePath).base), remotePath: remotePath });
     }
