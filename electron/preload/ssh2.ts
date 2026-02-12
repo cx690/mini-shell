@@ -153,15 +153,23 @@ function getClient() {
         },
         uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
             const { quiet = false, name, uuid, exclude } = option;
-            const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir, exclude);
             const emit = emitUpload(quiet, uuid);
             let successNum = 0;
             let errorNum = 0;
-            const total = uploadPathList.length;
+            let total = 0;
             let _sftp: SFTPWrapper | null = null;
-            const status = await new Promise<boolean | Error>((resolve, reject) => {
+            const status = await new Promise<boolean | Error>(async (resolve, reject) => {
                 uploadAbort[uuid] = new AbortController();
                 const { signal } = uploadAbort[uuid];
+                emit({
+                    successNum,
+                    errorNum,
+                    total,
+                    status: 4,
+                    name,
+                })
+                const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir, exclude).catch(err => { reject(err); return [] });
+                total = uploadPathList.length;
                 emit({
                     successNum,
                     errorNum,
@@ -173,6 +181,10 @@ function getClient() {
                 uploadAbort[uuid].signal.addEventListener('abort', () => {
                     reject(new Error(message));
                 })
+                if (total === 0) {
+                    resolve(true);
+                    return;
+                }
                 client.sftp(async function (err, sftp) {
                     _sftp = sftp;
                     if (err) {
@@ -180,16 +192,6 @@ function getClient() {
                         reject(err);
                         return;
                     };
-                    if (signal.aborted) {
-                        reject(new Error(message));
-                        return;
-                    }
-                    const mkRemotedir = getMkRemoteDir(client);
-                    const status = await mkRemotedir(remoteDir);//创建远程文件上传根目录
-                    if (status !== true) {
-                        reject(status);
-                        return;
-                    }
                     if (signal.aborted) {
                         reject(new Error(message));
                         return;
@@ -207,6 +209,7 @@ function getClient() {
                         return;
                     }
                     let start = false;
+                    const mkRemotedir = getMkRemoteDir(sftp);
                     function* genTasks() {// 防止上传数量过多导致内存占用过高，改为迭代器方式生成任务，不直接使用数组
                         for (let i = 0, len = uploadPathList.length; i < len; i++) {
                             const { localPath, remotePath } = uploadPathList[i];
@@ -225,72 +228,54 @@ function getClient() {
                                     start = true;
                                 }
                                 const itDir = path.dirname(remotePath);
-                                const mkstatus = await mkRemotedir(itDir);
+                                await mkRemotedir(itDir);
                                 if (signal.aborted) {
                                     throw new Error(message);
                                 }
-                                if (mkstatus !== true) {
-                                    throw mkstatus;
-                                } else {
-                                    let totalSize = 0;
-                                    let transferredSize = 0;
-                                    const emitProgress = total === 1 ? function (total: number, fsize: number) {
-                                        totalSize = fsize;
-                                        transferredSize = total;
-                                        emit({
-                                            successNum: transferredSize,
-                                            errorNum: 0,
-                                            total: fsize,
-                                            status: 1,
-                                            transferType: 'upload',
-                                            type: 'fileSize'
-                                        })
-                                    } : undefined;
-                                    const status = await fastPut(sftp, localPath, remotePath, emitProgress);
-                                    if (signal.aborted) {
-                                        throw new Error(message);
-                                    }
-                                    if (status !== true) {
-                                        errorNum++;
-                                        throw status;
-                                    } else {
-                                        successNum++;
-                                    }
-                                    if (total === 1) {
-                                        emit({
-                                            successNum: transferredSize,
-                                            errorNum,
-                                            total: totalSize,
-                                            status: 2,
-                                            name,
-                                            transferType: 'upload',
-                                            type: 'fileSize'
-                                        })
-                                    } else {
-                                        emit({
-                                            successNum,
-                                            errorNum,
-                                            total,
-                                            status: (successNum + errorNum) === total ? 2 : 1,
-                                            name,
-                                        })
-                                    }
 
-                                    return status;
+                                let totalSize = 0;
+                                let transferredSize = 0;
+                                const emitProgress = total === 1 ? function (total: number, fsize: number) {
+                                    totalSize = fsize;
+                                    transferredSize = total;
+                                    emit({
+                                        successNum: transferredSize,
+                                        errorNum: 0,
+                                        total: fsize,
+                                        status: 1,
+                                        transferType: 'upload',
+                                        type: 'fileSize'
+                                    })
+                                } : undefined;
+                                await sftpFastPut(sftp, localPath, remotePath, emitProgress);
+                                successNum++;
+                                if (signal.aborted) {
+                                    throw new Error(message);
+                                }
+                                if (total === 1) {
+                                    emit({
+                                        successNum: transferredSize,
+                                        errorNum,
+                                        total: totalSize,
+                                        status: 2,
+                                        name,
+                                        transferType: 'upload',
+                                        type: 'fileSize'
+                                    })
+                                } else {
+                                    emit({
+                                        successNum,
+                                        errorNum,
+                                        total,
+                                        status: (successNum + errorNum) === total ? 2 : 1,
+                                        name,
+                                    })
                                 }
                             }
                         }
                     }
                     await parallelTask(genTasks()).catch(err => reject(err));
                     resolve(true);
-                    emit({
-                        successNum: total,
-                        errorNum,
-                        total,
-                        status: 2,
-                        name,
-                    })
-                    sftp.end();
                 });
             }).catch((err: Error) => {
                 emit({
@@ -305,6 +290,7 @@ function getClient() {
                 return err;
             });
             delete uploadAbort[uuid];
+            (_sftp as SFTPWrapper | null)?.end();
             return status;
         },
         abortUploadFile(uuid: string) {
@@ -318,15 +304,15 @@ function getClient() {
             let successNum = 0;
             let errorNum = 0;
             let total = 0;
-            uploadAbort[uuid] = new AbortController();
-            const { signal } = uploadAbort[uuid];
             let _sftp: SFTPWrapper | null = null;
             const status = await new Promise<boolean | Error | string>(async (resolve, reject) => {
+                uploadAbort[uuid] = new AbortController();
+                const { signal } = uploadAbort[uuid];
                 const message = `${name ? (name + ' d') : 'D'}ownload canceled!`;
                 signal.addEventListener('abort', () => {
                     reject(new Error(message));
                 })
-                const info = await fs.stat(localDir);
+                const info = await fs.stat(localDir).catch(err => { reject(err); return { isDirectory: () => false } });
                 if (!info.isDirectory()) {
                     reject(new Error(`${localDir} is not a directory!`));
                     return;
@@ -352,7 +338,7 @@ function getClient() {
                         status: 4,
                         name,
                     })
-                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, { signal, exclude });
+                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, { signal, exclude }).catch(err => { reject(err); return [] });
                     total = downloadList.length;
                     emit({
                         successNum,
@@ -384,6 +370,7 @@ function getClient() {
                                 if (signal.aborted) {
                                     throw new Error(message);
                                 }
+
                                 let totalSize = 0;
                                 let transferredSize = 0;
                                 const emitProgress = total === 1 ? function (total: number, fsize: number) {
@@ -444,11 +431,11 @@ function getClient() {
 export default getClient;
 
 /** 去掉重复的创建目录 */
-function getMkRemoteDir(client: Client) {
+function getMkRemoteDir(sftp: SFTPWrapper) {
     const promiseInfo: Record<string, Promise<any>> = {}
     return async (dir: string) => {
         if (!promiseInfo[dir]) {
-            promiseInfo[dir] = mkRemotedir(client, dir);
+            promiseInfo[dir] = sftMkdir(sftp, dir);
         }
         return promiseInfo[dir];
     }
@@ -462,42 +449,6 @@ function getMkLocalDir() {
         }
         return promiseInfo[dir];
     }
-}
-
-async function mkRemotedir(client: Client, dir: string) {
-    return new Promise<true | Error>((resolve) => {
-        client.exec(`mkdir -p ${dir.replaceAll(/\\/g, '/')}`, (err, channel) => {
-            if (err) {
-                console.error(err);
-                resolve(err);
-                return;
-            };
-            channel.on('exit', (code) => {
-                if (code) {
-                    resolve(new Error(`远端新建目录：${dir.replaceAll(/\\/g, '/')}错误！`))
-                } else {
-                    resolve(true);
-                }
-            })
-        })
-    })
-}
-
-async function fastPut(sftp: SFTPWrapper, localPath: string, remotePath: string, emitProgress?: (total: number, fsize: number) => void) {
-    return new Promise<true | Error>((resolve) => {
-        const option = emitProgress ? {
-            step: (total: number, nb: number, fsize: number) => {
-                emitProgress(total, fsize);
-            }
-        } : {};
-        sftp.fastPut(localPath, remotePath, option, function (err) {
-            if (err) {
-                console.error(err);
-                resolve(err);
-            };
-            resolve(true);
-        })
-    })
 }
 
 function emitUpload(quiet: boolean, uuid: string, others = { transferType: 'upload' as 'upload' | 'download' }) {
@@ -539,6 +490,12 @@ function sftpReaddir(sftp: SFTPWrapper, remote: string) {
     });
 }
 
+function sftMkdir(sftp: SFTPWrapper, remote: string) {
+    return new Promise<true | Error>((resolve, reject) => {
+        sftp.mkdir(remote, (err) => (err ? reject(err) : resolve(true)));
+    });
+}
+
 /** 封装 sftp.fastGet 为 Promise */
 function sftpFastGet(sftp: SFTPWrapper, remotePath: string, localPath: string, emitProgress?: (total: number, fsize: number) => void): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -548,6 +505,23 @@ function sftpFastGet(sftp: SFTPWrapper, remotePath: string, localPath: string, e
             }
         }, (err) => (err ? reject(err) : resolve()));
     });
+}
+
+async function sftpFastPut(sftp: SFTPWrapper, localPath: string, remotePath: string, emitProgress?: (total: number, fsize: number) => void) {
+    return new Promise<true | Error>((resolve, reject) => {
+        const option = emitProgress ? {
+            step: (total: number, nb: number, fsize: number) => {
+                emitProgress(total, fsize);
+            }
+        } : {};
+        sftp.fastPut(localPath, remotePath, option, function (err) {
+            if (err) {
+                console.error(err);
+                reject(err);
+            };
+            resolve(true);
+        })
+    })
 }
 
 function testDir(item: FileEntryWithStats) {
