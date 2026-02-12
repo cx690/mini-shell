@@ -30,8 +30,7 @@
             </div>
         </template>
 
-        <el-tabs v-model="state.activeName" class="excute-tabs" type="border-card" editable @edit="handleTabsEdit"
-            @tab-change="onActiveChange">
+        <el-tabs v-model="state.activeName" class="excute-tabs" type="border-card" editable @edit="handleTabsEdit">
             <el-tab-pane label="Execute" name="Execute" :closable="false">
                 <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
                     {{ t('Back') }}
@@ -223,7 +222,8 @@
                 </template>
                 <Terminal ref="holdTermRef" />
             </el-tab-pane>
-            <el-tab-pane v-for="(item, index) of formData.terminals" :key="index" :name="index" class="terminal-pane">
+            <el-tab-pane v-for="(item, index) of formData.terminals" :key="item.shellNum" :name="index"
+                class="terminal-pane">
                 <template #label>
                     <span>{{ t('Terminal') + ' ' + item.shellNum }}</span>
                     <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
@@ -315,18 +315,7 @@ function reLink() {
     clientStore.connect(clientStore.config);
 };
 
-watchEffect(() => {
-    if (clientStore.status === 2) {
-        nextTick(() => {
-            holdTermRef.value?.initShell();//holdTermRef不可被添加为依赖
-            if (state.activeName === 'Terminal') {
-                holdTermRef.value?.focus();
-            }
-        })
-    }
-}, {
-    flush: 'post'
-})
+
 
 function initShell(index?: number) {
     if (typeof index === 'number') {
@@ -771,7 +760,6 @@ function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
         if (typeof state.activeName === 'string') return;
         if (formData.terminals.length === 0) {
             state.activeName = 'Terminal';
-            onActiveChange('Terminal');
             return;
         }
         if (targetName <= state.activeName) {
@@ -784,17 +772,6 @@ function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
     }
 }
 
-function onActiveChange(activeName: any) {
-    if (activeName === 'Terminal') {
-        if (clientStore.status !== 2) {
-            ElMessage.warning(t('unuse-term'));
-        } else {
-            nextTick(() => {
-                holdTermRef.value?.initShell();
-            })
-        }
-    }
-}
 
 function onSelectShell(id: number) {
     formData.selectShell = state.shellList.find(item => item.id === id);

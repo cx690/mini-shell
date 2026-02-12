@@ -27,7 +27,6 @@ import { Plus } from '@element-plus/icons-vue';
 import { getAllFilesFromDataTransfer } from '@/utils/files';
 import useSettings from '@/store/useSetting';
 
-const props = defineProps<{ init?: boolean }>()
 const clientStore = useClient();
 const div = ref<HTMLDivElement>()
 const term = new Terminal();
@@ -42,7 +41,7 @@ const { t } = useI18n();
 useResize(div, term, channel);
 onMounted(() => {
     term.open(div.value!);
-    props.init && initShell();
+    initShell();
     term.onKey((e) => {
         if (clientStore.status !== 2) {
             ElMessage.warning(t('connect-lose-term'));
