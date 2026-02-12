@@ -35,7 +35,7 @@
                     </el-button>
                     <el-button size="small" :icon="Upload"
                         :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                        @click="uploadToRemote">
+                        @click="throttleUploadToRemote">
                         {{ t('upload') }}
                     </el-button>
                 </div>
@@ -112,7 +112,7 @@
                     </el-button>
                     <el-button size="small" :icon="Download"
                         :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                        @click="downloadToLocal">
+                        @click="throttleDownloadToLocal">
                         {{ t('download') }}
                     </el-button>
                 </div>
@@ -203,7 +203,7 @@ import { ElMessage, ElMessageBox, ElTable } from 'element-plus';
 import { FolderOpened, FolderAdd, Delete, Edit, Upload, Download, Back, Folder, Document, Monitor, Postcard, Refresh } from '@element-plus/icons-vue';
 import useClient from '@/store/useClient';
 import { useI18n } from 'vue-i18n';
-import { formatSize } from '@/utils';
+import { formatSize, throttle } from '@/utils';
 import type { SFTPType } from 'electron/preload/ssh2';
 import { v4 } from 'uuid';
 
@@ -734,6 +734,7 @@ async function uploadToRemote() {
         loadRemoteDir();
     }
 }
+const throttleUploadToRemote = throttle(uploadToRemote);
 
 async function downloadToLocal() {
     if (!state.remoteSelected || !remoteConnected.value || !clientStore.client || !state.localPath) return;
@@ -747,7 +748,7 @@ async function downloadToLocal() {
         return;
     }
 }
-
+const throttleDownloadToLocal = throttle(downloadToLocal);
 
 watch(remoteConnected, (v) => {
     if (v) {

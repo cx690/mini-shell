@@ -93,7 +93,7 @@ export function formatEnv(config: Record<string, any> | null | undefined, env?: 
     }
 }
 
-/** 一段时间只保留最后一次触发 */
+/** 防抖函数，一段时间只保留最后一次触发 */
 export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 500) {
     let timer: any = 0;
     return function (this: any, ...args: any[]) {
@@ -103,6 +103,19 @@ export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number
         timer = setTimeout(() => {
             fn.apply(this, args);
             timer = 0;
+        }, delay)
+    } as T;
+}
+
+/** 节流函数，一段时间只触发一次 */
+export function throttle<T extends (...args: any[]) => any>(fn: T, delay: number = 500) {
+    let lock: boolean = false;
+    return function (this: any, ...args: any[]) {
+        if (lock) return;
+        lock = true;
+        fn.apply(this, args);
+        setTimeout(() => {
+            lock = false;
         }, delay)
     } as T;
 }
