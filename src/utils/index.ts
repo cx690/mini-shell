@@ -179,9 +179,10 @@ export function Content(props: any, ctx: any) {//ElNotification.message不是可
 /**
  * 格式化文件大小，单位字节
  * @param size 文件大小，单位字节
+ * @param precision 精度，默认1位小数并用浮点数处理，如果为0，则直接返回整数
  * @returns 格式化后的文件大小字符串
  */
-export function formatSize(size?: number | string) {
+export function formatSize(size?: number | string, precision?: number) {
     if (typeof size === 'string') size = Number(size);
     if (!size || size <= 0 || !isFinite(size) || isNaN(size)) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -190,5 +191,5 @@ export function formatSize(size?: number | string) {
         size /= 1024;
         index++;
     }
-    return `${parseFloat(size.toFixed(1))} ${units[index]}`;
+    return `${precision ? size.toFixed(precision) : parseFloat(size.toFixed(1))} ${units[index]}`;
 }

@@ -63,7 +63,7 @@ electronAPI.onInfo('upload', (info) => {//上传回执处理
                             style: "width:250px;"
                         }, {
                             default: () => h('span', null,
-                                uploadInfo[uuid].data.type === 'fileSize' ? `${formatSize(uploadInfo[uuid].data.successNum)}/${formatSize(uploadInfo[uuid].data.total)}` :
+                                uploadInfo[uuid].data.type === 'fileSize' ? `${formatSize(uploadInfo[uuid].data.successNum, 2)}/${formatSize(uploadInfo[uuid].data.total, 2)}` :
                                     `${uploadInfo[uuid].data.successNum}/${uploadInfo[uuid].data.total}`)
                         })
                     ]
