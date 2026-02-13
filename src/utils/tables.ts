@@ -23,7 +23,7 @@ export interface ServerListRecord extends BaseItem {
 }
 
 export type ShellsType<T extends 'edit' | 'record' = 'record'> = {
-    type: 1 | 2 | 3 | 4,
+    type: 1 | 2 | 3 | 4 | 5,
     key: string,
     baseScripts: {
         key: string, value: string,

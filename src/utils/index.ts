@@ -37,6 +37,7 @@ export function useShellTypeEnum() {
         2: t('local-script'),
         3: t('upload-script'),
         4: t('combined-script'),
+        5: t('download-script'),
     }))
 }
 
@@ -48,6 +49,7 @@ export function formatScriptStr(config: Record<string, any> | undefined | null, 
         2: t('local-script'),
         3: t('upload-script'),
         4: t('combined-script'),
+        5: t('download-script'),
     };
     for (const item of shells) {
         const { type } = item;
@@ -73,6 +75,8 @@ export function formatScriptStr(config: Record<string, any> | undefined | null, 
         } else if (type === 4) {
             str += item.combine?.map(item => `${t('script-name')}:${item.name} ${t('Sign')}:${item.value} `)?.join('\n') || '';
             str += '\n';
+        }else if (type === 5) {
+            str += `${t('download-file-path')}：${formatterShell(config, item.remoteDir ?? '')}\n${t('local-path-dir')}：${formatterShell(config, item.localFile ?? '')}\n${item.exclude ? `${t('ignore-rules')}: ${formatterShell(config, item.exclude)}\n` : ''}`;
         }
     }
     return str;

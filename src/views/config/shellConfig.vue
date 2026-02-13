@@ -137,16 +137,19 @@
                                 </el-tooltip>：
                             </span>
                             <el-button :icon="Plus" @click="addShellType(1)">
-                                {{ t('Add ') }}{{ shellTypeEnum[1] }}
+                                {{ shellTypeEnum[1] }}
                             </el-button>
                             <el-button :icon="Plus" @click="addShellType(2)">
-                                {{ t('Add ') }}{{ shellTypeEnum[2] }}
+                                {{ shellTypeEnum[2] }}
                             </el-button>
                             <el-button :icon="Plus" @click="addShellType(3)">
-                                {{ t('Add ') }}{{ shellTypeEnum[3] }}
+                                {{ shellTypeEnum[3] }}
+                            </el-button>
+                            <el-button :icon="Plus" @click="addShellType(5)">
+                                {{ shellTypeEnum[5] }}
                             </el-button>
                             <el-button :icon="Plus" @click="addShellType(4)">
-                                {{ t('Add ') }}{{ shellTypeEnum[4] }}
+                                {{ shellTypeEnum[4] }}
                             </el-button>
                             <el-button type="primary" @click="showShell(state.currentRow)" :icon="View">
                                 {{ t('view-format-script') }}
@@ -226,8 +229,25 @@
                                 <el-form-item :label="t('local-dir')"
                                     :rules="{ required: true, message: t('enter-local-dir') }"
                                     :prop="`baseScripts.${num}.localFile`">
-                                    <el-input v-model="base.localFile" :placeholder="t('enter-local-dir')" clearable
-                                        :spellcheck="false" />
+
+                                    <div class="flex-center">
+                                        <el-input v-model="base.localFile" :placeholder="t('enter-local-dir')" clearable
+                                            :spellcheck="false" />
+                                        <el-dropdown @command="onPickLocalFile($event, base)">
+                                            <el-button :icon="Location" size="small" circle>
+                                            </el-button>
+                                            <template #dropdown>
+                                                <el-dropdown-menu>
+                                                    <el-dropdown-item command="openFile">
+                                                        {{ t('select-file') }}
+                                                    </el-dropdown-item>
+                                                    <el-dropdown-item command="openDirectory">
+                                                        {{ t('select-dir') }}
+                                                    </el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </template>
+                                        </el-dropdown>
+                                    </div>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="12">
@@ -250,6 +270,65 @@
                                     </template>
                                     <el-input v-model="base.remoteDir" :placeholder="t('enter-remote-dir')" clearable
                                         :spellcheck="false" />
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item :prop="`baseScripts.${num}.exclude`">
+                                    <template #label>
+                                        <div>
+                                            <span class="script-config">
+                                                {{ t('ignore-rules') }}
+                                                <el-tooltip placement="top">
+                                                    <el-icon>
+                                                        <QuestionFilled />
+                                                    </el-icon>
+                                                    <template #content>
+                                                        <p>{{ t('ignore-rules-tip') }}</p>
+                                                    </template>
+                                                </el-tooltip>：
+                                            </span>
+                                        </div>
+                                    </template>
+                                    <el-input v-model="base.exclude" :placeholder="t('enter-ignore-rules')" clearable
+                                        :spellcheck="false" />
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row v-else-if="base.type === 5" :gutter="8">
+                            <el-col :span="12">
+                                <el-form-item :rules="{ required: true, message: t('enter-local-dir') }"
+                                    :prop="`baseScripts.${num}.localFile`">
+                                    <template #label>
+                                        <div>
+                                            <span class="script-config">
+                                                {{ t('local-file-directory') }}
+                                                <el-tooltip placement="top">
+                                                    <el-icon>
+                                                        <QuestionFilled />
+                                                    </el-icon>
+                                                    <template #content>
+                                                        <p>{{ isWin32 ? t('download-local-dir-win-tip') :
+                                                            t('remote-dir-suffix-tip') }}</p>
+                                                    </template>
+                                                </el-tooltip>：
+                                            </span>
+                                        </div>
+                                    </template>
+                                    <div class="flex-center">
+                                        <el-input v-model="base.localFile"
+                                            :placeholder="t('enter-local-file-directory')" clearable
+                                            :spellcheck="false" />
+                                        <el-button @click="onSelectDir(base)" :icon="Location" size="small" circle>
+                                        </el-button>
+                                    </div>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item :label="t('remote-dir-file')"
+                                    :rules="{ required: true, message: t('enter-remote-dir-file') }"
+                                    :prop="`baseScripts.${num}.remoteDir`">
+                                    <el-input v-model="base.remoteDir" :placeholder="t('enter-remote-dir-file')"
+                                        clearable :spellcheck="false" />
                                 </el-form-item>
                             </el-col>
                             <el-col :span="12">
@@ -334,7 +413,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElForm, ElMessageBox } from 'element-plus';
 import Table from '@/components/table.vue';
 import { addOrPut, deleteItemsById, findAll } from '@/utils/database';
-import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View, Hide } from '@element-plus/icons-vue';
+import { CirclePlusFilled, RemoveFilled, Sort, Plus, Search, Download, Delete, QuestionFilled, View, Hide, Location } from '@element-plus/icons-vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import { ServerListRecord } from '@/utils/tables';
 import { exportData, formatScriptStr, noRepeat, useShellTypeEnum } from '@/utils';
@@ -343,6 +422,7 @@ import { ShellListRecoed } from '@/utils/tables';
 import { v4 } from 'uuid';
 import { useI18n } from 'vue-i18n';
 import { checkLoop } from '@/utils/valid';
+const isWin32 = electronAPI.platform === 'win32';
 const { t } = useI18n();
 const shellTypeEnum = useShellTypeEnum();
 const addForm = ref<InstanceType<typeof ElForm>>();
@@ -478,7 +558,7 @@ function handleFormat() {
     }
 }
 
-function addShellType(type: 1 | 2 | 3 | 4) {
+function addShellType(type: 1 | 2 | 3 | 4 | 5) {
     if (type === 1 || type === 2) {
         state.currentRow.baseScripts.push({
             type,
@@ -499,6 +579,14 @@ function addShellType(type: 1 | 2 | 3 | 4) {
             key: v4(),
             baseScripts: [],
             combine: [{ value: '', name: '' }]
+        })
+    } else if (type === 5) {
+        state.currentRow.baseScripts.push({
+            type,
+            key: v4(),
+            baseScripts: [],
+            localFile: '',
+            remoteDir: ''
         })
     }
 }
@@ -696,6 +784,21 @@ function showChild(value?: string) {
     if (!item) return;
     showShell(item);
 }
+
+async function onSelectDir(base: ShellListRecoed<'edit'>['baseScripts'][number], properties: 'openFile' | 'openDirectory' = 'openDirectory') {
+    const res = await electronAPI.showOpenDialog({
+        title: t('select-dir'),
+        properties: [properties]
+    })
+    if (!res.canceled) {
+        base.localFile = res.filePaths[0];
+    }
+}
+
+async function onPickLocalFile(command: 'openFile' | 'openDirectory', base: ShellListRecoed<'edit'>['baseScripts'][number]) {
+    await onSelectDir(base, command);
+}
+
 </script>
 <style lang="less" scoped>
 .multi-row {
@@ -730,5 +833,12 @@ function showChild(value?: string) {
 .script-config {
     display: inline-flex;
     align-items: center;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
 }
 </style>
