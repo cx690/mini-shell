@@ -69,9 +69,9 @@
                         }">
                             <template #default="{ row }">
                                 <div class="table-name"
-                                    :data-drop-target="!row.isParent && !row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? 'folder' : undefined"
-                                    :data-drop-name="!row.isParent && !row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? row.name : undefined"
-                                    :draggable="!row.isParent && !row.isEdit && !!state.localPath && remoteConnected"
+                                    :data-drop-target="row.isParent ? 'folder' : (!row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? 'folder' : undefined)"
+                                    :data-drop-name="row.isParent ? '..' : (!row.isParent && !row.isEdit && !row.isNew && !state.isDriveRoot && row.isDirectory ? row.name : undefined)"
+                                    :draggable="!row.isParent && !row.isEdit && !row.isNew && !!state.localPath && !state.isDriveRoot"
                                     @dragstart="onLocalDragStart($event, row)"
                                     @dragover.prevent="onLocalFolderDragOver($event, row)"
                                     @dragleave="onLocalFolderDragLeave">
@@ -165,8 +165,8 @@
                         }">
                             <template #default="{ row }">
                                 <div class="table-name"
-                                    :data-drop-target="!row.isParent && !row.isEdit && row.isDirectory ? 'folder' : undefined"
-                                    :data-drop-name="!row.isParent && !row.isEdit && row.isDirectory ? row.name : undefined"
+                                    :data-drop-target="row.isParent ? 'folder' : (!row.isEdit && !row.isNew && row.isDirectory ? 'folder' : undefined)"
+                                    :data-drop-name="row.isParent ? '..' : (!row.isEdit && !row.isNew && row.isDirectory ? row.name : undefined)"
                                     :draggable="!row.isParent && !row.isEdit"
                                     @dragstart="onRemoteDragStart($event, row)"
                                     @dragover.prevent="onRemoteFolderDragOver($event, row)"
@@ -321,7 +321,7 @@ const remoteConnected = computed(() => clientStore.status === 2);
 const isWin = computed(() => electronAPI.platform === 'win32');
 
 const localPathParts = computed(() => {
-    const p = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
+    const p = state.localPath;
     return p ? p.split('/').filter(Boolean) : [];
 });
 
@@ -367,17 +367,15 @@ function rowKey(row: Row) {
     return row.isParent ? parentKey : row.name;
 }
 
-/** 本地表格行类名：拖拽悬停到该文件夹行时高亮 */
+/** 本地表格行类名：拖拽悬停到该文件夹行或“上一级”行时高亮 */
 function localRowClassName({ row }: { row: Row }) {
-    return !row.isParent && !row.isEdit && row.isDirectory && row.name === state.localDropTargetFolder
-        ? 'drop-target-folder-row'
-        : '';
+    if (row.isParent) return state.localDropTargetFolder === '..' ? 'drop-target-folder-row' : '';
+    return !row.isEdit && row.isDirectory && row.name === state.localDropTargetFolder ? 'drop-target-folder-row' : '';
 }
-/** 远程表格行类名：拖拽悬停到该文件夹行时高亮 */
+/** 远程表格行类名：拖拽悬停到该文件夹行或“上一级”行时高亮 */
 function remoteRowClassName({ row }: { row: Row }) {
-    return !row.isParent && !row.isEdit && row.isDirectory && row.name === state.remoteDropTargetFolder
-        ? 'drop-target-folder-row'
-        : '';
+    if (row.isParent) return state.remoteDropTargetFolder === '..' ? 'drop-target-folder-row' : '';
+    return !row.isEdit && row.isDirectory && row.name === state.remoteDropTargetFolder ? 'drop-target-folder-row' : '';
 }
 
 const localCurrentRowKey = computed(() => {
@@ -470,21 +468,21 @@ async function loadDrivesView() {
 }
 
 async function loadLocalDir(targetPath?: string) {
-    const pathToLoad = targetPath ?? (state.localPathShow || state.localPath);
+    let pathToLoad = targetPath ?? (state.localPathShow || state.localPath);
     if (!pathToLoad) {
         state.localList = [];
         return;
     }
     state.localLoading = true;
     try {
+        pathToLoad = formatPath(pathToLoad, true);
         const entries = await electronAPI.fsReaddir(pathToLoad);
-        const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
         const withSize = await Promise.all(
             entries.map(async (e) => {
                 let size: number | undefined;
                 if (!e.isDirectory) {
                     try {
-                        const full = (pathToLoad.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + e.name).replace(/\//g, pathSep);
+                        const full = pathToLoad + '/' + e.name;
                         const stat = await electronAPI.fsStat(full);
                         size = stat.size;
                     } catch {
@@ -515,7 +513,8 @@ async function loadRemoteDir(targetPath?: string) {
         state.remoteList = [];
         return;
     }
-    const pathToLoad = (targetPath ?? (state.remotePathShow || state.remotePath)).replace(/\\/g, '/').trim() || '/';
+    let pathToLoad = targetPath ?? (state.remotePathShow || state.remotePath);
+    pathToLoad = formatPath(pathToLoad);
     state.remoteLoading = true;
     try {
         const sftp = await ensureSftp();
@@ -573,17 +572,8 @@ function pickLocalDir() {
 }
 
 function localGoUp() {
-    if (!localPathParts.value.length) return;
-    if (electronAPI.platform === 'win32' && isLocalDriveRoot.value) {
-        loadDrivesView();
-        return;
-    }
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    let newPath = localPathParts.value.slice(0, -1).join(pathSep);
-    if (!newPath && pathSep === '\\') newPath = 'C:\\';
-    if (electronAPI.platform === 'win32' && /^[a-zA-Z]:$/.test(newPath)) {
-        newPath = newPath + '\\';
-    }
+    const newPath = getParentLocalPath();
+    if (!newPath) return;
     loadLocalDir(newPath);
 }
 
@@ -593,13 +583,12 @@ function localEnter(item: { name: string; isDirectory: boolean }) {
         loadLocalDir(item.name);
         return;
     }
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    const newPath = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + item.name).replace(/\//g, pathSep);
+    const newPath = state.localPath + '/' + item.name;
     loadLocalDir(newPath);
 }
 
 function remoteGoUp() {
-    const p = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const p = state.remotePath;
     const parts = p.split('/').filter(Boolean);
     if (parts.length <= 1) {
         loadRemoteDir('/');
@@ -610,21 +599,32 @@ function remoteGoUp() {
 
 function remoteEnter(item: { name: string; isDirectory: boolean }) {
     if (!item.isDirectory) return;
-    const base = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
-    const newPath = /\/$/.test(base) ? base + item.name : base + '/' + item.name;
+    const base = state.remotePath;
+    const newPath = base + '/' + item.name;
     loadRemoteDir(newPath);
 }
 
 
 function enterRemote() {
-    const pathNorm = (state.remotePathShow || state.remotePath).replace(/\\/g, '/').trim() || '/';
+    const pathNorm = state.remotePathShow || state.remotePath;
     loadRemoteDir(pathNorm);
+}
+
+/** 本地当前路径的父路径；若已是驱动器根则返回 null（不允许移动到驱动器根） */
+function getParentLocalPath(): string | null {
+    const parts = localPathParts.value;
+    if (parts.length <= 1) return null;
+    const parentParts = parts.slice(0, -1);
+    if (parentParts.length === 1 && electronAPI.platform === 'win32') {
+        return parentParts[0] + '/';
+    }
+    let parentPath = parentParts.join('/');
+    return parentPath || '/';
 }
 
 async function deleteLocal() {
     if (!state.localSelected || !state.localPath) return;
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    const full = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + state.localSelected.name).replace(/\//g, pathSep);
+    const full = state.localPath + '/' + state.localSelected.name;
     const action = await ElMessageBox.confirm(t('confirm-delete') + ' ' + state.localSelected.name + '?', t('delete'), {
         type: 'warning',
     }).catch(action => action);
@@ -643,7 +643,7 @@ async function deleteLocal() {
 
 async function deleteRemote() {
     if (!state.remoteSelected || !clientStore.client) return;
-    const full = (state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '') + (state.remotePath === '/' ? '' : '/') + state.remoteSelected.name;
+    const full = state.remotePath + '/' + state.remoteSelected.name;
     const action = await ElMessageBox.confirm(t('confirm-delete') + ' ' + state.remoteSelected.name + '?', t('delete'), {
         type: 'warning',
     }).catch(action => action);
@@ -714,8 +714,7 @@ async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem)
         const { renameValue: newName, name: oldName } = row;
         if (row.isNew) {
             try {
-                const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-                const full = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + newName).replace(/\//g, pathSep);
+                const full = state.localPath + '/' + newName;
                 await electronAPI.fsMkdir(full);
                 ElMessage.success(t('create-success'));
                 loadLocalDir();
@@ -725,9 +724,8 @@ async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem)
                 state.showNewLocalDir = false;
             }
         } else {
-            const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-            const oldFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + oldName).replace(/\//g, pathSep);
-            const newFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + newName).replace(/\//g, pathSep);
+            const oldFull = state.localPath + '/' + oldName;
+            const newFull = state.localPath + '/' + newName;
             try {
                 await electronAPI.fsRename(oldFull, newFull);
                 ElMessage.success(t('rename-success'));
@@ -745,7 +743,7 @@ async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem)
             const sftp = await ensureSftp();
             if (!sftp) return;
             try {
-                const full = (state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '') + (state.remotePath === '/' ? '' : '/') + name;
+                const full = state.remotePath + '/' + name;
                 const res = await sftp.mkdir(full);
                 if (res !== true) {
                     ElMessage.error(String(res));
@@ -760,7 +758,7 @@ async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem)
                 state.showNewRemoteDir = false;
             }
         } else {
-            const base = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
+            const base = state.remotePath;
             const oldFull = (base ? base + '/' : '') + oldName;
             const newFull = (base ? base + '/' : '') + newName;
             const sftp = await ensureSftp();
@@ -785,12 +783,11 @@ async function confirmRename(side: 'local' | 'remote', row: FileItem | FileItem)
 
 async function uploadToRemote() {
     if (!state.localSelected || !remoteConnected.value || !clientStore.client || !state.localPath?.trim()) return;
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    const localFull = (state.localPath.replace(/\\/g, '/').replace(/\/+$/, '') + '/' + state.localSelected.name).replace(/\//g, pathSep);
-    const targetDir = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const localFull = state.localPath + '/' + state.localSelected.name;
+    const targetDir = state.remotePath;
 
     const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
-    const nowRemotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const nowRemotePath = state.remotePath;
     if (status === true && nowRemotePath === targetDir) {
         loadRemoteDir();
     }
@@ -799,8 +796,8 @@ const throttleUploadToRemote = throttle(uploadToRemote);
 
 async function downloadToLocal() {
     if (!state.remoteSelected || !remoteConnected.value || !clientStore.client || !state.localPath) return;
-    const remotePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
-    const remoteFull = (/\/$/.test(remotePath) ? (remotePath + state.remoteSelected.name) : (remotePath + '/' + state.remoteSelected.name));
+    const remotePath = state.remotePath;
+    const remoteFull = remotePath + '/' + state.remoteSelected.name;
     const localDir = state.localPath;
 
     const status = await clientStore.client.downloadFile(localDir, remoteFull, { quiet: false, uuid: v4() });
@@ -842,62 +839,69 @@ onBeforeUnmount(() => {
 const SFTP_DRAG_LOCAL = 'application/x-sftp-local';
 const SFTP_DRAG_REMOTE = 'application/x-sftp-remote';
 function onLocalDragStart(e: DragEvent, row: Row) {
-    if (row.isParent || row.isEdit || !state.localPath || !remoteConnected.value) return;
-    const basePath = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
+    if (row.isParent || row.isEdit || row.isNew || !state.localPath || state.isDriveRoot) return;
+    const basePath = state.localPath;
     const payload = { type: 'local' as const, basePath, name: row.name, isDirectory: row.isDirectory };
     e.dataTransfer!.setData(SFTP_DRAG_LOCAL, JSON.stringify(payload));
-    e.dataTransfer!.effectAllowed = 'copy';
+    e.dataTransfer!.effectAllowed = 'move';
 }
 
 function onRemoteDragStart(e: DragEvent, row: Row) {
     if (row.isParent || row.isEdit) return;
-    const basePath = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '';
+    const basePath = state.remotePath;
     const payload = { type: 'remote' as const, basePath, name: row.name, isDirectory: row.isDirectory };
     e.dataTransfer!.setData(SFTP_DRAG_REMOTE, JSON.stringify(payload));
-    e.dataTransfer!.effectAllowed = 'copy';
+    e.dataTransfer!.effectAllowed = 'move';
 }
 
-/** 本地文件夹行 dragover：仅当拖拽的是远程文件时高亮该行 */
+/** 本地文件夹行 dragover：拖拽远程文件（下载到该文件夹）或本地文件（移动到该文件夹/上一级）时高亮 */
 function onLocalFolderDragOver(e: DragEvent, row: Row) {
-    if (row.isParent || row.isEdit || row.isNew || state.isDriveRoot || !row.isDirectory) return;
-    if (!e.dataTransfer?.types?.includes(SFTP_DRAG_REMOTE)) return;
-    e.dataTransfer.dropEffect = 'copy';
+    const types = e.dataTransfer?.types;
+    if (row.isParent) {
+        if (!state.isDriveRoot && types?.includes(SFTP_DRAG_LOCAL)) {
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            state.localDropTargetFolder = '..';
+        }
+        return;
+    }
+    if (row.isEdit || row.isNew || state.isDriveRoot || !row.isDirectory) return;
+    if (!types?.includes(SFTP_DRAG_REMOTE) && !types?.includes(SFTP_DRAG_LOCAL)) return;
+    if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_LOCAL) ? 'move' : 'copy';
     state.localDropTargetFolder = row.name;
 }
 
 function onLocalFolderDragLeave(e: DragEvent) {
     const relatedTarget = e.relatedTarget as Node | null;
-    if (relatedTarget instanceof HTMLElement) {
-        if (!relatedTarget?.closest?.('[data-drop-target="folder"]') || relatedTarget.dataset.dropTarget !== 'folder') {
-            state.localDropTargetFolder = null;
-        }
-        return
-    }
+    if (relatedTarget instanceof HTMLElement && relatedTarget.closest?.('[data-drop-target="folder"], [data-drop-target="parent"]')) return;
     state.localDropTargetFolder = null;
 }
 
-/** 远程文件夹行 dragover：仅当拖拽的是本地文件时高亮该行 */
+/** 远程文件夹行 dragover：拖拽本地文件（上传到该文件夹）或远程文件（移动到该文件夹/上一级）时高亮 */
 function onRemoteFolderDragOver(e: DragEvent, row: Row) {
-    if (row.isParent || row.isEdit || !row.isDirectory) return;
-    if (!e.dataTransfer?.types?.includes(SFTP_DRAG_LOCAL)) return;
-    e.dataTransfer.dropEffect = 'copy';
+    const types = e.dataTransfer?.types;
+    if (row.isParent) {
+        if (types?.includes(SFTP_DRAG_REMOTE)) {
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            state.remoteDropTargetFolder = '..';
+        }
+        return;
+    }
+    if (row.isEdit || !row.isDirectory) return;
+    if (!types?.includes(SFTP_DRAG_LOCAL) && !types?.includes(SFTP_DRAG_REMOTE)) return;
+    if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_REMOTE) ? 'move' : 'copy';
     state.remoteDropTargetFolder = row.name;
 }
 
 function onRemoteFolderDragLeave(e: DragEvent) {
     const relatedTarget = e.relatedTarget as Node | null;
-    if (relatedTarget instanceof HTMLElement) {
-        if (!relatedTarget?.closest?.('[data-drop-target="folder"]') || relatedTarget.dataset.dropTarget !== 'folder') {
-            state.remoteDropTargetFolder = null;
-        }
-        return
-    }
+    if (relatedTarget instanceof HTMLElement && relatedTarget.closest?.('[data-drop-target="folder"], [data-drop-target="parent"]')) return;
     state.remoteDropTargetFolder = null;
 }
 
 function onRemotePanelDragOver(e: DragEvent) {
-    if (e.dataTransfer?.types?.includes(SFTP_DRAG_LOCAL)) {
-        e.dataTransfer.dropEffect = 'copy';
+    const types = e.dataTransfer?.types;
+    if (types?.includes(SFTP_DRAG_LOCAL) || types?.includes(SFTP_DRAG_REMOTE)) {
+        if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_REMOTE) ? 'move' : 'copy';
         state.remotePanelDragOver = true;
     }
 }
@@ -907,34 +911,72 @@ function onRemotePanelDragLeave() {
     state.remoteDropTargetFolder = null;
 }
 
-/** 从 drop 事件中解析是否落在某文件夹行上，返回该文件夹名（未落在文件夹行则返回 null） */
+/** 从 drop 事件中解析是否落在某文件夹或“上一级”行上，返回文件夹名或 '..'（上一级），否则 null */
 function getDropTargetFolderName(e: DragEvent): string | null {
     const el = (e.target as HTMLElement)?.closest?.('[data-drop-target="folder"]');
-    return el?.getAttribute('data-drop-name') ?? null;
+    if (!el) return null;
+    return el.getAttribute('data-drop-name');
 }
 
 async function onRemotePanelDrop(e: DragEvent) {
     state.remotePanelDragOver = false;
     state.remoteDropTargetFolder = null;
-    const raw = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
-    if (!raw || !remoteConnected.value || !clientStore.client) return;
-
-    const { type, basePath, name } = JSON.parse(raw);
-    if (type !== 'local' || !basePath || !name) return;
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    const localFull = (basePath + '/' + name).replace(/\//g, pathSep);
-    const baseRemote = state.remotePath.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+    const baseRemote = state.remotePath;
     const folderName = getDropTargetFolderName(e);
-    const targetDir = folderName ? (baseRemote + '/' + folderName).replace(/\/+/g, '/') : baseRemote;
-    const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
-    if (status === true) {
-        loadRemoteDir();
+
+    // 本地 → 远程：上传到当前目录或指定文件夹
+    const rawLocal = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
+    if (rawLocal) {
+        if (!remoteConnected.value || !clientStore.client) return;
+        const { type, basePath, name } = JSON.parse(rawLocal);
+        if (type !== 'local' || !basePath || !name) return;
+        const localFull = basePath + '/' + name;
+        const targetDir = folderName ? (baseRemote + '/' + folderName).replace(/\/+/g, '/') : baseRemote;
+        const status = await clientStore.client.uploadFile(localFull, targetDir, { quiet: false, uuid: v4() });
+        if (status === true) loadRemoteDir();
+        return;
+    }
+
+    // 远程 → 远程文件夹：在服务器上移动到指定文件夹或上一级
+    const rawRemote = e.dataTransfer?.getData(SFTP_DRAG_REMOTE);
+
+    if (rawRemote && folderName && remoteConnected.value) {
+        const { type, basePath, name } = JSON.parse(rawRemote);
+        if (type !== 'remote' || !name) return;
+        const oldRemote = (basePath ? basePath + '/' : '') + name;
+        let targetDir: string;
+        if (folderName === '..') {
+            const parts = baseRemote.split('/').filter(Boolean);
+            targetDir = parts.length <= 1 ? '/' : '/' + parts.slice(0, -1).join('/');
+        } else {
+            targetDir = baseRemote + '/' + folderName;
+        }
+        const newRemote = targetDir + '/' + name;
+        if (newRemote === oldRemote) return;
+        if (newRemote.startsWith(oldRemote + '/')) {
+            ElMessage.warning(t('move-into-self-warn'));
+            return;
+        }
+        const sftp = await ensureSftp();
+        if (!sftp) return;
+        try {
+            const res = await sftp.rename(oldRemote, newRemote);
+            if (res !== true) {
+                ElMessage.error(String(res));
+                return;
+            }
+            ElMessage.success(t('move-success'));
+            loadRemoteDir();
+        } catch (err: any) {
+            ElMessage.error(err?.message || String(err));
+        }
     }
 }
 
 function onLocalPanelDragOver(e: DragEvent) {
-    if (e.dataTransfer?.types?.includes(SFTP_DRAG_REMOTE)) {
-        e.dataTransfer.dropEffect = 'copy';
+    const types = e.dataTransfer?.types;
+    if (types?.includes(SFTP_DRAG_REMOTE) || types?.includes(SFTP_DRAG_LOCAL)) {
+        if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_LOCAL) ? 'move' : 'copy';
         state.localPanelDragOver = true;
     }
 }
@@ -947,26 +989,72 @@ function onLocalPanelDragLeave() {
 async function onLocalPanelDrop(e: DragEvent) {
     state.localPanelDragOver = false;
     state.localDropTargetFolder = null;
-    const raw = e.dataTransfer?.getData(SFTP_DRAG_REMOTE);
-    if (!raw || !remoteConnected.value || !clientStore.client) return;
-    if (!state.localPath?.trim()) {
-        ElMessage.warning(t('select-dir-hint'));
+    const baseLocal = state.localPath;
+    const folderName = getDropTargetFolderName(e);
+
+    // 远程 → 本地：下载到当前目录或指定文件夹
+    const rawRemote = e.dataTransfer?.getData(SFTP_DRAG_REMOTE);
+    if (rawRemote) {
+        if (!remoteConnected.value || !clientStore.client || !state.localPath?.trim()) {
+            if (!state.localPath?.trim()) ElMessage.warning(t('select-dir-hint'));
+            return;
+        }
+        const { type, basePath, name } = JSON.parse(rawRemote);
+        if (type !== 'remote' || !name) return;
+        const remotePath = (basePath ? basePath + '/' : '') + name;
+        const localDir = folderName ? (baseLocal + '/' + folderName) : baseLocal;
+        const status = await clientStore.client.downloadFile(localDir, remotePath, { quiet: false, name, uuid: v4() });
+        if (status === true) loadLocalDir();
         return;
     }
 
-    const { type, basePath, name } = JSON.parse(raw);
-    if (type !== 'remote' || !name) return;
-    const remotePath = (basePath ? basePath + '/' : '') + name;
-    const pathSep = electronAPI.platform === 'win32' ? '\\' : '/';
-    const baseLocal = state.localPath.replace(/\\/g, '/').replace(/\/+$/, '');
-    const folderName = getDropTargetFolderName(e);
-    const localDir = folderName
-        ? (baseLocal + '/' + folderName).replace(/\//g, pathSep)
-        : state.localPath;
-    const status = await clientStore.client.downloadFile(localDir, remotePath, { quiet: false, name, uuid: v4() });
-    if (status === true) {
-        loadLocalDir();
+    // 本地 → 本地文件夹：移动到指定文件夹或上一级
+    const rawLocal = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
+    if (rawLocal && folderName) {
+        if (!state.localPath?.trim() || state.isDriveRoot) return;
+        const { type, basePath, name } = JSON.parse(rawLocal);
+        if (type !== 'local' || !basePath || !name) return;
+        const oldFull = basePath + '/' + name;
+        let newFull: string;
+        if (folderName === '..') {
+            const parentPath = getParentLocalPath();
+            if (parentPath === null) {
+                ElMessage.warning(t('move-to-drive-root-disallowed'));
+                return;
+            }
+            newFull = parentPath + '/' + name;
+        } else {
+            newFull = baseLocal + '/' + folderName + '/' + name;
+        }
+
+        if (formatPath(newFull, true) === formatPath(oldFull, true)) return;
+        if (newFull.startsWith(oldFull + '/') || newFull.startsWith(oldFull + '/')) {
+            ElMessage.warning(t('move-into-self-warn'));
+            return;
+        }
+        try {
+            await electronAPI.fsRename(oldFull, newFull);
+            ElMessage.success(t('move-success'));
+            loadLocalDir();
+        } catch (err: any) {
+            ElMessage.error(err?.message || String(err));
+        }
     }
+}
+
+function formatPath(path: string, isLocal: boolean = false) {
+    let step = isLocal && electronAPI.platform === 'win32' ? '\\' : '/'
+    const parts = path.replace(/\\/g, step).replace(/\/+$/, '').split(step).filter(Boolean);
+    let normalized = parts.join(step) || step;
+    if (/^[a-zA-Z]:/.test(normalized)) {
+        if (/^[a-zA-Z]:$/.test(normalized)) {
+            return normalized + '\\'
+        }
+        return normalized
+    } else if (!normalized.startsWith('/')) {
+        return '/' + normalized;
+    }
+    return normalized;
 }
 </script>
 

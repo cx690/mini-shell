@@ -13,7 +13,7 @@
             </el-card>
             <el-card>
                 <template #header>
-                    {{ t('Transfer-Settings') }}
+                    {{ t('Transfer-Settings-sftp') }}
                 </template>
                 <el-form-item :label="t('max-upload-tasks')" prop="maxTasks">
                     <el-select v-model="settings.config.maxTasks">
@@ -45,7 +45,7 @@
                         </template>
                     </el-tooltip>
                 </el-form-item>
-                <el-form-item :label="t('Show-upload-process')" prop="pageSize">
+                <el-form-item :label="t('Show-transfer-process')" prop="pageSize">
                     <el-switch v-model="settings.config.showUploadProcess" />
                 </el-form-item>
             </el-card>
