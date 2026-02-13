@@ -15,7 +15,7 @@
                     <el-input v-model="state.localPathShow" size="small" @keypress.enter="enterLocal">
                         <template #prepend>{{ t('path') }}</template>
                     </el-input>
-                    <el-button size="small" @click="enterLocal" :loading="state.localLoading" :icon="Refresh">
+                    <el-button size="small" @click="enterLocal" :icon="Refresh">
                         {{ t('refresh') }}
                     </el-button>
                 </div>
@@ -114,7 +114,7 @@
                     <el-input v-model="state.remotePathShow" size="small" @keypress.enter="enterRemote">
                         <template #prepend>{{ t('remote-path') }}</template>
                     </el-input>
-                    <el-button size="small" @click="enterRemote" :loading="state.remoteLoading" :icon="Refresh">
+                    <el-button size="small" @click="enterRemote" :icon="Refresh">
                         {{ t('refresh') }}
                     </el-button>
                 </div>
@@ -545,14 +545,13 @@ async function loadRemoteDir(targetPath?: string) {
     }
 }
 
-function enterLocal() {
-    if (state.localLoading) return;
+const enterLocal = throttle(() => {
     if (electronAPI.platform === 'win32' && state.localPathShow === t('this-pc')) {
         loadDrivesView();
     } else {
         loadLocalDir(state.localPathShow || state.localPath);
     }
-}
+})
 
 async function enterDesktop() {
     try {
@@ -611,11 +610,9 @@ function remoteEnter(item: { name: string; isDirectory: boolean }) {
     loadRemoteDir(newPath);
 }
 
-
-function enterRemote() {
-    const pathNorm = state.remotePathShow || state.remotePath;
-    loadRemoteDir(pathNorm);
-}
+const enterRemote = throttle(() => {
+    loadRemoteDir()
+})
 
 /** 本地当前路径的父路径；若已是驱动器根则返回 null（不允许移动到驱动器根） */
 function getParentLocalPath(): string | null {
