@@ -11,7 +11,18 @@
                 </span>
             </div>
         </div>
-        <div class="terminal" ref="div"></div>
+        <div class="terminal" ref="div" @contextmenu.prevent="onContextmenu"></div>
+        <!-- 右键菜单：el-dropdown 虚拟触发 -->
+        <el-dropdown ref="contextDropdownRef" :virtual-ref="triggerRef" virtual-triggering trigger="contextmenu"
+            placement="bottom-start" :show-arrow="false"
+            :popper-options="{ modifiers: [{ name: 'offset', options: { offset: [0, 0] } }] }"
+            @command="handleContextCommand" append-to="body">
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <el-dropdown-item command="paste">{{ t('Paste') }}</el-dropdown-item>
+                </el-dropdown-menu>
+            </template>
+        </el-dropdown>
     </div>
 </template>
 <script setup lang="ts">
@@ -20,7 +31,7 @@ import { useResize } from '@/utils/hooks';
 import { onMounted, ref, onBeforeUnmount, nextTick, reactive } from 'vue';
 import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/preload/ssh2';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElDropdown, ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import Zmodem from 'zmodem.js/src/zmodem_browser.js';
 import { Plus } from '@element-plus/icons-vue';
@@ -349,6 +360,27 @@ function dragleave(e: DragEvent) {
     }
     dragFiles = [];
     state.draging = false;
+}
+/** 右键菜单：虚拟触发位置（el-dropdown 虚拟触发用） */
+const contextMenuPosition = ref({ x: 0, y: 0, width: 0, height: 0 } as DOMRect);
+const contextDropdownRef = ref<InstanceType<typeof ElDropdown> | null>(null);
+const triggerRef = ref({
+    getBoundingClientRect: () => contextMenuPosition.value,
+});
+function onContextmenu(e: MouseEvent) {
+    if (clientStore.status !== 2) return;
+    contextMenuPosition.value = DOMRect.fromRect({ x: e.clientX, y: e.clientY });
+    nextTick(() => contextDropdownRef.value?.handleOpen());
+}
+
+async function handleContextCommand(command: 'paste' | 'paste-file') {
+    if (command === 'paste') {
+        const text = await window.navigator.clipboard.readText();
+        if (clientStore.status !== 2) {
+            ElMessage.warning(t('connect-lose-term'));
+        }
+        text && channel.value?.write(text);
+    }
 }
 </script>
 <style lang="less" scoped>

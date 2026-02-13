@@ -372,5 +372,6 @@
   "download-file-path": "下载的文件地址",
   "local-path-dir": "本地文件目录",
   "no-download-found": "未找到下载设置",
-  "download-config": "下载文件脚本 远端目标：{remote} 本地目录：{local}"
+  "download-config": "下载文件脚本 远端目标：{remote} 本地目录：{local}",
+  "Paste": "粘贴"
 }

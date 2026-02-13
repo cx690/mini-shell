@@ -371,6 +371,7 @@
   "download-local-dir-win-tip": "The address defaults to suffix \"\\\", i.e. \"D:\\apps\\dist\" and \"D:\\apps\\dist\\\" is equivalent",
   "download-file-path": "Download file path",
   "local-path-dir": "Local path directory",
-  "no-download-found": "Download config not found",  
-  "download-config": "Download script Remote target: {remote} Local directory: {local}"
+  "no-download-found": "Download config not found",
+  "download-config": "Download script Remote target: {remote} Local directory: {local}",
+  "Paste": "Paste"
 }
