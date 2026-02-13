@@ -58,7 +58,7 @@ function getClient() {
                     });
                     resolve({
                         write: function (chunk: any) {
-                            channel.write(chunk, undefined, (err) => {
+                            channel.write(chunk, (err) => {
                                 if (err) {
                                     console.error(err);
                                 }
