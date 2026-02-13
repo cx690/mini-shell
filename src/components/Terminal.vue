@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import useClient from '@/store/useClient';
 import { useResize } from '@/utils/hooks';
-import { onMounted, ref, onBeforeUnmount, nextTick, reactive } from 'vue';
+import { onMounted, ref, onBeforeUnmount, nextTick, reactive, watch } from 'vue';
 import { Terminal } from '@xterm/xterm';
 import type { ChannelType } from 'electron/preload/ssh2';
 import { ElDropdown, ElMessage, ElMessageBox } from 'element-plus';
@@ -38,6 +38,9 @@ import { Plus } from '@element-plus/icons-vue';
 import { getAllFilesFromDataTransfer } from '@/utils/files';
 import useSettings from '@/store/useSetting';
 
+const props = defineProps<{
+    autoRefresh?: boolean;
+}>()
 const clientStore = useClient();
 const div = ref<HTMLDivElement>()
 const term = new Terminal();
@@ -76,6 +79,10 @@ onMounted(() => {
 
 let zsession: any = null;
 async function initShell() {
+    if (clientStore.status !== 2) {
+        ElMessage.warning(t('connect-lose-term'));
+        return;
+    }
     // 使用静态导入的Zmodem
     let zsentry: any = null;
 
@@ -382,6 +389,15 @@ async function handleContextCommand(command: 'paste' | 'paste-file') {
         text && channel.value?.write(text);
     }
 }
+
+watch(() => clientStore.status, (newVal) => {
+    if (newVal === 2 && props.autoRefresh) {
+        term.clear();
+        channel.value?.destroy();
+        dragFiles = [];
+        initShell();
+    }
+})
 </script>
 <style lang="less" scoped>
 .terminal-div {

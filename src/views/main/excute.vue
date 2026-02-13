@@ -30,8 +30,8 @@
             </div>
         </template>
 
-        <el-tabs v-model="state.activeName" class="excute-tabs" type="border-card" editable @edit="handleTabsEdit">
-            <el-tab-pane label="Execute" name="Execute" :closable="false">
+        <el-tabs v-model="state.activeName" class="excute-tabs" type="border-card" addable @edit="handleTabsEdit">
+            <el-tab-pane label="Execute" name="Execute">
                 <el-button v-show="state.currentRecord" @click="state.currentRecord = null" style="margin: 4px 10px;">
                     {{ t('Back') }}
                 </el-button>
@@ -210,19 +210,19 @@
                     </Table>
                 </div>
             </el-tab-pane>
-            <el-tab-pane :label="t('sftp')" name="SFTP" :closable="false" lazy>
+            <el-tab-pane :label="t('sftp')" name="SFTP" lazy>
                 <Sftp />
             </el-tab-pane>
-            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane" :closable="false" lazy>
+            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane" lazy>
                 <template #label>
                     <span>{{ t('Terminal') }}</span>
                     <el-icon class="refresh-icon" @click="initShell()" v-if="state.activeName === 'Terminal'">
                         <Refresh />
                     </el-icon>
                 </template>
-                <Terminal ref="holdTermRef" />
+                <Terminal ref="holdTermRef" autoRefresh />
             </el-tab-pane>
-            <el-tab-pane v-for="(item, index) of formData.terminals" :key="item.shellNum" :name="index"
+            <el-tab-pane v-for="(item, index) of formData.terminals" :key="item.shellNum" :name="index" closable
                 class="terminal-pane">
                 <template #label>
                     <span>{{ t('Terminal') + ' ' + item.shellNum }}</span>
@@ -1022,15 +1022,6 @@ function rowKey(row: ShellListRecoed) {
     :deep(.el-tabs__header) {
         >.el-tabs__new-tab {
             margin-right: 10px;
-        }
-
-        >.el-tabs__nav-wrap {
-
-            .el-tabs__item:nth-child(1)>.is-icon-close,
-            .el-tabs__item:nth-child(2)>.is-icon-close,
-            .el-tabs__item:nth-child(3)>.is-icon-close {
-                display: none;
-            }
         }
     }
 
