@@ -866,7 +866,7 @@ function onLocalFolderDragOver(e: DragEvent, row: Row) {
     }
     if (row.isEdit || row.isNew || state.isDriveRoot || !row.isDirectory) return;
     if (!types?.includes(SFTP_DRAG_REMOTE) && !types?.includes(SFTP_DRAG_LOCAL)) return;
-    if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_LOCAL) ? 'move' : 'copy';
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
     state.localDropTargetFolder = row.name;
 }
 
@@ -888,7 +888,7 @@ function onRemoteFolderDragOver(e: DragEvent, row: Row) {
     }
     if (row.isEdit || !row.isDirectory) return;
     if (!types?.includes(SFTP_DRAG_LOCAL) && !types?.includes(SFTP_DRAG_REMOTE)) return;
-    if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_REMOTE) ? 'move' : 'copy';
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
     state.remoteDropTargetFolder = row.name;
 }
 
@@ -901,7 +901,7 @@ function onRemoteFolderDragLeave(e: DragEvent) {
 function onRemotePanelDragOver(e: DragEvent) {
     const types = e.dataTransfer?.types;
     if (types?.includes(SFTP_DRAG_LOCAL) || types?.includes(SFTP_DRAG_REMOTE)) {
-        if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_REMOTE) ? 'move' : 'copy';
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
         state.remotePanelDragOver = true;
     }
 }
@@ -976,7 +976,7 @@ async function onRemotePanelDrop(e: DragEvent) {
 function onLocalPanelDragOver(e: DragEvent) {
     const types = e.dataTransfer?.types;
     if (types?.includes(SFTP_DRAG_REMOTE) || types?.includes(SFTP_DRAG_LOCAL)) {
-        if (e.dataTransfer) e.dataTransfer.dropEffect = types.includes(SFTP_DRAG_LOCAL) ? 'move' : 'copy';
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
         state.localPanelDragOver = true;
     }
 }
