@@ -373,5 +373,6 @@
   "local-path-dir": "Local path directory",
   "no-download-found": "Download config not found",
   "download-config": "Download script Remote target: {remote} Local directory: {local}",
-  "Paste": "Paste"
+  "Paste": "Paste",
+  "confirm-delete-name":"Are you sure you want to delete \"{name}\" ?"
 }

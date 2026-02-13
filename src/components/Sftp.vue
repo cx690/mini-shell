@@ -629,7 +629,7 @@ function getParentLocalPath(): string | null {
 async function deleteLocal() {
     if (!state.localSelected || !state.localPath) return;
     const full = state.localPath + '/' + state.localSelected.name;
-    const action = await ElMessageBox.confirm(t('confirm-delete') + ' ' + state.localSelected.name + '?', t('delete'), {
+    const action = await ElMessageBox.confirm(t('confirm-delete-name', { name: state.localSelected.name }), t('delete'), {
         type: 'warning',
     }).catch(action => action);
     if (action === 'confirm') {
@@ -648,7 +648,7 @@ async function deleteLocal() {
 async function deleteRemote() {
     if (!state.remoteSelected || !clientStore.client) return;
     const full = state.remotePath + '/' + state.remoteSelected.name;
-    const action = await ElMessageBox.confirm(t('confirm-delete') + ' ' + state.remoteSelected.name + '?', t('delete'), {
+    const action = await ElMessageBox.confirm(t('confirm-delete-name', { name: state.remoteSelected.name }), t('delete'), {
         type: 'warning',
     }).catch(action => action);
     if (action === 'confirm') {
