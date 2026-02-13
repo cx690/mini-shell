@@ -37,7 +37,7 @@
                         {{ t('rename') }}
                     </el-button>
                     <el-tooltip placement="top"
-                        :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot">
+                        :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot || state.localSelected.name === '..'">
                         <template #content>
                             <p>
                                 {{ t('upload-to-remote-hint', {
@@ -47,8 +47,8 @@
                             </p>
                         </template>
                         <el-button size="small" :icon="Upload"
-                            :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                            @click="throttleUploadToRemote">
+                            :disabled="!state.localSelected || !remoteConnected || state.isDriveRoot || state.localSelected.name === '..'"
+                            type="primary" @click="throttleUploadToRemote">
                             {{ t('upload') }}
                         </el-button>
                     </el-tooltip>
@@ -62,7 +62,7 @@
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
                         :row-class-name="localRowClassName" highlight-current-row :current-row-key="localCurrentRowKey"
                         @current-change="state.localSelected = $event" @row-dblclick="onRowDblclick"
-                        @row-contextmenu="onRowContextmenu" class="file-table no-select" size="small"
+                        @row-contextmenu="onLocalRowContextmenu" class="file-table no-select" size="small"
                         ref="localTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
                             appendTo: 'body'
@@ -125,7 +125,8 @@
                     <el-button size="small" :icon="FolderAdd" :disabled="!remoteConnected" @click="addDir('remote')">
                         {{ t('new-folder') }}
                     </el-button>
-                    <el-button size="small" :icon="Delete" :disabled="!state.remoteSelected || !remoteConnected"
+                    <el-button size="small" :icon="Delete"
+                        :disabled="!state.remoteSelected || !remoteConnected || state.remoteSelected.name === '..'"
                         @click="deleteRemote">
                         {{ t('delete') }}
                     </el-button>
@@ -135,7 +136,7 @@
                         {{ t('rename') }}
                     </el-button>
                     <el-tooltip placement="top"
-                        :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot">
+                        :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot || state.remoteSelected.name === '..'">
                         <template #content>
                             <p>
                                 {{ t('download-to-local-hint', {
@@ -145,8 +146,8 @@
                             </p>
                         </template>
                         <el-button size="small" :icon="Download"
-                            :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot" type="primary"
-                            @click="throttleDownloadToLocal">
+                            :disabled="!state.remoteSelected || !remoteConnected || state.isDriveRoot || state.remoteSelected.name === '..'"
+                            type="primary" @click="throttleDownloadToLocal">
                             {{ t('download') }}
                         </el-button>
                     </el-tooltip>
@@ -206,26 +207,30 @@
             <template #dropdown>
                 <el-dropdown-menu>
                     <template v-if="state.contextMenuType === 'local-row'">
-                        <el-dropdown-item :icon="Edit" command="rename" :disabled="state.isDriveRoot">
+                        <el-dropdown-item :icon="Edit" command="rename"
+                            :disabled="state.isDriveRoot || state.localSelected?.name === '..'">
                             {{ t('rename') }}
                         </el-dropdown-item>
-                        <el-dropdown-item :icon="Delete" command="delete" :disabled="state.isDriveRoot">
+                        <el-dropdown-item :icon="Delete" command="delete"
+                            :disabled="state.isDriveRoot || state.localSelected?.name === '..'">
                             {{ t('delete') }}
                         </el-dropdown-item>
                         <el-dropdown-item v-if="state.contextMenuType === 'local-row'"
-                            :disabled="state.isDriveRoot || !remoteConnected" :icon="Upload" command="upload">
+                            :disabled="state.isDriveRoot || !remoteConnected || state.localSelected?.name === '..'"
+                            :icon="Upload" command="upload">
                             {{ t('upload') }}
                         </el-dropdown-item>
                     </template>
                     <template v-if="state.contextMenuType === 'remote-row'">
-                        <el-dropdown-item :icon="Edit" command="rename">
+                        <el-dropdown-item :icon="Edit" command="rename" :disabled="state.remoteSelected?.name === '..'">
                             {{ t('rename') }}
                         </el-dropdown-item>
-                        <el-dropdown-item :icon="Delete" command="delete">
+                        <el-dropdown-item :icon="Delete" command="delete"
+                            :disabled="state.remoteSelected?.name === '..'">
                             {{ t('delete') }}
                         </el-dropdown-item>
                         <el-dropdown-item v-if="state.contextMenuType === 'remote-row'" :icon="Download"
-                            command="download">
+                            :disabled="state.remoteSelected?.name === '..'" command="download">
                             {{ t('download') }}
                         </el-dropdown-item>
                     </template>
@@ -411,7 +416,8 @@ function onPanelContextMenu(e: MouseEvent, side: 'local' | 'remote') {
     nextTick(() => contextDropdownRef.value?.handleOpen());
 }
 
-function onRowContextmenu(row: any, column: any, e: MouseEvent) {
+function onLocalRowContextmenu(row: any, column: any, e: MouseEvent) {
+    if (row.name === '..' || state.isDriveRoot) return;
     e.preventDefault();
     e.stopPropagation();
     state.localSelected = row;
@@ -421,6 +427,7 @@ function onRowContextmenu(row: any, column: any, e: MouseEvent) {
 }
 
 function onRemoteRowContextmenu(row: any, column: any, e: MouseEvent) {
+    if (row.name === '..') return;
     e.preventDefault();
     e.stopPropagation();
     state.remoteSelected = row;
