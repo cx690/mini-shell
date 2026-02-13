@@ -61,7 +61,7 @@
                     </div>
                     <el-table v-loading="state.localLoading" v-else :data="localTableData" :row-key="rowKey"
                         :row-class-name="localRowClassName" highlight-current-row :current-row-key="localCurrentRowKey"
-                        @current-change="state.localSelected = $event" @row-dblclick="onRowDblclick"
+                        @current-change="state.localSelected = $event" @row-dblclick="onLocalRowDblclick"
                         @row-contextmenu="onLocalRowContextmenu" class="file-table no-select" size="small"
                         ref="localTableRef">
                         <el-table-column :label="t('Name')" min-width="0" sortable prop="name" :show-overflow-tooltip="{
@@ -327,7 +327,8 @@ const isWin = computed(() => electronAPI.platform === 'win32');
 
 const localPathParts = computed(() => {
     const p = state.localPath;
-    return p ? p.split('/').filter(Boolean) : [];
+    const step = electronAPI.platform === 'win32' ? '\\' : '/'
+    return p ? p.split(step).filter(Boolean) : [];
 });
 
 type Row = FileItem & { isParent?: boolean };
@@ -401,7 +402,7 @@ const triggerRef = ref({
 });
 const contextDropdownRef = ref<{ handleOpen: () => void } | null>(null);
 
-function onRowDblclick(row: Row) {
+function onLocalRowDblclick(row: Row) {
     if (row.isParent) localGoUp();
     else localEnter(row);
 }
@@ -589,7 +590,8 @@ function localEnter(item: { name: string; isDirectory: boolean }) {
         loadLocalDir(item.name);
         return;
     }
-    const newPath = state.localPath + '/' + item.name;
+    let step = electronAPI.platform === 'win32' ? '\\' : '/'
+    const newPath = state.localPath + (state.localPath.endsWith(step) ? '' : step) + item.name;
     loadLocalDir(newPath);
 }
 
@@ -619,10 +621,11 @@ function getParentLocalPath(): string | null {
     const parts = localPathParts.value;
     if (parts.length <= 1) return null;
     const parentParts = parts.slice(0, -1);
+    const step = electronAPI.platform === 'win32' ? '\\' : '/'
     if (parentParts.length === 1 && electronAPI.platform === 'win32') {
-        return parentParts[0] + '/';
+        return parentParts[0] + step;
     }
-    let parentPath = parentParts.join('/');
+    let parentPath = parentParts.join(step);
     return parentPath || '/';
 }
 
@@ -1047,9 +1050,9 @@ async function onLocalPanelDrop(e: DragEvent) {
 }
 
 function formatPath(path: string, isLocal: boolean = false) {
-    let step = isLocal && electronAPI.platform === 'win32' ? '\\' : '/'
+    const step = isLocal && electronAPI.platform === 'win32' ? '\\' : '/'
     const parts = path.replace(/\\/g, step).replace(/\/+$/, '').split(step).filter(Boolean);
-    let normalized = parts.join(step) || step;
+    const normalized = parts.join(step) || step;
     if (/^[a-zA-Z]:/.test(normalized)) {
         if (/^[a-zA-Z]:$/.test(normalized)) {
             return normalized + '\\'
