@@ -151,7 +151,7 @@ function getClient() {
             client.destroy();
             return clientProxy;
         },
-        uploadFile: async (localPath: string, remoteDir: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
+        uploadFile: async (localPath: string, remotePath: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
             const { quiet = false, name, uuid, exclude } = option;
             const emit = emitUpload(quiet, uuid);
             let successNum = 0;
@@ -168,7 +168,7 @@ function getClient() {
                     status: 4,
                     name,
                 })
-                const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remoteDir, exclude).catch(err => { reject(err); return [] });
+                const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remotePath, exclude).catch(err => { reject(err); return [] });
                 total = uploadPathList.length;
                 emit({
                     successNum,
@@ -298,7 +298,7 @@ function getClient() {
                 uploadAbort[uuid].abort();
             };
         },
-        downloadFile: async (localDir: string, remotePath: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
+        downloadFile: async (localPath: string, remotePath: string, option: { quiet?: boolean, name?: string, uuid: string, exclude?: string }) => {
             const { quiet = false, name, uuid, exclude } = option;
             const emit = emitUpload(quiet, uuid, { transferType: 'download' });
             let successNum = 0;
@@ -312,9 +312,9 @@ function getClient() {
                 signal.addEventListener('abort', () => {
                     reject(new Error(message));
                 })
-                const info = await fs.stat(localDir).catch(err => { reject(err); return { isDirectory: () => false } });
+                const info = await fs.stat(localPath).catch(err => { reject(err); return { isDirectory: () => false } });
                 if (!info.isDirectory()) {
-                    reject(new Error(`${localDir} is not a directory!`));
+                    reject(new Error(`${localPath} is not a directory!`));
                     return;
                 }
                 if (signal.aborted) {
@@ -338,7 +338,7 @@ function getClient() {
                         status: 4,
                         name,
                     })
-                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localDir, { signal, exclude }).catch(err => { reject(err); return [] });
+                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localPath, { signal, exclude }).catch(err => { reject(err); return [] });
                     total = downloadList.length;
                     emit({
                         successNum,
