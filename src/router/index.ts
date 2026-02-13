@@ -46,7 +46,7 @@ export const routes: RouteRecordRaw[] = [
                 name: 'main',
                 component: () => import('@/views/main/main.vue'),
                 meta: {
-                    title: '服务列表',
+                    title: '连接列表',
                     t: 'route-main',
                     keepAlive: false,
                     icon: List,
