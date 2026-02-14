@@ -483,23 +483,8 @@ async function loadLocalDir(targetPath?: string) {
     state.localLoading = true;
     try {
         pathToLoad = formatPath(pathToLoad, true);
-        const entries = await electronAPI.fsReaddir(pathToLoad);
-        const withSize = await Promise.all(
-            entries.map(async (e) => {
-                let size: number | undefined;
-                if (!e.isDirectory) {
-                    try {
-                        const full = pathToLoad + '/' + e.name;
-                        const stat = await electronAPI.fsStat(full);
-                        size = stat.size;
-                    } catch {
-                        size = undefined;
-                    }
-                }
-                return { ...e, size };
-            })
-        );
-        state.localList = withSize.sort((a, b) => {
+        const list = await electronAPI.fsReaddir(pathToLoad);
+        state.localList = list.sort((a, b) => {
             if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
             return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
         });

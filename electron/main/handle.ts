@@ -59,10 +59,34 @@ export function handles() {
     ipcMain.handle('fs-readdir', async (e, dirPath: string) => {
         const normalized = path.normalize(dirPath);
         const entries = await fs.readdir(normalized, { withFileTypes: true });
-        return entries.map((d) => ({
-            name: d.name,
-            isDirectory: d.isDirectory(),
-        }));
+        const list: {
+            name: string,
+            isDirectory: boolean,
+            size?: number,
+            mtime?: number
+        }[] = [];
+        for (let i = 0, len = entries.length; i < len; i++) {
+            const entry = entries[i]
+            const isDirectory = entry.isDirectory();
+            let size = undefined as undefined | number;
+            let mtime = undefined as undefined | number;
+            if (!isDirectory) {
+                try {
+                    const stat = await fs.stat(path.join(entry.parentPath, entry.name));
+                    size = stat.size;
+                    mtime = new Date(stat.mtime).getTime();
+                } catch (error) {
+                    import.meta.env.DEV && console.error(error)
+                }
+            }
+            list.push({
+                name: entry.name,
+                isDirectory,
+                size,
+                mtime
+            })
+        }
+        return list;
     })
     /** 本地：创建目录 */
     ipcMain.handle('fs-mkdir', async (e, dirPath: string) => {

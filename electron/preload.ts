@@ -15,13 +15,18 @@ const electronAPI = {
     switchLocale: (locale: string) => ipcRenderer.send('switch-locale', locale),
     readFile: (path: string) => ipcRenderer.invoke('read-file', path) as Promise<string>,
     writeFile: (path: string, data: any) => ipcRenderer.invoke('write-file', { path, data }) as Promise<boolean | Error>,
-    fsReaddir: (dirPath: string) => ipcRenderer.invoke('fs-readdir', dirPath) as Promise<Array<{ name: string; isDirectory: boolean }>>,
+    /** 读取文件目录内的文件信息 */
+    fsReaddir: (dirPath: string) => ipcRenderer.invoke('fs-readdir', dirPath) as Promise<{
+        name: string,
+        isDirectory: boolean,
+        size?: number,
+        mtime?: number
+    }[]>,
     fsMkdir: (dirPath: string) => ipcRenderer.invoke('fs-mkdir', dirPath) as ReturnType<typeof import('fs/promises')['mkdir']>,
     fsUnlink: (filePath: string) => ipcRenderer.invoke('fs-unlink', filePath) as ReturnType<typeof import('fs/promises')['unlink']>,
     fsRmdir: (dirPath: string) => ipcRenderer.invoke('fs-rmdir', dirPath) as ReturnType<typeof import('fs/promises')['rmdir']>,
     fsRm: (targetPath: string, options?: { recursive?: boolean }) => ipcRenderer.invoke('fs-rm', targetPath, options) as ReturnType<typeof import('fs/promises')['rm']>,
     fsRename: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs-rename', oldPath, newPath) as ReturnType<typeof import('fs/promises')['rename']>,
-    fsStat: (filePath: string) => ipcRenderer.invoke('fs-stat', filePath) as Promise<{ isDirectory: boolean; size: number; mtime: number }>,
     fsCopyFile2dir: (oldPath: string, newdir: string) => ipcRenderer.invoke('fs-copyFile2dir', oldPath, newdir) as ReturnType<typeof import('fs/promises')['copyFile']>,
     appGetPath: (name: Parameters<typeof import('electron').app.getPath>[0]) => ipcRenderer.invoke('app-get-path', name) as Promise<string>,
     getDrives: () => ipcRenderer.invoke('get-drives') as Promise<string[]>,
