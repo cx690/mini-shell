@@ -112,16 +112,3 @@ export async function getUploadFiles(localPath: string, remoteDir: string, optio
         throw new Error('本地路径不存在或者无权限访问！');
     }
 }
-
-/** 节流函数，一段时间只触发一次 */
-export function throttle<T extends (...args: any[]) => any>(fn: T, delay: number = 500) {
-    let lock: boolean = false;
-    return function (this: any, ...args: any[]) {
-        if (lock) return;
-        lock = true;
-        fn.apply(this, args);
-        setTimeout(() => {
-            lock = false;
-        }, delay)
-    } as T;
-}

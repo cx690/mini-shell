@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
 import { getUploadFiles, isExcluded, UploadFileItem } from '../common/utils';
 import { parallelTask } from './tasks';
-import { throttle } from '../common/utils';
 
 function getClient() {
     const client = new Client();
@@ -625,4 +624,18 @@ async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath:
         result.push({ localPath: path.join(localPath, path.parse(remotePath).base), remotePath: remotePath });
     }
     return result;
+}
+
+
+/** 节流函数，一段时间只触发一次 */
+function throttle<T extends (...args: any[]) => any>(fn: T, delay: number = 500) {
+    let lock: boolean = false;
+    return function (this: any, ...args: any[]) {
+        if (lock) return;
+        lock = true;
+        fn.apply(this, args);
+        setTimeout(() => {
+            lock = false;
+        }, delay)
+    } as T;
 }
