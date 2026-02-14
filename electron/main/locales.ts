@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import { dialog } from "electron";
 import path from 'path';
 import { getAllFiles } from '../common/utils';
-import { backupDirectory, langDir } from './config';
-import { copy } from './utils';
+import { langDir } from './config';
+
 const locales: { locale: string, message: any }[] = [];
 export let lang: string | undefined = 'zh-cn';
 export function setLang(next?: string) {
@@ -22,12 +22,7 @@ export default async function getLocales(locale?: string) {
     if (!locales.length) {
         const files = await getAllFiles(path.resolve(__dirname, '../locales'));
         if (langDir) {
-            const backLang = path.join(backupDirectory, 'lang');
-            if (await fs.access(backLang).then(() => true, () => false) && await fs.stat(backLang).then((stat) => stat.isDirectory(), () => false)) {
-                await copy(backLang, langDir, { force: false });
-                fs.rm(backLang, { force: true, recursive: true });
-            }
-            files.push(...await getAllFiles(langDir));
+            files.push(...await getAllFiles(langDir, /^(?!.*\.json$).*$/));
         }
         for (const { name, id } of files) {
             if (/\.json$/.test(id)) {

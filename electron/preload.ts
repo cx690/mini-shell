@@ -22,6 +22,7 @@ const electronAPI = {
     fsRm: (targetPath: string, options?: { recursive?: boolean }) => ipcRenderer.invoke('fs-rm', targetPath, options) as ReturnType<typeof import('fs/promises')['rm']>,
     fsRename: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs-rename', oldPath, newPath) as ReturnType<typeof import('fs/promises')['rename']>,
     fsStat: (filePath: string) => ipcRenderer.invoke('fs-stat', filePath) as Promise<{ isDirectory: boolean; size: number; mtime: number }>,
+    fsCopyFile2dir: (oldPath: string, newdir: string) => ipcRenderer.invoke('fs-copyFile2dir', oldPath, newdir) as ReturnType<typeof import('fs/promises')['copyFile']>,
     appGetPath: (name: Parameters<typeof import('electron').app.getPath>[0]) => ipcRenderer.invoke('app-get-path', name) as Promise<string>,
     getDrives: () => ipcRenderer.invoke('get-drives') as Promise<string[]>,
     /** 设置 Zmodem 下载目录（选择目录后调用，后续浏览器下载将写入该目录） */
@@ -53,6 +54,8 @@ const electronAPI = {
     downloadUpdate: () => ipcRenderer.invoke('download-update') as ReturnType<typeof import('./main/updater')['downloadUpdate']>,
     /** 重启更新应用 */
     quitAndInstall: () => ipcRenderer.send('quit-and-install-app'),
+    /** 重启当前应用 */
+    restartApp: () => ipcRenderer.send('restart-app'),
 }
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 

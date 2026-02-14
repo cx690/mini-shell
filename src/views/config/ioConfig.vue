@@ -15,8 +15,9 @@
                 </el-button>
             </ElCard>
             <ElCard>
-                <el-button type="danger" @Click="state.showDeleteLogs = true" :icon="Delete">{{ t('delete-logs')
-                    }}</el-button>
+                <el-button type="danger" @Click="state.showDeleteLogs = true" :icon="Delete">
+                    {{ t('delete-logs') }}
+                </el-button>
             </ElCard>
         </div>
         <el-dialog :title="t('delete-logs')" v-model="state.showDeleteLogs">

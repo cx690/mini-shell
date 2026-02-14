@@ -10,6 +10,7 @@ export async function getAllFiles(dir: string, exclud?: RegExp) {
         dirs = await fs.readdir(dir);
     } catch (error) {
         import.meta.env.DEV && console.error(error);
+        return [];
     }
     const allFiles: typeFileItem[] = [];
     for (const item of dirs) {

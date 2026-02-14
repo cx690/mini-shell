@@ -46,4 +46,4 @@ The mini-shell comes with built-in support for Chinese and English, with Chinese
 
 - Translate the language files located in the locales directory within the source code. If translating into Japanese, rename the translated file to ja.json. The naming convention can be found [here](https://element-plus.org/en-US/guide/i18n.html).
 
-- Create a new folder named `lang` in the root directory of your application installation. Place the translated files into this folder, and then restart the application.
+- Start the app, select the language pack in system settings, then restart the app for it to take effect.

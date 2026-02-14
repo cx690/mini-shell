@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog, nativeTheme } from "electron";
+import { ipcMain, BrowserWindow, dialog, nativeTheme, app } from "electron";
 import { exec } from 'child_process';
 import createWindow from "./createwin";
 import type { InfoTyoe } from "../preload/preload2Render";
@@ -45,6 +45,12 @@ function events() {
         if (!import.meta.env.DEV) {
             quitAndInstall();
         }
+    })
+
+    /** 重启当前应用 */
+    ipcMain.on('restart-app', function () {
+        app.relaunch();
+        app.exit(0);
     })
 }
 export default events;

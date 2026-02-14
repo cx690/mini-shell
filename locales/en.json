@@ -374,5 +374,9 @@
   "no-download-found": "Download config not found",
   "download-config": "Download script Remote target: {remote} Local directory: {local}",
   "Paste": "Paste",
-  "confirm-delete-name":"Are you sure you want to delete \"{name}\" ?"
+  "confirm-delete-name": "Are you sure you want to delete \"{name}\" ?",
+  "Language": "Language",
+  "load-language-pkg": "Load language pack",
+  "load-language-pkg-tips": "The current application has built-in Chinese and English. If you need to support other languages, you can make a language package from locales/zh-cn.json of the source code, name it a name supported by https://element-plus.org/en-US/guide/i18n, and then load it.",
+  "reload-app-locale-enable": "The language pack has been loaded. Restart the application to take effect. Restart the application now?"
 }

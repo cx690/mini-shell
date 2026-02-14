@@ -90,6 +90,13 @@ export function handles() {
         return { isDirectory: info.isDirectory(), size: info.size, mtime: info.mtimeMs };
     })
 
+    /** 将文件复制到新的文件夹 */
+    ipcMain.handle('fs-copyFile2dir', async (e, oldPath: string, newdir: string) => {
+        await fs.mkdir(newdir, { recursive: true });
+        const newPath = path.join(newdir, path.basename(oldPath));
+        return fs.copyFile(path.normalize(oldPath), path.normalize(newPath));
+    })
+
     ipcMain.handle('app-get-path', (e, name: Parameters<typeof app.getPath>[0]) => app.getPath(name))
 
     /** Windows 下获取所有逻辑磁盘根路径（如 ['C:\\', 'D:\\']），非 Windows 返回空数组 */
