@@ -120,7 +120,7 @@
                 </div>
                 <div class="panel-toolbar">
                     <el-button size="small" :icon="Back" :disabled="!hasRemoteParent" @click="remoteGoUp"
-                        :loading="state.remoteLoading">
+                        :loading="loadRemoteDirHandle.loading">
                     </el-button>
                     <el-button size="small" :icon="FolderAdd" :disabled="!remoteConnected" @click="addDir('remote')">
                         {{ t('new-folder') }}
@@ -156,7 +156,7 @@
                     :class="{ 'drop-zone-active': state.remotePanelDragOver }" @dragover.prevent="onRemotePanelDragOver"
                     @dragleave="onRemotePanelDragLeave" @drop.prevent="onRemotePanelDrop">
                     <div v-if="!remoteConnected" class="list-hint">{{ t('connect-first-hint') }}</div>
-                    <el-table v-loading="state.remoteLoading" v-else :data="remoteTableData" :row-key="rowKey"
+                    <el-table v-loading="loadRemoteDirHandle.loading" v-else :data="remoteTableData" :row-key="rowKey"
                         :row-class-name="remoteRowClassName" highlight-current-row
                         :current-row-key="remoteCurrentRowKey" @current-change="state.remoteSelected = $event"
                         @row-dblclick="onRemoteRowDblclick" @row-contextmenu="onRemoteRowContextmenu"
@@ -254,6 +254,7 @@ import { useI18n } from 'vue-i18n';
 import { formatSize, throttle } from '@/utils';
 import type { SFTPType } from 'electron/preload/ssh2';
 import { v4 } from 'uuid';
+import { useAbortAsync } from '@/utils/hooks';
 
 const { t } = useI18n();
 const clientStore = useClient();
@@ -307,7 +308,6 @@ const state = reactive({
     remotePathShow: '/',
     remotePath: '/',
     remoteList: [] as FileItem[],
-    remoteLoading: false,
     remoteSelected: null as FileItem | null,
 
     showNewLocalDir: false,
@@ -515,15 +515,13 @@ async function loadLocalDir(targetPath?: string) {
         state.localLoading = false;
     }
 }
-
-async function loadRemoteDir(targetPath?: string) {
+const loadRemoteDirHandle = useAbortAsync(async (targetPath?: string) => {
     if (!remoteConnected.value || !clientStore.client) {
         state.remoteList = [];
         return;
     }
     let pathToLoad = targetPath ?? (state.remotePathShow || state.remotePath);
     pathToLoad = formatPath(pathToLoad);
-    state.remoteLoading = true;
     try {
         const sftp = await ensureSftp();
         if (!sftp) {
@@ -541,10 +539,9 @@ async function loadRemoteDir(targetPath?: string) {
     } catch (err: any) {
         ElMessage.error(pathToLoad + " " + t('load-failed') + ': ' + (err?.message || err));
         state.remotePathShow = state.remotePath;
-    } finally {
-        state.remoteLoading = false;
     }
-}
+})
+const loadRemoteDir = loadRemoteDirHandle.run;
 
 const enterLocal = throttle(() => {
     if (electronAPI.platform === 'win32' && state.localPathShow === t('this-pc')) {
@@ -817,7 +814,7 @@ const throttleDownloadToLocal = throttle(downloadToLocal);
 
 watch(remoteConnected, (v) => {
     if (v) {
-        initSftp().then(() => loadRemoteDir());
+        initSftp().then(() => { loadRemoteDir() });
     } else {
         clearSftp();
     }
@@ -834,7 +831,7 @@ onMounted(async () => {
         state.localPathShow = '';
     }
     if (remoteConnected.value) {
-        initSftp().then(() => loadRemoteDir());
+        initSftp().then(() => { loadRemoteDir() });
     }
 });
 
