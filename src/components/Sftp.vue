@@ -7,7 +7,7 @@
                     <span class="panel-title">{{ t('local-files') }}</span>
                     <el-button size="small" :icon="FolderOpened" @click="pickLocalDir">{{ t('select-dir') }}</el-button>
                     <el-button size="small" :icon="Postcard" @click="enterDesktop">{{ t('enter-desktop') }}</el-button>
-                    <el-button v-if="isWin" size="small" :icon="Monitor" @click="enterThisPc">
+                    <el-button v-if="isWin" size="small" :icon="Monitor" @click="loadDrivesView">
                         {{ t('this-pc') }}
                     </el-button>
                 </div>
@@ -323,11 +323,11 @@ const state = reactive({
 });
 
 const remoteConnected = computed(() => clientStore.status === 2);
-const isWin = computed(() => electronAPI.platform === 'win32');
+const isWin = electronAPI.platform === 'win32';
 
 const localPathParts = computed(() => {
     const p = state.localPath;
-    const step = electronAPI.platform === 'win32' ? '\\' : '/'
+    const step = isWin ? '\\' : '/'
     return p ? p.split(step).filter(Boolean) : [];
 });
 
@@ -335,11 +335,11 @@ type Row = FileItem & { isParent?: boolean };
 
 /** Windows 下是否为盘符根目录（如 C:\） */
 const isLocalDriveRoot = computed(() => {
-    if (electronAPI.platform !== 'win32') return false;
+    if (!isWin) return false;
     return localPathParts.value.length === 1;
 });
 const hasLocalParent = computed(() => {
-    return electronAPI.platform === 'win32' && isLocalDriveRoot.value || localPathParts.value.length > 0;
+    return isWin && isLocalDriveRoot.value || localPathParts.value.length > 0;
 });
 const localTableData = computed<Row[]>(() => {
     const rows: Row[] = [];
@@ -459,7 +459,6 @@ function handleContextCommand(command: string | number | object) {
 }
 
 async function loadDrivesView() {
-    if (electronAPI.platform !== 'win32') return;
     state.localLoading = true;
     try {
         const drives = await electronAPI.getDrives();
@@ -544,7 +543,7 @@ const loadRemoteDirHandle = useAbortAsync(async (targetPath?: string) => {
 const loadRemoteDir = loadRemoteDirHandle.run;
 
 const enterLocal = throttle(() => {
-    if (electronAPI.platform === 'win32' && state.localPathShow === t('this-pc')) {
+    if (isWin && state.localPathShow === t('this-pc')) {
         loadDrivesView();
     } else {
         loadLocalDir(state.localPathShow || state.localPath);
@@ -562,11 +561,6 @@ async function enterDesktop() {
     }
 }
 
-async function enterThisPc() {
-    if (!isWin.value) return;
-    await loadDrivesView();
-}
-
 function pickLocalDir() {
     electronAPI.showOpenDialog({ properties: ['openDirectory'] }).then((res) => {
         if (!res.canceled && res.filePaths?.[0]) {
@@ -577,7 +571,12 @@ function pickLocalDir() {
 
 function localGoUp() {
     const newPath = getParentLocalPath();
-    if (!newPath) return;
+    if (!newPath) {
+        if (isWin) {
+            loadDrivesView();
+        }
+        return
+    };
     loadLocalDir(newPath);
 }
 
@@ -587,7 +586,7 @@ function localEnter(item: { name: string; isDirectory: boolean }) {
         loadLocalDir(item.name);
         return;
     }
-    let step = electronAPI.platform === 'win32' ? '\\' : '/'
+    let step = isWin ? '\\' : '/'
     const newPath = state.localPath + (state.localPath.endsWith(step) ? '' : step) + item.name;
     loadLocalDir(newPath);
 }
@@ -618,8 +617,8 @@ function getParentLocalPath(): string | null {
     const parts = localPathParts.value;
     if (parts.length <= 1) return null;
     const parentParts = parts.slice(0, -1);
-    const step = electronAPI.platform === 'win32' ? '\\' : '/'
-    if (parentParts.length === 1 && electronAPI.platform === 'win32') {
+    const step = isWin ? '\\' : '/'
+    if (parentParts.length === 1 && isWin) {
         return parentParts[0] + step;
     }
     let parentPath = parentParts.join(step);
@@ -1047,7 +1046,7 @@ async function onLocalPanelDrop(e: DragEvent) {
 }
 
 function formatPath(path: string, isLocal: boolean = false) {
-    const step = isLocal && electronAPI.platform === 'win32' ? '\\' : '/'
+    const step = isLocal && isWin ? '\\' : '/'
     const parts = path.replace(/\\/g, step).replace(/\/+$/, '').split(step).filter(Boolean);
     const normalized = parts.join(step) || step;
     if (/^[a-zA-Z]:/.test(normalized)) {
