@@ -80,6 +80,7 @@
   },
   "build": {
     "productName": "Mini Shell",
+    "icon": "public/logo.ico",
     "files": [
       "dist",
       "dist-electron",

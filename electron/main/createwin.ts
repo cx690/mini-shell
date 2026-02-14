@@ -1,6 +1,17 @@
-import { BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import path from "path";
 import { t } from './locales';
+
+function getIconPath(): string {
+    const isDev = import.meta.env.DEV;
+    const root = app.getAppPath();
+    if (isDev) {
+        return path.join(root, 'public', 'logo.ico');
+    }
+    // 打包后 dist 在 app.asar 内，需走 app.asar/dist
+    const distDir = app.isPackaged ? path.join('app.asar', 'dist') : 'dist';
+    return path.join(root, distDir, 'logo.ico');
+}
 
 function createWindow(url?: string) {
     const win = new BrowserWindow({
@@ -8,6 +19,7 @@ function createWindow(url?: string) {
         width: 1520,
         height: 800,
         fullscreenable: true,
+        icon: getIconPath(),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
