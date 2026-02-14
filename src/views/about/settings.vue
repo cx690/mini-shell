@@ -104,7 +104,9 @@ async function onLoadLanguage() {
             JSON.parse(text);
             const sessionPath = await electronAPI.appGetPath('sessionData');
             await electronAPI.fsCopyFile2dir(path, sessionPath + '/locales');
-            const action = await ElMessageBox.confirm(t('reload-app-locale-enable')).catch(action => action);
+            const action = await ElMessageBox.confirm(t('reload-app-locale-enable'), t('Hint'), {
+                type: 'success',
+            }).catch(action => action);
             if (action === 'confirm') {
                 electronAPI.restartApp();
             }
