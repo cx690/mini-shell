@@ -94,7 +94,6 @@ async function onLoadLanguage() {
         filters: [{ extensions: ['json'], name: '' }]
     })
     if (!res.canceled) {
-        console.log(res)
         const path = res.filePaths[0];
         if (!/\.json$/.test(path)) {
             ElMessage.error(t('select-error-json'));
