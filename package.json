@@ -79,14 +79,14 @@
     "node": "24.13.0"
   },
   "build": {
-    "productName": "mini-shell",
+    "productName": "Mini Shell",
     "files": [
       "dist",
       "dist-electron",
       "locales"
     ],
     "directories": {
-      "output": "./out/installation_package"
+      "output": "./out"
     },
     "nsis": {
       "oneClick": false,
