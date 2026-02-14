@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import preload2Render, { UploadInfoType } from './preload2Render';
 import { getUploadFiles, isExcluded, UploadFileItem } from '../common/utils';
 import { parallelTask } from './tasks';
+import { throttle } from '../common/utils';
 
 function getClient() {
     const client = new Client();
@@ -168,7 +169,16 @@ function getClient() {
                     status: 4,
                     name,
                 })
-                const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remotePath, exclude).catch(err => { reject(err); return [] });
+                const findCallback = throttle(({ length }) => {
+                    emit({
+                        successNum,
+                        errorNum,
+                        total: length,
+                        status: 4,
+                        name,
+                    })
+                }, 100)
+                const uploadPathList: UploadFileItem[] = await getUploadFiles(localPath, remotePath, { signal, exclude, findCallback }).catch(err => { reject(err); return [] });
                 total = uploadPathList.length;
                 emit({
                     successNum,
@@ -338,7 +348,16 @@ function getClient() {
                         status: 4,
                         name,
                     })
-                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localPath, { signal, exclude }).catch(err => { reject(err); return [] });
+                    const findCallback = throttle(({ length }) => {
+                        emit({
+                            successNum,
+                            errorNum,
+                            total: length,
+                            status: 4,
+                            name,
+                        })
+                    }, 100)
+                    const downloadList = await getDownloadList(sftp, remotePath.replaceAll(/\\/g, '/'), localPath, { signal, exclude, findCallback }).catch(err => { reject(err); return [] });
                     total = downloadList.length;
                     emit({
                         successNum,
@@ -531,11 +550,12 @@ function testDir(item: FileEntryWithStats) {
         || (typeof item.longname === 'string' && item.longname.trimStart().charAt(0) === 'd');
 }
 
-type OptionType = {
+type DownOptionType = {
     /** 取消信号 */
     signal?: AbortSignal,
     /**排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串 */
     exclude?: string
+    findCallback?: (info: { length: number, item: { localPath: string, remotePath: string } }) => any
 }
 /** 获取下载文件列表 
  * @param sftp SFTPWrapper
@@ -544,9 +564,9 @@ type OptionType = {
  * @param option OptionType
  * @returns 下载文件列表
  */
-async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath: string, option?: OptionType) {
+async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath: string, option?: DownOptionType) {
     const result: { localPath: string, remotePath: string }[] = [];
-    const { signal, exclude } = option || {};
+    const { signal, exclude, findCallback } = option || {};
     if (signal?.aborted) {
         return result;
     }
@@ -590,7 +610,9 @@ async function getDownloadList(sftp: SFTPWrapper, remotePath: string, localPath:
                         if (testDir(item)) {
                             dirs.push(currentDir + '/' + item.filename);
                         } else {
-                            result.push({ localPath: path.join(localPath, relativePath), remotePath: currentPath });
+                            const item = { localPath: path.join(localPath, relativePath), remotePath: currentPath };
+                            result.push(item);
+                            findCallback?.({ length: result.length, item });
                         }
                     }
                 }

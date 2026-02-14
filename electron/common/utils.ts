@@ -44,14 +44,25 @@ export function isExcluded(relativePath: string, patterns: RegExp[]): boolean {
     return false;
 }
 
+type UploadOptionType = {
+    /** 取消信号 */
+    signal?: AbortSignal,
+    /**排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串 */
+    exclude?: string
+    findCallback?: (info: { length: number, item: { localPath: string, remotePath: string } }) => any
+}
 /** 获取上传文件
  * @param localPath 本地目录或者文件
  * @param remoteDir 远程目录
- * @param exclude 排除的文件或目录，支持 "^node_modules/*,*.log$,^cache/*" 等正则字符串
+ * @param option UploadOptionType
  * @returns 上传文件列表
  */
-export async function getUploadFiles(localPath: string, remoteDir: string, exclude?: string): Promise<UploadFileItem[]> {
+export async function getUploadFiles(localPath: string, remoteDir: string, option?: UploadOptionType): Promise<UploadFileItem[]> {
+    const { exclude, signal, findCallback } = option || {};
     const stat = await fs.stat(localPath);
+    if (signal?.aborted) {
+        return []
+    }
     if (stat.isFile()) {
         return [{ localPath, remotePath: path.join(remoteDir, path.parse(localPath).base).replace(/\\/g, '/') }];
     } else if (stat.isDirectory()) {
@@ -68,6 +79,9 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
         }) : [];
 
         async function walk(currentDir: string) {
+            if (signal?.aborted) {
+                return []
+            }
             let entries: string[] = [];
             try {
                 entries = await fs.readdir(currentDir);
@@ -83,7 +97,9 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
                 const stat = await fs.stat(currentPath);
                 if (stat.isFile()) {
                     const remotePath = path.join(remoteDir, relativePath).replace(/\\/g, '/');
-                    result.push({ localPath: currentPath, remotePath });
+                    const item = { localPath: currentPath, remotePath }
+                    result.push(item);
+                    findCallback?.({ length: result.length, item });
                 } else if (stat.isDirectory()) {
                     await walk(currentPath);
                 }
@@ -95,4 +111,17 @@ export async function getUploadFiles(localPath: string, remoteDir: string, exclu
     } else {
         throw new Error('本地路径不存在或者无权限访问！');
     }
+}
+
+/** 节流函数，一段时间只触发一次 */
+export function throttle<T extends (...args: any[]) => any>(fn: T, delay: number = 500) {
+    let lock: boolean = false;
+    return function (this: any, ...args: any[]) {
+        if (lock) return;
+        lock = true;
+        fn.apply(this, args);
+        setTimeout(() => {
+            lock = false;
+        }, delay)
+    } as T;
 }
