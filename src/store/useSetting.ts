@@ -120,7 +120,7 @@ const useSettings = defineStore('settings', () => {
 
         const dayjsKey = `/node_modules/dayjs/locale/${file}.js`;
         if (dayjsKey in allDayjsLocales) {
-            allDayjsLocales[dayjsKey]();//加载dayjs时间设置
+            allDayjsLocales[dayjsKey]();//加载dayjs时间设置，开发模式下因为模块加载策略可能会报错
         }
     }
     return {
