@@ -916,25 +916,24 @@ async function onRemotePanelDrop(e: DragEvent) {
     if (e.dataTransfer?.types?.includes('Files')) {
         const files = e.dataTransfer ? await getAllFilesFromDataTransfer(e.dataTransfer) : [];
         if (files.length) {
-            let list: any[] = [];
+            const set: Set<string> = new Set();
             files.forEach(item => {
                 const path = electronAPI.getFilePath(item.source);
                 const name = item.fileWithPath.name;
                 const target = name.split('/')[0];
-                let dir = path.replace(name, '');
+
+                let dir = path.replace(new RegExp(name + '$'), '');
                 if (isWin) {
-                    dir = path.replace(name.split('/').join('\\'), '');
+                    dir = path.replace(new RegExp(name.replaceAll('/', '\\\\') + '$'), '');
                 }
                 const local = dir + target;
-                if (!list.includes(local) && local) {
-                    list.push(local);
-                }
+                set.add(local);
             })
 
             if (!remoteConnected.value || !clientStore.client) return;
             const all: any[] = []
-            for (let i = 0, len = list.length; i < len; i++) {
-                all.push(clientStore.client.uploadFile(list[i], state.remotePath, { quiet: false, uuid: v4() }));
+            for (const local of set) {
+                all.push(clientStore.client.uploadFile(local, state.remotePath, { quiet: false, uuid: v4() }));
             }
             await Promise.all(all);
             enterRemote();
