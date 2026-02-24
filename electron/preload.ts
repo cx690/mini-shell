@@ -61,6 +61,10 @@ const electronAPI = {
     quitAndInstall: () => ipcRenderer.send('quit-and-install-app'),
     /** 重启当前应用 */
     restartApp: () => ipcRenderer.send('restart-app'),
+    getClipboardFiles: () => ipcRenderer.invoke('get-clipboard-files') as Promise<{
+        name: string,
+        filePath: string,
+    }[]>,
 }
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 

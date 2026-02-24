@@ -4,6 +4,9 @@ import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, app, dialog,
 import { openExe, execCmd } from './cmd';
 import getLocales from './locales';
 import { checkForUpdatesAndNotify, downloadUpdate } from './updater';
+import { execFile } from 'child_process'
+import { promisify } from 'util'
+const execFilePromise = promisify(execFile);
 
 /** 每个窗口的 Zmodem 下载目录（webContentsId -> dir） */
 const zmodemDownloadDirs = new Map<number, string>();
@@ -184,4 +187,60 @@ export function handles() {
     ipcMain.handle('download-update', () => {
         return downloadUpdate();
     })
+
+    /** 获取剪切板文件信息 */
+    ipcMain.handle('get-clipboard-files', () => {
+        return getClipboardFilePaths();
+    })
+}
+
+/**
+ * 在主进程获取剪贴板中所有文件的真实路径（不依赖粘贴事件）
+ */
+async function getClipboardFilePaths() {
+    if (process.platform === 'win32') {
+        const psScript = `
+        Add-Type -AssemblyName System.Windows.Forms
+        $files = [System.Windows.Forms.Clipboard]::GetFileDropList()
+        if ($files -and $files.Count -gt 0) {
+            $files | ForEach-Object { Write-Output $_ }
+        }
+        `;
+        try {
+            const { stdout } = await execFilePromise('powershell.exe', [
+                '-NoProfile',
+                '-Command',
+                psScript
+            ], { encoding: 'utf8' });
+            // 输出按行分割，过滤空行
+            const files = stdout.split('\r\n').filter(line => line.trim() !== '');
+            return files.map(filePath => ({ filePath, name: path.basename(filePath) }));
+        } catch (err) {
+            return [];
+        }
+    }
+
+    // if (process.platform === 'darwin') {
+    //     // macOS: 多文件用 NSFilenamesPboardType（plist 数组），单文件用 public.file-url
+    //     try {
+    //         if (clipboard.has('NSFilenamesPboardType')) {
+    //             const plistStr = clipboard.read('NSFilenamesPboardType');
+    //             if (plistStr && typeof plistStr === 'string') {
+    //                 const arr = plist.parse(plistStr);
+    //                 if (Array.isArray(arr)) {
+    //                     return arr.filter((p): p is string => typeof p === 'string');
+    //                 }
+    //             }
+    //         }
+    //         const url = clipboard.read('public.file-url');
+    //         if (!url) return [];
+    //         const path = decodeURIComponent(url.replace(/^file:\/\//, ''));
+    //         return path ? [path] : [];
+    //     } catch {
+    //         return [];
+    //     }
+    // }
+
+    // Linux 等可再按需扩展
+    return [];
 }

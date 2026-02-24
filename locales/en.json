@@ -378,5 +378,6 @@
   "Language": "Language",
   "load-language-pkg": "Load language pack",
   "load-language-pkg-tips": "The current application has built-in Chinese and English. If you need to support other languages, you can make a language package from locales/zh-cn.json of the source code, name it a name supported by https://element-plus.org/en-US/guide/i18n, and then load it.",
-  "reload-app-locale-enable": "The language pack has been loaded. Restart the application to take effect. Restart the application now?"
+  "reload-app-locale-enable": "The language pack has been loaded. Restart the application to take effect. Restart the application now?",
+  "paste-confirm": "Would you like to upload the file(s) ({num}) from the clipboard to \"{remotePath}\"?"
 }

@@ -55,7 +55,7 @@
                 </div>
                 <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'local')"
                     :class="{ 'drop-zone-active': state.localPanelDragOver }" @dragover.prevent="onLocalPanelDragOver"
-                    @dragleave="onLocalPanelDragLeave" @drop.prevent="onLocalPanelDrop">
+                    @dragleave="onLocalPanelDragLeave" @drop.prevent="onLocalPanelDrop" tabindex="1">
                     <div v-if="!state.localPath && !state.localList.length" class="list-hint">
                         {{ t('select-dir-hint') }}
                     </div>
@@ -154,7 +154,8 @@
                 </div>
                 <div class="panel-list" @contextmenu.prevent="onPanelContextMenu($event, 'remote')"
                     :class="{ 'drop-zone-active': state.remotePanelDragOver }" @dragover.prevent="onRemotePanelDragOver"
-                    @dragleave="onRemotePanelDragLeave" @drop.prevent="onRemotePanelDrop">
+                    @dragleave="onRemotePanelDragLeave" @drop.prevent="onRemotePanelDrop" tabindex="2"
+                    @paste.prevent="pasteToRemote" @click="focusItem($event)" ref="remoteDiv">
                     <div v-if="!remoteConnected" class="list-hint">{{ t('connect-first-hint') }}</div>
                     <el-table v-loading="loadRemoteDirHandle.loading" v-else :data="remoteTableData" :row-key="rowKey"
                         :row-class-name="remoteRowClassName" highlight-current-row
@@ -1044,6 +1045,33 @@ function formatPath(path: string, isLocal: boolean = false) {
     }
     return normalized;
 }
+
+const remoteDiv = ref<HTMLDivElement>();
+function focusItem(e: MouseEvent) {
+    const target = e.target;
+    if (target instanceof HTMLElement && target.closest('input')) {
+        return;
+    }
+    remoteDiv.value?.focus?.();
+}
+
+async function pasteToRemote() {
+    const files = await electronAPI.getClipboardFiles();
+    if (!clientStore.client || !remoteConnected.value || !state.remotePath) return;
+    if (files.length) {
+        const action = await ElMessageBox.confirm(t('paste-confirm', { remotePath: state.remotePath, num: files.length }), t('Hint'), {
+            type: 'warning'
+        }).catch(action => action);
+        if (action !== 'confirm') return;
+        const all: any[] = []
+        for (let i = 0, len = files.length; i < len; i++) {
+            const { filePath: localFull } = files[i];
+            all.push(clientStore.client.uploadFile(localFull, state.remotePath, { quiet: false, uuid: v4() }));
+        }
+        await Promise.all(all);
+        enterRemote();
+    }
+}
 </script>
 
 <style scoped lang="less">
@@ -1113,11 +1141,17 @@ function formatPath(path: string, isLocal: boolean = false) {
         padding: @gap;
         display: flex;
         flex-direction: column;
-        border: 2px dashed transparent;
+        border: 2px solid transparent;
         border-radius: 6px;
         transition: border-color 0.15s, background-color 0.15s;
 
+        //&:focus {
+        //    border-color: var(--el-color-primary-light-5);
+        //    background-color: var(--el-color-primary-light-9);
+        //}
+
         &.drop-zone-active {
+            border-style: dashed;
             border-color: var(--el-color-primary);
             background-color: var(--el-color-primary-light-9);
         }
