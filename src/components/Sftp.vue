@@ -916,31 +916,33 @@ async function onRemotePanelDrop(e: DragEvent) {
     state.remoteDropTargetFolder = null;
     const baseRemote = state.remotePath;
     const folderName = getDropTargetFolderName(e);
-    const files = e.dataTransfer ? await getAllFilesFromDataTransfer(e.dataTransfer) : [];
-    if (files.length) {
-        let list: any[] = [];
-        files.forEach(item => {
-            const path = electronAPI.getFilePath(item.source);
-            const name = item.fileWithPath.name;
-            const target = name.split('/')[0];
-            let dir = path.replace(name, '');
-            if (isWin) {
-                dir = path.replace(name.split('/').join('\\'), '');
-            }
-            const local = dir + target;
-            if (!list.includes(local) && local) {
-                list.push(local);
-            }
-        })
+    if (e.dataTransfer?.types?.includes('Files')) {
+        const files = e.dataTransfer ? await getAllFilesFromDataTransfer(e.dataTransfer) : [];
+        if (files.length) {
+            let list: any[] = [];
+            files.forEach(item => {
+                const path = electronAPI.getFilePath(item.source);
+                const name = item.fileWithPath.name;
+                const target = name.split('/')[0];
+                let dir = path.replace(name, '');
+                if (isWin) {
+                    dir = path.replace(name.split('/').join('\\'), '');
+                }
+                const local = dir + target;
+                if (!list.includes(local) && local) {
+                    list.push(local);
+                }
+            })
 
-        if (!remoteConnected.value || !clientStore.client) return;
-        const all: any[] = []
-        for (let i = 0, len = list.length; i < len; i++) {
-            all.push(clientStore.client.uploadFile(list[i], state.remotePath, { quiet: false, uuid: v4() }));
+            if (!remoteConnected.value || !clientStore.client) return;
+            const all: any[] = []
+            for (let i = 0, len = list.length; i < len; i++) {
+                all.push(clientStore.client.uploadFile(list[i], state.remotePath, { quiet: false, uuid: v4() }));
+            }
+            await Promise.all(all);
+            enterRemote();
+            return;
         }
-        await Promise.all(all);
-        enterRemote();
-        return;
     }
 
     // 本地 → 远程：上传到当前目录或指定文件夹
