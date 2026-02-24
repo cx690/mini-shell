@@ -463,7 +463,11 @@ function getMkLocalDir() {
     const promiseInfo: Record<string, Promise<any>> = {}
     return async (dir: string) => {
         if (!promiseInfo[dir]) {
-            promiseInfo[dir] = fs.mkdir(dir, { recursive: true });
+            if (process.platform === 'win32' && /^[a-zA-Z]:(\/|\\)$/.test(dir)) {
+                return;
+            } else {
+                promiseInfo[dir] = fs.mkdir(dir, { recursive: true });
+            }
         }
         return promiseInfo[dir];
     }

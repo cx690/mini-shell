@@ -231,7 +231,7 @@
                             {{ t('delete') }}
                         </el-dropdown-item>
                         <el-dropdown-item v-if="state.contextMenuType === 'remote-row'" :icon="Download"
-                            :disabled="state.remoteSelected?.name === '..'" command="download">
+                            :disabled="state.remoteSelected?.name === '..' || state.isDriveRoot" command="download">
                             {{ t('download') }}
                         </el-dropdown-item>
                     </template>
