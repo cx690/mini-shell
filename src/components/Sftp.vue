@@ -1110,7 +1110,7 @@ async function pasteToRemote() {
 
 function openPath() {
     if (isWin) {
-        electronAPI.execCmd(`explorer "${state.localPath.replace(/\\$/, '')}"`);
+        electronAPI.execCmd(`explorer "${state.localPath.replace(/\\$/, '')}"`, 'native');
     } else {
         electronAPI.execCmd(`open "${state.localPath}"`);
     }
