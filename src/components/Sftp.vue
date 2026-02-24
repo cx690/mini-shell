@@ -913,9 +913,6 @@ function getDropTargetFolderName(e: DragEvent): string | null {
 
 async function onRemotePanelDrop(e: DragEvent) {
     state.remotePanelDragOver = false;
-    state.remoteDropTargetFolder = null;
-    const baseRemote = state.remotePath;
-    const folderName = getDropTargetFolderName(e);
     if (e.dataTransfer?.types?.includes('Files')) {
         const files = e.dataTransfer ? await getAllFilesFromDataTransfer(e.dataTransfer) : [];
         if (files.length) {
@@ -945,6 +942,9 @@ async function onRemotePanelDrop(e: DragEvent) {
         }
     }
 
+    state.remoteDropTargetFolder = null;
+    const folderName = getDropTargetFolderName(e);
+    const baseRemote = state.remotePath;
     // 本地 → 远程：上传到当前目录或指定文件夹
     const rawLocal = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);
     if (rawLocal) {
