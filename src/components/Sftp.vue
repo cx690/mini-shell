@@ -256,6 +256,7 @@ import { formatSize, throttle } from '@/utils';
 import type { SFTPType } from 'electron/preload/ssh2';
 import { v4 } from 'uuid';
 import { useAbortAsync } from '@/utils/hooks';
+import { getAllFilesFromDataTransfer } from '@/utils/files';
 
 const { t } = useI18n();
 const clientStore = useClient();
@@ -888,8 +889,11 @@ function onRemoteFolderDragLeave(e: DragEvent) {
 }
 
 function onRemotePanelDragOver(e: DragEvent) {
-    const types = e.dataTransfer?.types;
-    if (types?.includes(SFTP_DRAG_LOCAL) || types?.includes(SFTP_DRAG_REMOTE)) {
+    const types = e.dataTransfer?.types || [];
+    if (types.includes(SFTP_DRAG_LOCAL) || types.includes(SFTP_DRAG_REMOTE) || types.includes('Files')) {
+        if (types.includes('Files')) {
+            e.preventDefault();
+        }
         if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
         state.remotePanelDragOver = true;
     }
@@ -912,6 +916,32 @@ async function onRemotePanelDrop(e: DragEvent) {
     state.remoteDropTargetFolder = null;
     const baseRemote = state.remotePath;
     const folderName = getDropTargetFolderName(e);
+    const files = e.dataTransfer ? await getAllFilesFromDataTransfer(e.dataTransfer) : [];
+    if (files.length) {
+        let list: any[] = [];
+        files.forEach(item => {
+            const path = electronAPI.getFilePath(item.source);
+            const name = item.fileWithPath.name;
+            const target = name.split('/')[0];
+            let dir = path.replace(name, '');
+            if (isWin) {
+                dir = path.replace(name.split('/').join('\\'), '');
+            }
+            const local = dir + target;
+            if (!list.includes(local) && local) {
+                list.push(local);
+            }
+        })
+
+        if (!remoteConnected.value || !clientStore.client) return;
+        const all: any[] = []
+        for (let i = 0, len = list.length; i < len; i++) {
+            all.push(clientStore.client.uploadFile(list[i], state.remotePath, { quiet: false, uuid: v4() }));
+        }
+        await Promise.all(all);
+        enterRemote();
+        return;
+    }
 
     // 本地 → 远程：上传到当前目录或指定文件夹
     const rawLocal = e.dataTransfer?.getData(SFTP_DRAG_LOCAL);

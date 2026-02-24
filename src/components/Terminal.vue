@@ -344,7 +344,7 @@ async function drop(e: DragEvent) {
     state.draging = false;
     const dt = e.dataTransfer;
     if (!dt) return;
-    const files = await getAllFilesFromDataTransfer(dt);
+    const files = (await getAllFilesFromDataTransfer(dt)).map(item => item.fileWithPath);
     if (files.length > 0) {
         if (clientStore.status !== 2) {
             ElMessage.warning(t('connect-lose-term'));

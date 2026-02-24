@@ -6,8 +6,8 @@ function getFileFromEntry(entry: FileSystemFileEntry): Promise<File> {
 }
 
 /** 递归读取目录下的所有文件 */
-async function readDirectoryFiles(dir: FileSystemDirectoryEntry,): Promise<File[]> {
-    const files: File[] = [];
+async function readDirectoryFiles(dir: FileSystemDirectoryEntry,): Promise<{ fileWithPath: File, source: File }[]> {
+    const files: { fileWithPath: File, source: File }[] = [];
     const reader = dir.createReader();
 
     const readEntries = (): Promise<FileSystemEntry[]> => {
@@ -28,7 +28,7 @@ async function readDirectoryFiles(dir: FileSystemDirectoryEntry,): Promise<File[
                     lastModified: file.lastModified,
                     type: file.type,
                 });
-                files.push(fileWithPath);
+                files.push({ source: file, fileWithPath });
             } else if (entry.isDirectory) {
                 const subFiles = await readDirectoryFiles(
                     entry as FileSystemDirectoryEntry,
@@ -42,13 +42,13 @@ async function readDirectoryFiles(dir: FileSystemDirectoryEntry,): Promise<File[
 }
 
 /** 从 DataTransfer 递归收集所有文件（含文件夹内文件） */
-export async function getAllFilesFromDataTransfer(dt: DataTransfer): Promise<File[]> {
-    const files: File[] = [];
+export async function getAllFilesFromDataTransfer(dt: DataTransfer): Promise<{ fileWithPath: File, source: File }[]> {
+    const files: { fileWithPath: File, source: File }[] = [];
     const entries = Array.from(dt.items).map(item => item.webkitGetAsEntry());
     for (const entry of entries) {
         if (entry?.isFile) {
             const file = await getFileFromEntry(entry as FileSystemFileEntry);
-            files.push(file);
+            files.push({ fileWithPath: file, source: file });
         } else if (entry?.isDirectory) {
             const dirFiles = await readDirectoryFiles(entry as FileSystemDirectoryEntry);
             files.push(...dirFiles);

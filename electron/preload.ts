@@ -1,4 +1,4 @@
-import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, contextBridge, ipcRenderer } from 'electron';
+import { OpenDialogOptions, OpenExternalOptions, SaveDialogOptions, contextBridge, ipcRenderer, webUtils } from 'electron';
 import getClient from './preload/ssh2';
 import type { InfoEvent, InfoTyoe } from './preload/preload2Render';
 import './preload/preload2Render';
@@ -65,6 +65,7 @@ const electronAPI = {
         name: string,
         filePath: string,
     }[]>,
+    getFilePath: (file: File) => webUtils.getPathForFile(file)
 }
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 
