@@ -18,6 +18,9 @@
                     <el-button size="small" @click="enterLocal" :icon="Refresh">
                         {{ t('refresh') }}
                     </el-button>
+                    <el-button size="small" style="margin-left: 0;" @click="openPath" :icon="FolderOpened"
+                        :disabled="!state.localPath">
+                    </el-button>
                 </div>
                 <div class="panel-toolbar">
                     <el-button size="small" :icon="Back" :disabled="!hasLocalParent" @click="localGoUp"
@@ -1101,6 +1104,14 @@ async function pasteToRemote() {
         }
         await Promise.all(all);
         enterRemote();
+    }
+}
+
+function openPath() {
+    if (isWin) {
+        electronAPI.execCmd(`explorer "${state.localPath.replace(/\\$/, '')}"`);
+    } else {
+        electronAPI.execCmd(`open "${state.localPath}"`);
     }
 }
 </script>
