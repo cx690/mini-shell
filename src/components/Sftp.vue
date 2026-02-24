@@ -19,7 +19,7 @@
                         {{ t('refresh') }}
                     </el-button>
                     <el-button size="small" style="margin-left: 0;" @click="openPath" :icon="FolderOpened"
-                        :disabled="!state.localPath">
+                        :disabled="!state.localPath" v-if="platform === 'win32' || platform === 'darwin'">
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
@@ -328,7 +328,8 @@ const state = reactive({
 });
 
 const remoteConnected = computed(() => clientStore.status === 2);
-const isWin = electronAPI.platform === 'win32';
+const platform = electronAPI.platform;
+const isWin = platform === 'win32';
 
 const localPathParts = computed(() => {
     const p = state.localPath;
