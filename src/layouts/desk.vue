@@ -61,7 +61,9 @@
                                     <template #title>
                                         <span v-if="item.meta?.icon">
                                             <el-icon>
-                                                <component :is="item.meta.icon" />
+                                                <SvgIcon v-if="typeof item.meta.icon === 'string'"
+                                                    :name="item.meta.icon" />
+                                                <component v-else :is="item.meta.icon" />
                                             </el-icon>
                                         </span>
                                         <span>
@@ -73,7 +75,9 @@
                                         <router-link :to="{ name: subItem.name }">
                                             <span v-if="subItem.meta?.icon">
                                                 <el-icon>
-                                                    <component :is="subItem.meta.icon" />
+                                                    <SvgIcon v-if="typeof subItem.meta.icon === 'string'"
+                                                        :name="subItem.meta.icon" />
+                                                    <component v-else :is="subItem.meta.icon" />
                                                 </el-icon>
                                             </span>
                                             <span>

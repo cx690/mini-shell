@@ -3,7 +3,7 @@ import Desk from '@/layouts/desk.vue';
 import { ElMessage } from 'element-plus';
 import { t } from '@/i18n';
 import { Component } from 'vue';
-import { Monitor, List, VideoPlay, Setting, Connection, Document, Upload, InfoFilled, Cpu, } from '@element-plus/icons-vue';
+import { Monitor, Setting, Connection, Document, Upload, InfoFilled, Cpu, } from '@element-plus/icons-vue';
 
 /** meta类型说明 */
 export interface MetaType {
@@ -18,7 +18,7 @@ export interface MetaType {
     /** 页面是否缓存，默认true */
     keepAlive?: boolean;
     /** element-plus菜单图标 */
-    icon?: Component;
+    icon?: Component | string;
 }
 // name会用作菜单的key,且必须与path一致，根路径请加左/，请必填
 export const routes: RouteRecordRaw[] = [
@@ -49,7 +49,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '连接列表',
                     t: 'route-main',
                     keepAlive: false,
-                    icon: List,
+                    icon: 'list',
                 },
             },
             {
@@ -60,7 +60,7 @@ export const routes: RouteRecordRaw[] = [
                     title: '脚本执行',
                     t: 'route-excute',
                     keepAlive: true,
-                    icon: VideoPlay,
+                    icon: 'execute',
                 },
             },
         ]

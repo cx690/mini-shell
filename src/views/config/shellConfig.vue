@@ -1,5 +1,5 @@
 <template>
-    <base-page>
+    <BasePage>
         <template #form>
             <el-form inline labelPosition="right">
                 <el-form-item :label="t('view-type')">
@@ -406,7 +406,7 @@
         <el-dialog v-model="state.showInset" :title="t('built-in-detail')" draggable>
             <div> NOW_TIME: 'YYYY-MM-DD~HH:mm:ss' // {{ t('excute-time') }}</div>
         </el-dialog>
-    </base-page>
+    </BasePage>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';

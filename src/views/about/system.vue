@@ -1,5 +1,5 @@
 <template>
-    <base-page>
+    <BasePage>
         <div class="content">
             <div>{{ $t('version') }}:&nbsp;
                 <el-badge v-if="update.shouldUpdate === '1'"
@@ -33,7 +33,7 @@
                 </div>
             </div>
         </div>
-    </base-page>
+    </BasePage>
 </template>
 <script setup lang="ts">
 import useUpdate from '@/store/useUpdate';

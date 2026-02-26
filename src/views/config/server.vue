@@ -1,5 +1,5 @@
 <template>
-    <base-page>
+    <BasePage>
         <template #form>
             <el-form inline labelPosition="right">
                 <el-form-item :label="t('Sign')">
@@ -74,7 +74,7 @@
                 <el-button type="primary" @click="onConfim">{{ t('Confirm') }}</el-button>
             </template>
         </el-dialog>
-    </base-page>
+    </BasePage>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';

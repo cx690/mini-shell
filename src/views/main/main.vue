@@ -1,5 +1,5 @@
 <template>
-    <base-page>
+    <BasePage>
         <template #form>
             <el-form inline labelPosition="right">
                 <el-form-item :label="t('Name')">
@@ -65,9 +65,10 @@
                 <el-button @click="state.showAdd = false">{{ t('Confirm') }}</el-button>
             </template>
         </el-dialog>
-    </base-page>
+    </BasePage>
 </template>
 <script setup lang="ts">
+
 import { computed, onActivated, onMounted, reactive } from 'vue';
 import { ElForm, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';

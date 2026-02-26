@@ -1,5 +1,5 @@
 <template>
-    <base-page>
+    <BasePage>
         <div class="main-container">
             <ElCard>
                 <el-button type="primary" @click="onImport" :icon="Upload">{{ t('import-data') }}</el-button>
@@ -59,7 +59,7 @@
                 <el-button @click="quest?.(6)">{{ t('Always-skip') }}</el-button>
             </template>
         </el-dialog>
-    </base-page>
+    </BasePage>
 </template>
 <script setup lang="ts">
 import { ElMessage, ElCard } from 'element-plus';
