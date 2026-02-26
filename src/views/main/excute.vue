@@ -211,7 +211,7 @@
                 </div>
             </el-tab-pane>
             <el-tab-pane :label="t('sftp')" name="SFTP" lazy>
-                <Sftp />
+                <Sftp :selectShell="formData.selectShell" />
             </el-tab-pane>
             <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane" lazy>
                 <template #label>

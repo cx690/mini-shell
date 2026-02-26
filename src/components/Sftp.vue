@@ -21,6 +21,12 @@
                     <el-button size="small" style="margin-left: 0;" @click="openPath" :icon="FolderOpened"
                         :disabled="!state.localPath" v-if="platform === 'win32' || platform === 'darwin'">
                     </el-button>
+                    <el-button size="small" style="margin-left: 0;" v-if="position.local"
+                        @click="loadLocalDir(position.local)">
+                        <template #icon>
+                            <SvgIcon name="position" />
+                        </template>
+                    </el-button>
                 </div>
                 <div class="panel-toolbar">
                     <el-button size="small" :icon="Back" :disabled="!hasLocalParent" @click="localGoUp"
@@ -119,6 +125,12 @@
                     </el-input>
                     <el-button size="small" @click="enterRemote" :icon="Refresh">
                         {{ t('refresh') }}
+                    </el-button>
+                    <el-button size="small" style="margin-left: 0;" v-if="position.remote"
+                        @click="loadRemoteDir(position.remote)">
+                        <template #icon>
+                            <SvgIcon name="position" />
+                        </template>
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
@@ -260,6 +272,11 @@ import type { SFTPType } from 'electron/preload/ssh2';
 import { v4 } from 'uuid';
 import { useAbortAsync } from '@/utils/hooks';
 import { getAllFilesFromDataTransfer } from '@/utils/files';
+import { ShellListRecoed } from '@/utils/tables';
+
+const props = defineProps<{
+    selectShell?: ShellListRecoed | null;
+}>();
 
 const { t } = useI18n();
 const clientStore = useClient();
@@ -1115,6 +1132,22 @@ function openPath() {
         electronAPI.execCmd(`open "${state.localPath}"`);
     }
 }
+
+const position = computed(() => {
+    const { localDir, mainPath } = props.selectShell || {};
+    let local = '';
+    let remote = '';
+    if (localDir) {
+        local = props.selectShell?.envVar?.[localDir] ?? '';
+    }
+    if (mainPath) {
+        remote = props.selectShell?.envVar?.[mainPath] ?? '';
+    }
+    return {
+        local,
+        remote,
+    };
+})
 </script>
 
 <style scoped lang="less">
