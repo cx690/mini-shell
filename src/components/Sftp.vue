@@ -10,6 +10,13 @@
                     <el-button v-if="isWin" size="small" :icon="Monitor" @click="loadDrivesView">
                         {{ t('this-pc') }}
                     </el-button>
+                    <el-button size="small" style="margin-left: 0;" v-if="position.local"
+                        @click="loadLocalDir(position.local)">
+                        <template #icon>
+                            <SvgIcon name="position" />
+                        </template>
+                        {{ t('position-path') }}
+                    </el-button>
                 </div>
                 <div class="panel-path">
                     <el-input v-model="state.localPathShow" size="small" @keypress.enter="enterLocal">
@@ -20,12 +27,6 @@
                     </el-button>
                     <el-button size="small" style="margin-left: 0;" @click="openPath" :icon="FolderOpened"
                         :disabled="!state.localPath" v-if="platform === 'win32' || platform === 'darwin'">
-                    </el-button>
-                    <el-button size="small" style="margin-left: 0;" v-if="position.local"
-                        @click="loadLocalDir(position.local)">
-                        <template #icon>
-                            <SvgIcon name="position" />
-                        </template>
                     </el-button>
                 </div>
                 <div class="panel-toolbar">
@@ -118,6 +119,13 @@
                         t('connected') }}
                     </el-tag>
                     <el-tag v-else type="info" size="small">{{ t('not-connected') }}</el-tag>
+                    <el-button size="small" style="margin-left: 0;" v-if="position.remote"
+                        @click="loadRemoteDir(position.remote)">
+                        <template #icon>
+                            <SvgIcon name="position" />
+                        </template>
+                        {{ t('position-path') }}
+                    </el-button>
                 </div>
                 <div class="panel-path">
                     <el-input v-model="state.remotePathShow" size="small" @keypress.enter="enterRemote">
@@ -125,12 +133,6 @@
                     </el-input>
                     <el-button size="small" @click="enterRemote" :icon="Refresh">
                         {{ t('refresh') }}
-                    </el-button>
-                    <el-button size="small" style="margin-left: 0;" v-if="position.remote"
-                        @click="loadRemoteDir(position.remote)">
-                        <template #icon>
-                            <SvgIcon name="position" />
-                        </template>
                     </el-button>
                 </div>
                 <div class="panel-toolbar">

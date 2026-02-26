@@ -379,5 +379,6 @@
   "load-language-pkg": "加载语言包",
   "load-language-pkg-tips": "当前应用内置中文和英文，如果您需要支持其他语言，可以从源码的locales/zh-cn.json制作语言包，命名为https://element-plus.org/zh-CN/guide/i18n所支持的名称，然后进行加载。",
   "reload-app-locale-enable": "语言包已加载，重启应用以生效，现在重启应用吗？",
-  "paste-confirm": "您是想将剪切板内文件（{num}）上传到\"{remotePath}\"吗？"
+  "paste-confirm": "您是想将剪切板内文件（{num}）上传到\"{remotePath}\"吗？",
+  "position-path": "当前脚本位置"
 }
