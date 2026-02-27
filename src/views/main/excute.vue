@@ -213,24 +213,15 @@
             <el-tab-pane :label="t('sftp')" name="SFTP" lazy>
                 <Sftp :selectShell="formData.selectShell" />
             </el-tab-pane>
-            <el-tab-pane key="handle-terminal" name="Terminal" class="terminal-pane" lazy>
-                <template #label>
-                    <span>{{ t('Terminal') }}</span>
-                    <el-icon class="refresh-icon" @click="initShell()" v-if="state.activeName === 'Terminal'">
-                        <Refresh />
-                    </el-icon>
-                </template>
-                <Terminal ref="holdTermRef" autoRefresh />
-            </el-tab-pane>
             <el-tab-pane v-for="(item, index) of formData.terminals" :key="item.shellNum" :name="index" closable
-                class="terminal-pane">
+                class="terminal-pane" lazy>
                 <template #label>
-                    <span>{{ t('Terminal') + ' ' + item.shellNum }}</span>
+                    <span>{{ t('Terminal') + ' ' + (item.shellNum || '') }}</span>
                     <el-icon class="refresh-icon" @click="initShell(index)" v-if="state.activeName === index">
                         <Refresh />
                     </el-icon>
                 </template>
-                <Terminal ref="terminalsRef" init />
+                <Terminal ref="terminalsRef" :autoRefresh="index === 0" />
             </el-tab-pane>
         </el-tabs>
         <el-dialog v-model="state.shellShow" :title="`${t('format-script-detail')} - ${state.scriptName ?? ''}`"
@@ -335,7 +326,7 @@ const formData = reactive({
     cmd: '',
     file: '',
     uploadDir: '/root',
-    terminals: [] as { shellNum: number }[],
+    terminals: [{ shellNum: 0 }] as { shellNum: number }[],
     selectShell: null as null | ShellListRecoed | undefined,
     selectShellCode: null as any,
     group: '',
@@ -373,7 +364,7 @@ const state = reactive({
     showUpload: false,
     showDownload: false,
     uploadLoading: false,
-    activeName: 'Execute' as 'Execute' | 'Terminal' | number,
+    activeName: 'Execute' as 'Execute' | 'SFTP' | number,
     shellNum: 1,
     shellShow: false,
     scriptName: '',
@@ -791,7 +782,7 @@ function handleTabsEdit(targetName: any, action: 'remove' | 'add') {
         formData.terminals.splice(targetName, 1);
         if (typeof state.activeName === 'string') return;
         if (formData.terminals.length === 0) {
-            state.activeName = 'Terminal';
+            state.activeName = 'Execute';
             return;
         }
         if (targetName <= state.activeName) {
