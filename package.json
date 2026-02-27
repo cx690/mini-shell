@@ -23,7 +23,6 @@
     "dev:f": "vite --force --host 0.0.0.0",
     "start": "vite --host 0.0.0.0",
     "build": "vite build",
-    "build:p": "vite build && yarn package",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint --ext .js,.ts,.tsx,.vue ./src ./electron",
     "lint:fix": "eslint --fix --ext .js,.ts,.tsx,.vue ./src ./electron",
